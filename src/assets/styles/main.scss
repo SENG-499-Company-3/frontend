@@ -1,7 +1,2 @@
-body {
-    background: #DDD;
-}
-
-.calendar {
-    color: red;
-}
+@import 'reset';
+@import 'components/test-component';
