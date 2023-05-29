@@ -1,9 +1,9 @@
-import { AxiosInstance } from 'axios'
+import { AxiosInstance, AxiosResponse } from 'axios'
 
 const useAuthApi = (axios: AxiosInstance) => {
-    const login = async (username: string, password: string) => {
+    const login = (username: string, password: string) => {
         return axios.post('/api/login', { username, password})
-            .then((response) => {
+            .then((response: AxiosResponse<unknown>) => {
                 return response.data
             });
     }
@@ -12,3 +12,5 @@ const useAuthApi = (axios: AxiosInstance) => {
         login
     }
 }
+
+export default useAuthApi;

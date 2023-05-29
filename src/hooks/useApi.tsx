@@ -1,4 +1,6 @@
-import { useContext } from "react";
+import axios from 'axios';
+import { useContext, useMemo } from 'react';
+import useAuthApi from './api/useAuthApi';
 
 const useApi = () => {
     /**
@@ -26,3 +28,5 @@ const useApi = () => {
         auth
     }
 }
+
+export default useApi
