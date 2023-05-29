@@ -3,6 +3,7 @@ import { DataGrid, GridRowsProp, GridColDef, GridToolbar } from '@mui/x-data-gri
 import { courseScheduleData } from '../common/sampleData/courseSchedule'
 import WeekdayTable  from './WeekdayTable'
 import { Course } from '../common/types'
+import { format, parse } from 'date-fns'
 
 const rows: GridRowsProp = courseScheduleData.map((course: Course, index: number) => ({
   id: index + 1,
@@ -57,12 +58,13 @@ export default ScheduleList
 
 
 // convert time from hhmm to hh:mm
-function convertToTime(minutes: number): string {
-  const hours = Math.floor(minutes / 100);
-  const mins = minutes % 100;
+function convertToTime(time: number): string {
+  var timeString = time.toString();
 
-  const formattedHours = hours.toString().padStart(2, '0');
-  const formattedMins = mins.toString().padStart(2, '0');
+  const formatString = timeString.length === 3 ? 'Hmm' : 'HHmm';
 
-  return `${formattedHours}:${formattedMins}`;
+  const parsedTime = parse(timeString, formatString, new Date());
+  const formattedTime = format(parsedTime, 'HH:mm');
+
+  return formattedTime;
 }
