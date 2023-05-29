@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useContext, useMemo } from 'react';
 import useAuthApi from './api/useAuthApi';
+import { AuthContext } from '../contexts/AuthContext';
 
 const useApi = () => {
     /**
