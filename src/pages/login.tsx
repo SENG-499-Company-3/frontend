@@ -9,7 +9,7 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
-import { IAuthenticatedUser } from '../types/auth'
+import { IAuthenticatedUser } from '../types/auth.d'
 import { AuthContext } from '../contexts/AuthContext'
 import { useRouter } from 'next/router'
 

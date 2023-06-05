@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, createContext } from 'react'
-import { AuthenticatedUserType, IAuthenticatedUser } from '../types/auth'
+import { AuthenticatedUserType, IAuthenticatedUser } from '../types/auth.d'
 
 interface IAuthContext {
     /**

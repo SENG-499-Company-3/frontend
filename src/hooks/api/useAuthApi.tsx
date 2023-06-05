@@ -1,5 +1,5 @@
 import { AxiosInstance, AxiosResponse } from 'axios'
-import { IAuthenticatedUser } from '../../types/auth';
+import { IAuthenticatedUser } from '../../types/auth.d';
 
 const useAuthApi = (axios: AxiosInstance) => {
 
