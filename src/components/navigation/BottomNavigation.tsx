@@ -3,7 +3,7 @@ export const BottomNavigation = () => {
     const sessionData = null;
 
     return (
-        <div className="flex md:hidden">
+        <div className="flex z-50 md:hidden">
             {/* Bottom Navigation */}
             <div className="btm-nav bg-base-200">
                 {/* Home */}
