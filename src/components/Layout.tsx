@@ -4,7 +4,7 @@ export default function Layout({ children }) {
     return (
         <>
             <Navigation />
-            <main className="ml-[4.6rem]">{children}</main>
+            <main className="md:ml-[4.6rem]">{children}</main>
         </>
     );
 }
