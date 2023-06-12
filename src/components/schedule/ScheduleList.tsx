@@ -39,7 +39,7 @@ const columns: GridColDef[] = [
 
 const ScheduleList = () => {
     return (
-        <div style={{ height: 'calc(100vh - 64px) ', width: 'calc(100% - 64px)' }}>
+        <div style={{ height: '100%', width: '100%' }}>
             <DataGrid 
               rows={rows} 
               columns={columns}
