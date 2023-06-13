@@ -120,15 +120,7 @@ interface CourseSchedule {
     /**
      * The predicted enrollment numbers for this course offering
      */
-    predictedEnrollment: PredictedEnrollment
-}
-
-/**
- * Encodes forecasted enrollment statistics.
- */
-interface PredictedEnrollment {
-    minStudents: number
-    maxStudents: number
+    predictedEnrollment: number
 }
 
 /**
@@ -144,6 +136,11 @@ interface Classroom {
      * The room number the classroom exists in, e.g. "A123"
      */
     roomNumber: string
+
+    /**
+     * Hard limit on the number of students
+     */
+    maxCapacity: number
 
     /**
      * The technologies available in this classroom
@@ -212,10 +209,16 @@ interface InstructorPreference {
  * Assigns min and max loads to an instructor and a particular teaching term
  */
 interface InstructorLoad {
-    instructor: User,
-    term: Term,
+    instructor: User
+    term: Term
     minLoad: number // Min number of courses they could teach
     maxLoad: number // Max number of courses they could teach
+}
+
+interface InstructorAvailability {
+    instructor: InstructorAvailability;
+    term: Term;
+    availability: TimeSlot[]
 }
 
 /**
