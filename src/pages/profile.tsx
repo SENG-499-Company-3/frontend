@@ -6,13 +6,13 @@ const Profile = () => {
     const userContext = useContext(AuthContext)
 
     return (
-        <div className="flex flex-col w-full h-full p-8 gap-2">
-            <div className="flex h-[8rem] w-full">
+        <div className="flex flex-col w-full h-full md:px-32 py-8 gap-2">
+            <div className="flex h-[8rem] w-full justify-center">
                 <div className="flex items-center">
                     {/* <Avatar alt={userContext.currentUser?.displayName} sx={{ width: 96, height: 96 }} /> */}
                     <Avatar alt="Jane Doe" sx={{ width: 128, height: 128 }} />
                 </div>
-                <div className="flex grow flex-col px-8 py-2">
+                <div className="flex justify-center flex-col px-8 py-2">
                     {/* <Typography variant="h5" sx={{fontWeight: 600}}>{userContext.currentUser?.displayName} ({userContext.currentUser?.type})</Typography> */}
                     <Typography variant="h5" sx={{ fontWeight: 600 }}>Jane Doe (Admin)</Typography>
                     {/* <Typography variant="h6">{userContext.currentUser?.emailAddress</Typography> */}
