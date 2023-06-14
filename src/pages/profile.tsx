@@ -13,14 +13,15 @@ const Profile = () => {
                     <Avatar alt="Jane Doe" sx={{ width: 128, height: 128 }} />
                 </div>
                 <div className="flex grow flex-col px-8 py-2">
-                    {/* <Typography variant="h5" sx={{fontWeight: 600}}>{userContext.currentUser?.displayName} ({userContext.currentUser?.role})</Typography> */}
+                    {/* <Typography variant="h5" sx={{fontWeight: 600}}>{userContext.currentUser?.displayName} ({userContext.currentUser?.type})</Typography> */}
                     <Typography variant="h5" sx={{ fontWeight: 600 }}>Jane Doe (Admin)</Typography>
                     {/* <Typography variant="h6">{userContext.currentUser?.emailAddress</Typography> */}
                     <Typography variant="h6">Jan.Doe@uvic.ca</Typography>
                 </div>
             </div>
             <div className="flex w-full h-full">
-                {userContext.isAdmin() ?
+                {/* userContext.isAdmin() */}
+                {true ?
                     <div>
                         {/* TODO: add admin content for profile */}
                     </div>
