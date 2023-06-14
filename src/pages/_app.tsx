@@ -1,17 +1,47 @@
-import React from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import '../assets/styles/main.scss'
 
 import type { AppProps } from 'next/app';
 import { AuthContextProvider } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
- 
+
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+
+const darkTheme = createTheme({
+	palette: {
+		mode: 'dark',
+	},
+});
+
 export default function MyApp({ Component, pageProps }: AppProps) {
-  return ( 
-	<AuthContextProvider>
-		<Layout>
-			<Component {...pageProps} />
-		</Layout>
-	</AuthContextProvider>
-  );
+	const [mode, setMode] = useState<'light' | 'dark'>('light');
+
+	const switchTheme = () => {
+		setMode(mode === 'light' ? 'dark' : 'light');
+	};
+
+	useEffect(() => {
+		document.querySelector('html').setAttribute('data-theme', mode);
+	}, [mode]);
+
+	const theme = useMemo(
+		() =>
+			createTheme({
+				palette: {
+					mode,
+				},
+			}),
+		[mode],
+	);
+
+	return (
+		<AuthContextProvider>
+			<ThemeProvider theme={theme}>
+				<Layout switchTheme={switchTheme}>
+					<Component {...pageProps} />
+				</Layout>
+			</ThemeProvider>
+		</AuthContextProvider>
+	);
 }
