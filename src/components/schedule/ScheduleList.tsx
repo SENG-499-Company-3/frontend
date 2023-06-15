@@ -2,8 +2,8 @@ import React from 'react'
 import { DataGrid, GridRowsProp, GridColDef, GridToolbar } from '@mui/x-data-grid';
 import { courseScheduleData } from '../common/sampleData/courseSchedule'
 import WeekdayTable  from './WeekdayTable'
-import { Course } from '../common/types'
-import { format, parse } from 'date-fns'
+import { Course } from '../../types/course'
+import { convertToTime } from '../../utils/helper';
 
 const rows: GridRowsProp = courseScheduleData.map((course: Course, index: number) => ({
   id: index + 1,
@@ -55,16 +55,3 @@ const ScheduleList = () => {
 }
 
 export default ScheduleList
-
-
-// convert time from hhmm to hh:mm
-function convertToTime(time: number): string {
-  var timeString = time.toString();
-
-  const formatString = timeString.length === 3 ? 'Hmm' : 'HHmm';
-
-  const parsedTime = parse(timeString, formatString, new Date());
-  const formattedTime = format(parsedTime, 'HH:mm');
-
-  return formattedTime;
-}
