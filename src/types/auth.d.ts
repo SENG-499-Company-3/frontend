@@ -12,6 +12,7 @@ export enum AuthenticatedUserType {
 export interface IAuthenticatedUserDetails {
     displayName: string
     emailAddress: string
+    isMissingPreferenceSubmission: boolean
 }
 
 export interface IAuthenticatedAdmin extends IAuthenticatedUserDetails {
