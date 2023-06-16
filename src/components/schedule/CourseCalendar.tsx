@@ -204,7 +204,7 @@ const CourseCalendar = ({
       <Calendar
         height="900px"
         calendars={initialCalendars}
-        month={{ startDayOfWeek: 1 }}
+        month={{ startDayOfWeek: 0 }}
         events={calCourses}
         view={selectedView}
         week={{
