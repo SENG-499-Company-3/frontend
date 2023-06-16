@@ -9,7 +9,7 @@ export const TopNavigation = ({switchTheme}) => {
     }
 
     return (
-        <div className="navbar bg-base-300 z-50">
+        <div className="fixed navbar z-50 bg-base-300">
             <div className="flex-1">
                 <a className="btn btn-ghost normal-case text-xl">UVic Scheduler</a>
             </div>
