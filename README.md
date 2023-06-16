@@ -25,3 +25,15 @@ npm run dev
 ```
 
 Go to `http://localhost:3000/`
+
+5. Building the application
+
+```
+npm run build
+```
+
+6. Running the build
+
+```
+npm run start
+```
