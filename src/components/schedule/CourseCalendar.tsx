@@ -169,7 +169,7 @@ const CourseCalendar = ({
   }, [selectedView, updateRenderRangeText]);
 
   return (
-    <Box display="flex" flexDirection="column" height="100%">
+    <Box display="flex" flexDirection="column" height="100%" width="100%">
       <Stack padding={2} direction={isSmallScreen ? "column" : "row"} alignContent="center" gap={4}>
         <Select
           sx={{ width: isSmallScreen ? "100%" : "30%", maxWidth: "200px" }}
@@ -212,6 +212,8 @@ const CourseCalendar = ({
           timezonesCollapsed: false,
           eventView: ["time"],
           taskView: false,
+          hourStart: 7,
+          hourEnd: 21,
         }}
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
