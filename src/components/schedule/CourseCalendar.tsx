@@ -125,11 +125,12 @@ const CourseCalendar = ({
         date = rangeStart.getDate();
         const endMonth = rangeEnd.getMonth() + 1;
         const endDate = rangeEnd.getDate();
+        const endYear = rangeEnd.getFullYear();
 
         const start = `${year}-${month < 10 ? "0" : ""}${month}-${
           date < 10 ? "0" : ""
         }${date}`;
-        const end = `${year}-${endMonth < 10 ? "0" : ""}${endMonth}-${
+        const end = `${endYear}-${endMonth < 10 ? "0" : ""}${endMonth}-${
           endDate < 10 ? "0" : ""
         }${endDate}`;
         dateRangeText = `${start} ~ ${end}`;
