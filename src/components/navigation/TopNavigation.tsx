@@ -1,9 +1,26 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { useRouter } from 'next/router';
+import { AuthContext } from '../../contexts/AuthContext';
 
-export const TopNavigation = ({switchTheme}) => {
+export const TopNavigation = ({ switchTheme }) => {
     // TODO: Add useContext for user data
     const sessionData = null
 
+    const router = useRouter();
+    const authContext = useContext(AuthContext);
+    const currentUser = authContext.currentUser();
+    const [emailAddress, setEmailAddress] = useState<string>("testemail@test.com");
+    //SET that inital to null - currently in test
+
+    useEffect(
+        () => {
+            if (currentUser) {
+                console.log("Is signed in");
+                setEmailAddress(currentUser.emailAddress);
+            }
+        },
+        [currentUser]
+    )
     const signOut = async () => {
         // TODO: Add sign out logic
     }
@@ -14,6 +31,9 @@ export const TopNavigation = ({switchTheme}) => {
                 <a className="btn btn-ghost normal-case text-xl">UVic Scheduler</a>
             </div>
             <div className="flex-none gap-2 px-4">
+
+                {/* If user is signed in, email is displayed */}
+                <div>{emailAddress}</div>
 
                 {/* Theme Button */}
                 <label className="swap swap-rotate px-2">
@@ -27,6 +47,7 @@ export const TopNavigation = ({switchTheme}) => {
                     <label
                         className="btn btn-primary btn-sm"
                         htmlFor="signInModal"
+                        onClick={() => router.push('/login')}
                     >
                         Log In
                     </label>
