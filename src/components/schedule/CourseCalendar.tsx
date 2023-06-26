@@ -125,11 +125,12 @@ const CourseCalendar = ({
         date = rangeStart.getDate();
         const endMonth = rangeEnd.getMonth() + 1;
         const endDate = rangeEnd.getDate();
+        const endYear = rangeEnd.getFullYear();
 
         const start = `${year}-${month < 10 ? "0" : ""}${month}-${
           date < 10 ? "0" : ""
         }${date}`;
-        const end = `${year}-${endMonth < 10 ? "0" : ""}${endMonth}-${
+        const end = `${endYear}-${endMonth < 10 ? "0" : ""}${endMonth}-${
           endDate < 10 ? "0" : ""
         }${endDate}`;
         dateRangeText = `${start} ~ ${end}`;
@@ -169,7 +170,7 @@ const CourseCalendar = ({
   }, [selectedView, updateRenderRangeText]);
 
   return (
-    <Box display="flex" flexDirection="column" height="100%">
+    <Box display="flex" flexDirection="column" height="100%" width="100%">
       <Stack padding={2} direction={isSmallScreen ? "column" : "row"} alignContent="center" gap={4}>
         <Select
           sx={{ width: isSmallScreen ? "100%" : "30%", maxWidth: "200px" }}
@@ -212,6 +213,8 @@ const CourseCalendar = ({
           timezonesCollapsed: false,
           eventView: ["time"],
           taskView: false,
+          hourStart: 7,
+          hourEnd: 21,
         }}
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
