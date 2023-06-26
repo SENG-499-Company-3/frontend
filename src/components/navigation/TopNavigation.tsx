@@ -17,6 +17,8 @@ export const TopNavigation = ({ switchTheme }) => {
             if (currentUser) {
                 console.log("Is signed in");
                 setEmailAddress(currentUser.emailAddress);
+            } else {
+                setEmailAddress(null);
             }
         },
         [currentUser]
