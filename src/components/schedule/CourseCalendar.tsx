@@ -85,7 +85,7 @@ const CourseCalendar = ({
     },
   ];
 
-  const termOptions = ["Spring", "Summer", "Fall"];
+  const termOptions = ["Summer", "Fall", "Spring"];
 
   const useDisclosure = () => {
     const [isOpen, setIsOpen] = useState(false);
