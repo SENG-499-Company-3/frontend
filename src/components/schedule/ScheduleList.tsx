@@ -1,12 +1,19 @@
-import React from 'react'
-import { DataGrid, GridRowsProp, GridColDef, GridToolbar } from '@mui/x-data-grid';
+import React, { useState } from 'react'
+import { DataGrid, GridRowsProp, GridColDef, GridToolbar, GridRowModel, GridEventListener, GridRowEditStopReasons, GridRowId, GridRowModes, GridActionsCellItem, GridRowModesModel, GridValueGetterParams, GridValueSetterParams } from '@mui/x-data-grid';
 import { courseScheduleData } from '../common/sampleData/courseSchedule'
 import WeekdayTable  from './WeekdayTable'
 import { Course } from '../../types/course'
 import { convertToTime } from '../../utils/helper';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/DeleteOutlined';
+import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Close';
+import { Button } from '@mui/material';
 
-const rows: GridRowsProp = courseScheduleData.map((course: Course, index: number) => ({
-  id: index + 1,
+let index = 1;
+const initialRows: GridRowsProp = courseScheduleData.map((course: Course) => ({
+  id: index++,
   term: course.Term,
   course: course.Subj + ' ' + course.Num,
   section: course.Section,
@@ -20,41 +27,154 @@ const rows: GridRowsProp = courseScheduleData.map((course: Course, index: number
   capacity: course.Cap,
 }));
 
-const columns: GridColDef[] = [
-  { field: 'term', headerName: 'Term', width: 100 },
-  { field: 'course', headerName: 'Course', width: 150 },
-  { field: 'section', headerName: 'Section', width: 100 },
-  { field: 'instructor', headerName: 'Instructor', width: 150 },
-  { field: 'capacity', headerName: 'Capacity', type: 'number', width: 100 },
-  { field: 'location', headerName: 'Location', width: 150 },
-  {
-    field: 'days',
-    headerName: 'Days',
-    width: 200,
-    renderCell: (params) => <WeekdayTable days = {params.value.split('')} />,
-  },
-  { field: 'start', headerName: 'Start', width: 100 },
-  { field: 'end', headerName: 'End', width: 100 }
-];
+const createRow = () => {
+    const id = ++index;
+    return { id, days: 'MR', isNew: true };
+};
+function parseToCaps(value: any) {
+    return String(value).toUpperCase();
+}
 
 const ScheduleList = () => {
+    const [rows, setRows] = React.useState(initialRows);
+    const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
+
+    const handleAddRow = () => {
+        setRows((prevRows) => [...prevRows, createRow()]);
+        setRowModesModel((oldModel) => ({
+            ...oldModel,
+            [index]: { mode: GridRowModes.Edit, fieldToFocus: 'name' },
+        }));
+    };
+
+    const handleEditClick = (id: GridRowId) => () => {
+        setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
+    };
+
+    const handleSaveClick = (id: GridRowId) => () => {
+        setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
+    };
+
+    const handleDeleteClick = (id: GridRowId) => () => {
+        setRows(rows.filter((row) => row.id !== id));
+    };
+
+    const handleCancelClick = (id: GridRowId) => () => {
+        setRowModesModel({
+            ...rowModesModel,
+            [id]: { mode: GridRowModes.View, ignoreModifications: true },
+        });
+
+        const editedRow = rows.find((row) => row.id === id);
+        if (editedRow!.isNew) {
+            setRows(rows.filter((row) => row.id !== id));
+        }
+    };
+
+    const processRowUpdate = (newRow: GridRowModel) => {
+        const updatedRow = { ...newRow, isNew: false };
+        setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
+        return updatedRow;
+    };
+
+    const handleRowEditStop: GridEventListener<'rowEditStop'> = (params, event) => {
+        if (params.reason === GridRowEditStopReasons.rowFocusOut) {
+            event.defaultMuiPrevented = true;
+        }
+    };
+
+    const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
+        setRowModesModel(newRowModesModel);
+    };
+
+    const columns: GridColDef[] = [
+        { field: 'term', headerName: 'Term', width: 100, editable: true, type: 'singleSelect', valueOptions: ['SUMMER', 'SPRING', 'FALL'] },
+        { field: 'course', headerName: 'Course', width: 150, editable: true, valueParser: parseToCaps },
+        { field: 'section', headerName: 'Section', width: 100, editable: true, valueParser: parseToCaps },
+        { field: 'instructor', headerName: 'Instructor', width: 150 },
+        { field: 'capacity', headerName: 'Capacity', type: 'number', width: 100, editable: true },
+        { field: 'location', headerName: 'Location', width: 150, editable: true, valueParser: parseToCaps },
+        {
+            field: 'days',
+            headerName: 'Days',
+            width: 200,
+            renderCell: (params) => <WeekdayTable days={params.value.split('')} />,
+        },
+        { field: 'start', headerName: 'Start', width: 100 },
+        { field: 'end', headerName: 'End', width: 100 },
+        {
+            field: 'actions',
+            type: 'actions',
+            headerName: 'Actions',
+            width: 100,
+            cellClassName: 'actions',
+            getActions: ({ id }) => {
+                const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
+
+                if (isInEditMode) {
+                    return [
+                        <GridActionsCellItem
+                            icon={<SaveIcon />}
+                            label="Save"
+                            sx={{
+                                color: 'primary.main',
+                            }}
+                            onClick={handleSaveClick(id)}
+                        />,
+                        <GridActionsCellItem
+                            icon={<CancelIcon />}
+                            label="Cancel"
+                            className="textPrimary"
+                            onClick={handleCancelClick(id)}
+                            color="inherit"
+                        />,
+                    ];
+                }
+
+                return [
+                    <GridActionsCellItem
+                        icon={<EditIcon />}
+                        label="Edit"
+                        className="textPrimary"
+                        onClick={handleEditClick(id)}
+                        color="inherit"
+                    />,
+                    <GridActionsCellItem
+                        icon={<DeleteIcon />}
+                        label="Delete"
+                        onClick={handleDeleteClick(id)}
+                        color="inherit"
+                    />,
+                ];
+            },
+        },
+    ];
+
     return (
         <div style={{ height: '100%', width: '100%' }}>
+            <Button size="small" startIcon={<AddIcon />} onClick={handleAddRow}>
+                Add Course
+            </Button>
             <DataGrid 
-              rows={rows} 
-              columns={columns}
-              initialState={{
-                sorting: {
-                  sortModel: [{ field: 'course', sort: 'asc' }],
-                },
-              }}
-              slots={{ toolbar: GridToolbar }}
-              slotProps={{
-                toolbar: {
-                  showQuickFilter: true,
-                  quickFilterProps: { debounceMs: 500 },
-                },
-              }}
+                rows={rows} 
+                columns={columns}
+                editMode="row"
+                rowModesModel={rowModesModel}
+                onRowModesModelChange={handleRowModesModelChange}
+                processRowUpdate={processRowUpdate}
+                onRowEditStop={handleRowEditStop}
+                initialState={{
+                    sorting: {
+                        sortModel: [{ field: 'course', sort: 'asc' }],
+                    },
+                }}
+                slots={{ toolbar: GridToolbar }}
+                slotProps={{
+                    toolbar: {
+                    showQuickFilter: true,
+                    quickFilterProps: { debounceMs: 500 },
+                    },
+                }}
             />
         </div>
     )
