@@ -12,5 +12,8 @@ module.exports = {
     require("daisyui"),
     require("@tailwindcss/typography"),
   ],
+  corePlugins: {
+    preflight: false,
+  },
 } satisfies Config;
 

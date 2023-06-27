@@ -300,6 +300,8 @@ const CourseCalendar = ({
           timezonesCollapsed: false,
           eventView: ["time"],
           taskView: false,
+          hourStart: 7,
+          hourEnd: 21,
         }}
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
