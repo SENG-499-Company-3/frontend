@@ -58,8 +58,8 @@ function parseToCaps(value: any) {
 }
 
 const ScheduleList = () => {
-    const [rows, setRows] = React.useState(initialRows);
-    const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
+    const [rows, setRows] = useState(initialRows);
+    const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
     const handleAddRow = () => {
         setRows((prevRows) => [...prevRows, createRow()]);
@@ -180,11 +180,11 @@ const ScheduleList = () => {
     ];
 
     return (
-        <div style={{ height: '100%', width: '100%' }}>
+        <div style={{ height: '97%', width: '100%', verticalAlign: 'top'}}>
             <Button size="small" startIcon={<AddIcon />} onClick={handleAddRow}>
                 Add Course
             </Button>
-            <DataGrid 
+            <DataGrid
                 rows={rows} 
                 columns={columns}
                 editMode="row"
