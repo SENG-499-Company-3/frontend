@@ -29,8 +29,27 @@ const initialRows: GridRowsProp = courseScheduleData.map((course: Course) => ({
 
 const createRow = () => {
     const id = ++index;
-    return { id, days: 'MR', isNew: true };
+    return { id, days: '', isNew: true };
 };
+
+//TO DO: finish filling this out and maybe figure out if the setDateTime can map back to one of these dropdown items instead of text override
+const daysTimeSlots = [
+    'MR 08:30 09:50',
+    'MR 10:00 11:20',
+    'MR 13:00 14:20',
+    'TWF 08:30 09:20',
+    'TWF 09:30 10:20',
+    'TWF 11:30 12:20',
+];
+
+function getDaysTime(params: GridValueGetterParams) {
+    return `${params.row.days || ''} ${params.row.start || ''} ${params.row.end || ''}`
+}
+function setDaysTime(params: GridValueSetterParams) {
+    const [days, start, end] = params.value!.toString().split(' ');
+    return { ...params.row, days, start, end };
+}
+
 function parseToCaps(value: any) {
     return String(value).toUpperCase();
 }
@@ -88,10 +107,10 @@ const ScheduleList = () => {
     };
 
     const columns: GridColDef[] = [
-        { field: 'term', headerName: 'Term', width: 100, editable: true, type: 'singleSelect', valueOptions: ['SUMMER', 'SPRING', 'FALL'] },
+        { field: 'term', headerName: 'Term', width: 100, editable: true },
         { field: 'course', headerName: 'Course', width: 150, editable: true, valueParser: parseToCaps },
         { field: 'section', headerName: 'Section', width: 100, editable: true, valueParser: parseToCaps },
-        { field: 'instructor', headerName: 'Instructor', width: 150 },
+        { field: 'instructor', headerName: 'Instructor', width: 150, editable: true },
         { field: 'capacity', headerName: 'Capacity', type: 'number', width: 100, editable: true },
         { field: 'location', headerName: 'Location', width: 150, editable: true, valueParser: parseToCaps },
         {
@@ -102,6 +121,13 @@ const ScheduleList = () => {
         },
         { field: 'start', headerName: 'Start', width: 100 },
         { field: 'end', headerName: 'End', width: 100 },
+        {
+            field: 'daysTime', headerName: 'Block', width: 100, editable: true,
+            type: 'singleSelect',
+            valueOptions: daysTimeSlots,
+            valueGetter: getDaysTime,
+            valueSetter: setDaysTime,
+        },
         {
             field: 'actions',
             type: 'actions',
