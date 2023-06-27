@@ -32,6 +32,9 @@ const createRow = () => {
     return { id, days: '', isNew: true };
 };
 
+const termList = courseScheduleData.map((course: Course) => course.Term).filter((value, index, self) => self.indexOf(value) === index);
+const professorList = courseScheduleData.map((course: Course) => course.Instructor).filter((value, index, self) => self.indexOf(value) === index);
+
 //TO DO: finish filling this out and maybe figure out if the setDateTime can map back to one of these dropdown items instead of text override
 const daysTimeSlots = [
     'MR 08:30 09:50',
@@ -107,10 +110,10 @@ const ScheduleList = () => {
     };
 
     const columns: GridColDef[] = [
-        { field: 'term', headerName: 'Term', width: 100, editable: true },
+        { field: 'term', headerName: 'Term', width: 100, editable: true, type:'singleSelect', valueOptions:termList },
         { field: 'course', headerName: 'Course', width: 150, editable: true, valueParser: parseToCaps },
         { field: 'section', headerName: 'Section', width: 100, editable: true, valueParser: parseToCaps },
-        { field: 'instructor', headerName: 'Instructor', width: 150, editable: true },
+        { field: 'instructor', headerName: 'Instructor', width: 150, editable: true, type: 'singleSelect', valueOptions:professorList },
         { field: 'capacity', headerName: 'Capacity', type: 'number', width: 100, editable: true },
         { field: 'location', headerName: 'Location', width: 150, editable: true, valueParser: parseToCaps },
         {
