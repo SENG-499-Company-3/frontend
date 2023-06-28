@@ -2,13 +2,11 @@ import { EventObject, ExternalEventTypes, TZDate } from "@toast-ui/calendar";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import ButtonGroup from "@mui/material/ButtonGroup";
 import Select from "@mui/material/Select";
 import { SelectChangeEvent } from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
-import { createTheme } from "@mui/material/styles";
 import {
   convertIntoReadableMonth,
   convertIntoReadableRange,
@@ -19,17 +17,13 @@ import { ViewType } from "../../types/calendar";
 import { Course } from "../../types/course";
 import Calendar from "@toast-ui/react-calendar";
 import "@toast-ui/calendar/dist/toastui-calendar.min.css";
-import { ThemeProvider } from "@emotion/react";
 import EventDetailModal from "./EventDetailModal";
 import { calendarColours } from "../common/sampleData/courseSchedule";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import ToggleButton from "@mui/material/ToggleButton";
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
-const buttoneGroupTheme = createTheme({
-  palette: {
-    primary: {
-      main: "#000000",
-    },
-  },
-});
 
 const viewModeOptions = [
   {
@@ -41,6 +35,24 @@ const viewModeOptions = [
     value: "week",
   },
 ];
+
+const currentYear = new Date().getFullYear();
+const currentMonth = new Date().getMonth();
+var currentTerm = "Spring"
+
+if (currentMonth > 7) {
+  currentTerm = "Fall";
+}
+else if (currentMonth > 3) {
+  currentTerm = "Summer";
+}
+
+const termStartDates = {
+  Spring: `${(currentYear + 1).toString()}-1-1`,  // First week of January
+  Summer: `${currentYear.toString()}-5-1`,        // First week of May
+  Fall: `${currentYear.toString()}-9-1`,          // First week of September
+};      
+
 
 const CourseCalendar = ({
   view,
@@ -58,6 +70,8 @@ const CourseCalendar = ({
   const [selectedDateRangeText, setSelectedDateRangeText] = useState("");
   const [selectedView, setSelectedView] = useState(view);
   const [selectedEvent, setSelectedEvent] = useState<EventObject | null>(null);
+  const [selectedTerm, setSelectedTerm] = useState(currentTerm);
+
 
   const isSmallScreen = useSmallScreen();
 
@@ -70,6 +84,8 @@ const CourseCalendar = ({
       // dragBgColor: "#9e5fff",
     },
   ];
+
+  const termOptions = ["Summer", "Fall", "Spring"];
 
   const useDisclosure = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -123,9 +139,9 @@ const CourseCalendar = ({
         year = rangeStart.getFullYear();
         month = rangeStart.getMonth() + 1;
         date = rangeStart.getDate();
+        const endYear = rangeEnd.getFullYear();
         const endMonth = rangeEnd.getMonth() + 1;
         const endDate = rangeEnd.getDate();
-        const endYear = rangeEnd.getFullYear();
 
         const start = `${year}-${month < 10 ? "0" : ""}${month}-${
           date < 10 ? "0" : ""
@@ -136,16 +152,17 @@ const CourseCalendar = ({
         dateRangeText = `${start} ~ ${end}`;
         break;
       }
-      default:
+      default: {
         dateRangeText = `${year}-${month}-${date}`;
+      }
     }
-
     setSelectedDateRangeText(dateRangeText);
   }, [getCalInstance]);
 
   const onClickNav = (option: "prev" | "next" | "today") => {
     getCalInstance()[option]();
     updateRenderRangeText();
+    updateTerm();
   };
 
   const onChangeSelect = (event: SelectChangeEvent) => {
@@ -153,12 +170,41 @@ const CourseCalendar = ({
   };
 
   const onClickEvent: ExternalEventTypes["clickEvent"] = (res) => {
-    console.group("onClickEvent");
-    console.log("MouseEvent : ", res.nativeEvent);
-    console.log("Event Info : ", res.event);
-    console.groupEnd();
+    // console.group("onClickEvent");
+    // console.log("MouseEvent : ", res.nativeEvent);
+    // console.log("Event Info : ", res.event);
+    // console.groupEnd();
     setSelectedEvent(res.event);
     onEventDetailOpen();
+  };
+
+  const setStartDate = (term) => {
+    const calInstance = getCalInstance();
+    calInstance.setDate(termStartDates[term]);
+  };
+
+  const updateTerm = () => {
+    const calInstance = getCalInstance();
+    const currentMonth = calInstance.getDate().getMonth();
+    var currentTerm = selectedTerm;
+
+    if (currentMonth > 7) {
+      currentTerm = "Fall";
+    }
+    else if (currentMonth > 3) {
+      currentTerm = "Summer";
+    }
+    else {
+      currentTerm = "Spring";
+    }
+
+    setSelectedTerm(currentTerm);
+  };
+
+  const onClickTerm = (term) => {
+    setSelectedTerm(term.target.value);
+    setStartDate(term.target.value);
+    updateRenderRangeText();
   };
 
   useEffect(() => {
@@ -170,37 +216,78 @@ const CourseCalendar = ({
   }, [selectedView, updateRenderRangeText]);
 
   return (
-    <Box display="flex" flexDirection="column" height="100%" width="100%">
-      <Stack padding={2} direction={isSmallScreen ? "column" : "row"} alignContent="center" gap={4}>
-        <Select
-          sx={{ width: isSmallScreen ? "100%" : "30%", maxWidth: "200px" }}
-          variant="outlined"
-          onChange={onChangeSelect}
-          value={selectedView}
-        >
-          {viewModeOptions.map((option, index) => (
-            <MenuItem value={option.value} key={index}>
-              {option.title}
-            </MenuItem>
-          ))}
-        </Select>
-        <Stack direction="row" width="100%" justifyContent="space-between">
-          <ThemeProvider theme={buttoneGroupTheme}>
-            <ButtonGroup variant="outlined">
-              <Button onClick={() => onClickNav("today")}>Today</Button>
-              <Button onClick={() => onClickNav("prev")}>Prev</Button>
-              <Button onClick={() => onClickNav("next")}>Next</Button>
-            </ButtonGroup>
-          </ThemeProvider>
+    <Box display="flex" flexDirection="column" height="100%" width="100%" maxWidth="1536px"> {/* Calendar's max width is 1536px */}
+      <Stack padding={2} direction={isSmallScreen ? "column" : "row"} justifyContent="flex-end">
+          <Stack py={isSmallScreen ? 2: 0} direction="row" width="100%">
 
-          <Box>
-            <Typography variant="h5" sx={{ display: "flex", height: '100%', alignItems: 'center' }}>
-              {selectedDateRangeText && selectedView === "month"
-                ? convertIntoReadableMonth(selectedDateRangeText)
-                : convertIntoReadableRange(selectedDateRangeText)}
-            </Typography>
-          </Box>
-        </Stack>
+            <Button 
+              variant="outlined" 
+              onClick={() => onClickNav("today")} 
+              sx={{ 
+                marginY: "4px", 
+                marginRight: "8px", 
+                color: "black", 
+                borderColor: "gray", 
+                ":hover": { borderColor: "gray", bgcolor: "#F0F0F0" }  }}>
+              Today
+            </Button>
+            <Button 
+              onClick={() => onClickNav("prev")} 
+              sx={{ 
+                marginY: "4px", 
+                color: "black", 
+                ":hover": { bgcolor: "#F0F0F0" } }}>
+              <ArrowBackIosIcon />
+            </Button>
+            <Button 
+              onClick={() => onClickNav("next")} 
+              sx={{ 
+                marginY: "4px", 
+                color: "black", 
+                ":hover": { bgcolor: "#F0F0F0" } }}>
+              <ArrowForwardIosIcon />
+            </Button>
+
+            <Box>
+              <Typography variant="h5" sx={{ display: "flex", height: '100%', alignItems: 'center', marginLeft: "10px" }}>
+                {selectedDateRangeText && selectedView === "month"
+                  ? convertIntoReadableMonth(selectedDateRangeText)
+                  : convertIntoReadableRange(selectedDateRangeText)}
+              </Typography>
+            </Box>
+          </Stack>
+
+          <Stack direction="row" width="100%" justifyContent={isSmallScreen ? "left": "right"} gap="15px">
+            <ToggleButtonGroup
+                value={selectedTerm}
+                exclusive
+                onChange={(term) => onClickTerm(term)}
+              >
+                {termOptions.map((term, index) => (
+                  <ToggleButton 
+                    key={index} 
+                    value={term}
+                    sx={{ flex: 1, minWidth: 0 }}
+                  >
+                    {term}
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+            <Select
+              sx={{ width: isSmallScreen ? "100%" : "30%", maxWidth: "200px" }}
+              variant="outlined"
+              onChange={onChangeSelect}
+              value={selectedView}
+            >
+              {viewModeOptions.map((option, index) => (
+                <MenuItem value={option.value} key={index}>
+                  {option.title}
+                </MenuItem>
+              ))}
+            </Select>            
+
+            
+          </Stack>
       </Stack>
       <Calendar
         height="900px"
