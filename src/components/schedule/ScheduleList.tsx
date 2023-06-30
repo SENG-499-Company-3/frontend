@@ -11,10 +11,8 @@ import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 import { Button } from '@mui/material';
 
-/* Use index to create unique index numbers required by dataGrid. Stored outside for reuse in createRow, highlighting new rows */
-let index = 1;
-const initialRows: GridRowsProp = courseScheduleData.map((course: Course) => ({
-  id: index++,
+const initialRows: GridRowsProp = courseScheduleData.map((course: Course, index: number ) => ({
+  id: index,
   term: course.Term,
   course: course.Subj + ' ' + course.Num,
   section: course.Section,
@@ -28,8 +26,7 @@ const initialRows: GridRowsProp = courseScheduleData.map((course: Course) => ({
   capacity: course.Cap,
 }));
 
-const createRow = () => {
-    const id = ++index;
+const createRow = (id: number) => {
     return { id, days: '', isNew: true }; //Update with defaults if desired. Days must be empty string
 };
 
@@ -80,13 +77,14 @@ function parseToCaps(value: any) {
 const ScheduleList = () => {
     const [rows, setRows] = useState(initialRows);
     const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+    const numRows = rows.length;
 
     /* Add rows function for use with the added button */
-    const handleAddRow = () => {
-        setRows((prevRows) => [...prevRows, createRow()]);
+    const handleAddRow = (newIndex: number) => {
+        setRows((prevRows) => [...prevRows, createRow(newIndex)]);
         setRowModesModel((oldModel) => ({
             ...oldModel,
-            [index]: { mode: GridRowModes.Edit, fieldToFocus: 'name' },
+            [newIndex]: { mode: GridRowModes.Edit, fieldToFocus: 'term' },
         }));
     };
 
@@ -204,7 +202,7 @@ const ScheduleList = () => {
 
     return (
         <div style={{ height: '97%', width: '100%', verticalAlign: 'top'}}>
-            <Button size="small" startIcon={<AddIcon />} onClick={handleAddRow}>
+            <Button size="small" startIcon={<AddIcon />} onClick={() => handleAddRow(numRows)}>
                 Add Course
             </Button>
             <DataGrid
