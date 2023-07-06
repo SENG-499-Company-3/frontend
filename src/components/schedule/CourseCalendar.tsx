@@ -2,8 +2,7 @@ import { EventObject, ExternalEventTypes, TZDate } from "@toast-ui/calendar";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Select from "@mui/material/Select";
-import { SelectChangeEvent } from "@mui/material/Select";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
@@ -51,7 +50,9 @@ const termStartDates = {
   Spring: `${(currentYear + 1).toString()}-1-1`,  // First week of January
   Summer: `${currentYear.toString()}-5-1`,        // First week of May
   Fall: `${currentYear.toString()}-9-1`,          // First week of September
-};      
+};  
+
+const user = "admin" // TODO: replace with actual user type
 
 
 const CourseCalendar = ({
@@ -61,15 +62,19 @@ const CourseCalendar = ({
   view: ViewType;
   courses: Course[];
 }) => {
-  const calCourses = useMemo(
-    () => createCalendarEvents(mergeCourses(courses)),
-    [courses]
-  );
+  const calCourses = useMemo(() => {
+    if (user === "professor") {
+      return createCalendarEvents(mergeCourses(courses));
+    } else {
+      return createCalendarEvents(courses);
+    }
+  }, [courses, user]);
 
   const calendarRef = useRef<typeof Calendar>(null);
   const [selectedDateRangeText, setSelectedDateRangeText] = useState("");
   const [selectedView, setSelectedView] = useState(view);
   const [selectedEvent, setSelectedEvent] = useState<EventObject | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [selectedTerm, setSelectedTerm] = useState(currentTerm);
 
 
@@ -174,7 +179,10 @@ const CourseCalendar = ({
     // console.log("MouseEvent : ", res.nativeEvent);
     // console.log("Event Info : ", res.event);
     // console.groupEnd();
+    const course = getCourseById(courses, res.event.id);
+
     setSelectedEvent(res.event);
+    setSelectedCourse(course);
     onEventDetailOpen();
   };
 
@@ -272,7 +280,7 @@ const CourseCalendar = ({
                     {term}
                   </ToggleButton>
                 ))}
-              </ToggleButtonGroup>
+            </ToggleButtonGroup>
             <Select
               sx={{ width: isSmallScreen ? "100%" : "30%", maxWidth: "200px" }}
               variant="outlined"
@@ -306,14 +314,15 @@ const CourseCalendar = ({
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         ref={calendarRef}
-        // useDetailPopup={true}
         onClickEvent={onClickEvent}
       />{
         selectedEvent && (
           <EventDetailModal
-            event={selectedEvent}
+            calendarEvent={selectedEvent}
+            course={selectedCourse}
             isOpen={isEventDetailOpen}
             onClose={onEventDetailClose}
+            userType={user}
           />
         )
       }
@@ -334,6 +343,8 @@ function createCalendarEvents(courseScheduleData: Course[]): EventObject[] {
     const endDate = new Date(course.EndDate);
 
     let currentDate = new Date(startDate);
+    let bgColour = calendarColours[colorIndex % calendarColours.length].color;
+    let darkColour = calendarColours[colorIndex % calendarColours.length].darkColor;
 
     while (currentDate <= endDate) {
       var dayOfWeek = currentDate.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
@@ -354,9 +365,9 @@ function createCalendarEvents(courseScheduleData: Course[]): EventObject[] {
           location: course.Bldg + ' ' + course.Room,
           attendees: [course.Instructor],
           category: "time",
-          backgroundColor: calendarColours[colorIndex % calendarColours.length].color, 
-          borderColor: calendarColours[colorIndex % calendarColours.length].color,
-          dragBackgroundColor: calendarColours[colorIndex % calendarColours.length].darkColor,
+          backgroundColor: bgColour, 
+          borderColor: bgColour,
+          dragBackgroundColor: darkColour,
           start: addDate(new TZDate(eventStart)).toDate().toISOString(),
           end: addDate(new TZDate(eventEnd)).toDate().toISOString(),
           isReadOnly: true,
@@ -366,8 +377,8 @@ function createCalendarEvents(courseScheduleData: Course[]): EventObject[] {
       }
 
       currentDate.setDate(currentDate.getDate() + 1);
-      colorIndex++;
     }
+    colorIndex++;
   });
 
   return events;
@@ -426,4 +437,26 @@ function addDate(d: TZDate) {
 
 function clone (date: TZDate): TZDate {
   return new TZDate(date);
+};
+
+function getCourseById(courses: Course[], id: string): Course | undefined {
+  const term = id.slice(0, 6);
+  const subj = id.slice(6, 9);
+  const num = parseInt(id.slice(9), 10);
+
+  const matchingCourse = courses.find((course) => {
+    return course.Term === parseInt(term, 10) &&
+      course.Subj === subj &&
+      course.Num === num;
+  });
+
+  if (matchingCourse) {
+    console.log("Matching course found:");
+    console.log(matchingCourse);
+    return matchingCourse;
+  } 
+  else {
+    console.log("No matching course found.");
+    return undefined;
+  }
 };

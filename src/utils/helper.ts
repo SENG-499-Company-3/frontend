@@ -107,3 +107,19 @@ export const convertToTime = (time: number): string => {
 
   return formattedTime;
 };
+
+const year = new Date().getFullYear();
+export const termOptions = [
+  {
+    title: "Summer " + year.toString(),
+    value: parseInt(year.toString() + "05"),
+  },
+  {
+    title: "Fall " + year.toString(),
+    value: parseInt(year.toString() + "09"),
+  },
+  {
+    title: "Spring " + (year + 1).toString(),
+    value: parseInt((year + 1).toString() + "01"),
+  }
+];
