@@ -9,16 +9,16 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
-import { IExistingUserDetails } from '../types/auth.d'
+import { INewUserDetails } from '../types/auth.d'
 import { AuthContext } from '../contexts/AuthContext'
 import { useRouter } from 'next/router'
 import useApi from '../hooks/useApi';
-import { set } from 'date-fns';
+import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 
-const LoginPage = () => {
+const RegisterPage = () => {
     const router = useRouter();
     const authContext = useContext(AuthContext);
-    const api = useApi();
+    const api = useApi().user;
 
     //Variable for plaintext email
     const [email, setEmail] = useState('');
@@ -32,10 +32,29 @@ const LoginPage = () => {
         setPassword(event.target.value);
     }
 
+    //Variable for plaintext password
+    const [name, setName] = useState('');
+    const handleNameChange = (event) => {
+        setName(event.target.value);
+    }
+
+    //Variable for plaintext password
+    const [role, setRole] = useState<RoleType>("TEACHER");
+    const handleRoleChange = (event) => {
+        setRole(event.target.value);
+    }
+
     // When this callback runs, it sets the given user details into the Auth context.
-    const handleSignIn = (userDetails: IExistingUserDetails) => {
-        api.auth.login(userDetails.emailAddress, userDetails.password).then(() => {
-            api.auth.self(userDetails.emailAddress, userDetails.password)
+    const handleSignUp = (userDetails: INewUserDetails) => {
+        api.create(userDetails.emailAddress, userDetails.password, userDetails.displayName, userDetails.type).then((response) => {
+            setLoading(false)
+            if (response.status !== 200) {
+                setSuccess(false)
+            }
+            else {
+                setSuccess(true)
+                router.push('/login')
+            }
         })
     }
 
@@ -49,7 +68,7 @@ const LoginPage = () => {
         if (authContext.isAuthenticated()) {
             router.push('/'); // Redirect user
         }
-    }, [authContext]);
+    }, []);
 
     //Timer variables for testing spinner - remove once authentication complete unless you want the spinner regardless
     const timer = React.useRef<number>();
@@ -69,7 +88,7 @@ const LoginPage = () => {
                 setLoading(false);
             }, 2000);
 
-            handleSignIn({ emailAddress: email, password: password});
+            handleSignUp({ emailAddress: email, password: password, displayName: name, type: role });
         }
     }
 
@@ -102,12 +121,43 @@ const LoginPage = () => {
                     />
                 </div>
                 <br />
+                <div>
+                    <TextField
+                        id="outlined-basic"
+                        label="Display Name"
+                        type="text"
+                        variant="outlined"
+                        value={name}
+                        onChange={handleNameChange}
+                        fullWidth={true}
+                    />
+                </div>
+                <br />
+                <div>
+                    <FormControl fullWidth>
+                        <InputLabel id="role-select-label">Role</InputLabel>
+                        <Select
+                            labelId="role-select-label"
+                            id="role-select"
+                            value={role}
+                            label="Role"
+                            variant="outlined"
+                            onChange={handleRoleChange}
+                            fullWidth={true}
+                        >
+                            <MenuItem value={"ADMIN"}>Admin</MenuItem>
+                            <MenuItem value={"TEACHER"}>Professor</MenuItem>
+                            <MenuItem value={"RESEARCHER"}>Researcher</MenuItem>
+                        </Select>
+                    </FormControl>
+                </div>
+                <br />
                 <Box sx={{ m: 1, position: 'relative' }}>
                     <Button
                         variant="contained"
                         disabled={loading}
                         onClick={handleClick}
-                    >Login
+                    >Register
                     </Button>
                     {loading && (
                         <CircularProgress
@@ -122,7 +172,7 @@ const LoginPage = () => {
                         />
                     )}
                     {!loading && success && (
-                        <Alert severity="success">Login successful</Alert>
+                        <Alert severity="success">Register successful</Alert>
                     )}
                     {!loading && success === false && (
                         <Alert severity="error">Invalid account or password</Alert>
@@ -133,4 +183,4 @@ const LoginPage = () => {
     )
 }
 
-export default LoginPage
+export default RegisterPage
