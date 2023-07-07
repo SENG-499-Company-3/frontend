@@ -1,11 +1,14 @@
-import { useEffect, useState } from "react";
+import { useContext } from "react";
+import { AuthContext } from "../../contexts/AuthContext";
+import useApi from '../../hooks/useApi';
 
 export const TopNavigation = ({switchTheme}) => {
     // TODO: Add useContext for user data
-    const sessionData = null
+    const authContext = useContext(AuthContext);
+    const api = useApi().auth;
 
     const signOut = async () => {
-        // TODO: Add sign out logic
+        api.logout();
     }
 
     return (
@@ -23,7 +26,7 @@ export const TopNavigation = ({switchTheme}) => {
                 </label>
 
                 {/* If the user is not signed in, display auth buttons */}
-                {!sessionData?.user ?
+                {!authContext.isAuthenticated() ?
                     <label
                         className="btn btn-primary btn-sm"
                         htmlFor="signInModal"
