@@ -14,6 +14,18 @@ export interface IAuthenticatedUserDetails {
     emailAddress: string
 }
 
+export interface IExistingUserDetails {
+    emailAddress: string,
+    password: string,
+}
+
+export interface INewUserDetails {
+    emailAddress: string,
+    password: string,
+    displayName: string,
+    type: RoleType
+}
+
 export interface IAuthenticatedAdmin extends IAuthenticatedUserDetails {
     type: AuthenticatedUserType.ADMIN
 }
