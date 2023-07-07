@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import Link from "next/link";
 import MenuIcon from '@mui/icons-material/Menu';
-import { AppBar, Box, Button, IconButton, Toolbar } from "@mui/material";
+import { AppBar, Box, Button, IconButton, Toolbar, Typography } from "@mui/material";
 
 interface ITopNavigationProps {
     onToggleThemeMode: () => void
@@ -31,7 +31,12 @@ export const TopNavigation = (props: ITopNavigationProps) => {
                     </IconButton>
 
                     <div>
-                        <Link href='/'>UVic Scheduler</Link>
+                        <Typography
+                            component={Link}
+                            href='/'
+                            sx={{ color: 'white' }}
+                            style={{ textDecoration: 'none' }}
+                        ><strong>UVic Scheduler</strong></Typography>
                     </div>
                 </Box>
 

@@ -3,7 +3,7 @@ import { PropsWithChildren } from "react";
 
 const PageHeader = (props: PropsWithChildren) => {
     return (
-        <Paper sx={{ py: 2 }} component='section' elevation={0}>
+        <Paper sx={{ pt: 5, pb: 3 }} component='section' square elevation={0}>
             <Container maxWidth='xl'>
                 {props.children}
             </Container>

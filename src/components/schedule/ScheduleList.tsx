@@ -4,6 +4,7 @@ import { courseScheduleData } from '../common/sampleData/courseSchedule'
 import WeekdayTable  from './WeekdayTable'
 import { Course } from '../../types/course'
 import { convertToTime } from '../../utils/helper';
+import { Paper } from '@mui/material';
 
 const rows: GridRowsProp = courseScheduleData.map((course: Course, index: number) => ({
   id: index + 1,
@@ -39,8 +40,9 @@ const columns: GridColDef[] = [
 
 const ScheduleList = () => {
     return (
-        <div style={{ height: '100%', width: '100%' }}>
-            <DataGrid 
+        <Paper sx={{ p: 2 }}>
+            <DataGrid
+              sx={{ border: 0 }}
               rows={rows} 
               columns={columns}
               initialState={{
@@ -56,7 +58,7 @@ const ScheduleList = () => {
                 },
               }}
             />
-        </div>
+        </Paper>
     )
 }
 
