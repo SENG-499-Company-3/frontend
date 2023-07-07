@@ -2,7 +2,8 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import Link from "next/link";
 import MenuIcon from '@mui/icons-material/Menu';
-import { AppBar, Box, Button, IconButton, Toolbar, Typography } from "@mui/material";
+import { AppBar, Avatar, Box, Button, IconButton, Toolbar, Typography } from "@mui/material";
+import { AuthenticatedUserType } from "../../types/auth.d";
 
 interface ITopNavigationProps {
     onToggleThemeMode: () => void
@@ -10,11 +11,20 @@ interface ITopNavigationProps {
 
 export const TopNavigation = (props: ITopNavigationProps) => {
 
+    const authContext = useContext(AuthContext);
+
+    useEffect(() => {
+        authContext.setCurrentUser({
+            displayName: 'Dr. Rich Little',
+            type: AuthenticatedUserType.ADMIN,
+            emailAddress: 'richlittle@uvic.ca'
+        })
+    });
+
+
     const signOut = async () => {
         // TODO: Add sign out logic
     }
-
-    const authContext = useContext(AuthContext)
 
     return (
         <AppBar position="static">
@@ -40,7 +50,7 @@ export const TopNavigation = (props: ITopNavigationProps) => {
                     </div>
                 </Box>
 
-                <Box gap={2} flex={'test'} sx={{ display: 'flex' }}>
+                <Box gap={2} flex={'test'} sx={{ display: 'flex', alignItems: 'center' }}>
                     <label className="swap swap-rotate px-2">
                         <input onClick={() => props.onToggleThemeMode()} type="checkbox" />
                         <svg className="swap-on fill-current w-7 h-7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/></svg>
@@ -49,9 +59,9 @@ export const TopNavigation = (props: ITopNavigationProps) => {
 
                     {authContext.isAuthenticated() ? (
                         <>
-                            <button className="btn btn-ghost btn-circle btn-sm" onClick={() => void signOut()}>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M15.325 16.275q-.275-.325-.275-.737t.275-.688l1.85-1.85H10q-.425 0-.713-.288T9 12q0-.425.288-.713T10 11h7.175l-1.85-1.85q-.3-.3-.3-.713t.3-.712q.275-.3.688-.3t.687.275l3.6 3.6q.15.15.213.325t.062.375q0 .2-.062.375t-.213.325l-3.6 3.6q-.325.325-.713.288t-.662-.313ZM5 21q-.825 0-1.413-.588T3 19V5q0-.825.588-1.413T5 3h6q.425 0 .713.288T12 4q0 .425-.288.713T11 5H5v14h6q.425 0 .713.288T12 20q0 .425-.288.713T11 21H5Z" /></svg>
-                            </button>
+                            <Avatar>{authContext.avatarInitials()}</Avatar>
+                            <Typography variant='h6'>{authContext.currentUser().displayName}</Typography>
+                            <Button onClick={() => void signOut()}>Sign Out</Button>
                         </>
                     ) : (
                         <Button component={Link} variant='contained' href='/login'>Sign In</Button>
