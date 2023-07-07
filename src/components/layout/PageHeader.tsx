@@ -1,13 +1,13 @@
-import { Box, Container } from "@mui/material";
+import { Container, Paper } from "@mui/material";
 import { PropsWithChildren } from "react";
 
 const PageHeader = (props: PropsWithChildren) => {
     return (
-        <Box py={2} component='section'>
-            <Container maxWidth='xl' sx={{}}>
+        <Paper sx={{ py: 2 }} component='section' elevation={0}>
+            <Container maxWidth='xl'>
                 {props.children}
             </Container>
-        </Box>
+        </Paper>
     )
 }
 

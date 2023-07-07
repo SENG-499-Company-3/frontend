@@ -8,7 +8,7 @@ interface ILayoutProps {
 
 const AppLayout = (props: PropsWithChildren<ILayoutProps>) => {
     return (
-        <Box>
+        <Box sx={{ minHeight: '100vh', backgroundColor: '#EEE' }}>
             <TopNavigation onToggleThemeMode={props.onToggleThemeMode} />
             <Box component='main'>
                 {props.children}
