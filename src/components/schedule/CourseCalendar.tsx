@@ -22,6 +22,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import ToggleButton from "@mui/material/ToggleButton";
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import { v4 as uuidv4 } from 'uuid';
 
 
 const viewModeOptions = [
@@ -53,6 +54,16 @@ const termStartDates = {
 };  
 
 const user = "admin" // TODO: replace with actual user type
+const termOptions = ["Summer", "Fall", "Spring"];
+const initialCalendars = [
+  {
+    id: "1",
+    name: "calendar-1",
+    color: "#ffffff",
+    // bgColor: "#9e5fff",
+    // dragBgColor: "#9e5fff",
+  },
+];
 
 
 const CourseCalendar = ({
@@ -62,55 +73,45 @@ const CourseCalendar = ({
   view: ViewType;
   courses: Course[];
 }) => {
-  const calCourses = useMemo(() => {
-    if (user === "professor") {
-      return createCalendarEvents(mergeCourses(courses));
-    } else {
-      return createCalendarEvents(courses);
-    }
-  }, [courses, user]);
-
   const calendarRef = useRef<typeof Calendar>(null);
   const [selectedDateRangeText, setSelectedDateRangeText] = useState("");
   const [selectedView, setSelectedView] = useState(view);
   const [selectedEvent, setSelectedEvent] = useState<EventObject | null>(null);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [selectedTerm, setSelectedTerm] = useState(currentTerm);
+  const [allCourses, setAllCourses] = useState<Course[]>(addUniqueIds(courses));
+  const [isEventDetailOpen, setIsEventDetailOpen] = useState(false);
+  
 
+  const calCourses = useMemo(() => {
+    if (user === "professor") { // TODO: get professor name from auth
+      return createCalendarEvents(mergeCourses(allCourses));
+    } else {
+      return createCalendarEvents(allCourses);
+    }
+  }, [allCourses, user]);
+  console.log(allCourses);
 
   const isSmallScreen = useSmallScreen();
 
-  const initialCalendars = [
-    {
-      id: "1",
-      name: "calendar-1",
-      color: "#ffffff",
-      // bgColor: "#9e5fff",
-      // dragBgColor: "#9e5fff",
-    },
-  ];
-
-  const termOptions = ["Summer", "Fall", "Spring"];
-
-  const useDisclosure = () => {
-    const [isOpen, setIsOpen] = useState(false);
-
-    const onOpen = () => {
-      setIsOpen(true);
-    };
-
-    const onClose = () => {
-      setIsOpen(false);
-    };
-
-    return { isOpen, onOpen, onClose };
+  const onEventDetailOpen = () => {
+    setIsEventDetailOpen(true);
   };
 
-  const {
-    isOpen: isEventDetailOpen,
-    onOpen: onEventDetailOpen,
-    onClose: onEventDetailClose,
-  } = useDisclosure();
+  const onEventDetailClose = () => {
+    setIsEventDetailOpen(false);
+  };
+
+  const handleCourseUpdate = (updatedCourse: Course) => {
+    const updatedCourses = allCourses.map((course) => {
+      if ((course.id) === updatedCourse.id) {
+        return updatedCourse;
+      }
+      return course;
+    });
+    setAllCourses(updatedCourses);
+  };
+
 
   const getCalInstance = useCallback(
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -179,7 +180,10 @@ const CourseCalendar = ({
     // console.log("MouseEvent : ", res.nativeEvent);
     // console.log("Event Info : ", res.event);
     // console.groupEnd();
-    const course = getCourseById(courses, res.event.id);
+    console.log(res.event);
+    console.log(allCourses)
+    const course = allCourses.find((course) => course.id === res.event.id);
+    console.log(course);
 
     setSelectedEvent(res.event);
     setSelectedCourse(course);
@@ -319,9 +323,10 @@ const CourseCalendar = ({
         selectedEvent && (
           <EventDetailModal
             calendarEvent={selectedEvent}
-            course={selectedCourse}
+            initialCourse={selectedCourse}
             isOpen={isEventDetailOpen}
             onClose={onEventDetailClose}
+            onCourseUpdate={handleCourseUpdate}
             userType={user}
           />
         )
@@ -358,7 +363,7 @@ function createCalendarEvents(courseScheduleData: Course[]): EventObject[] {
         const eventEnd = currentDate.setHours(parseInt(endTime.split(":")[0]), parseInt(endTime.split(":")[1]), 0);
         
         const event: EventObject = {
-          id: course.Term.toString() + course.Subj + course.Num.toString() + course.Section, // generate a unique id
+          id: course.id, 
           calendarId: "1",
           title: course.Subj + ' ' + course.Num.toString() + ' ' + course.Section,
           body: course.Title,
@@ -439,24 +444,8 @@ function clone (date: TZDate): TZDate {
   return new TZDate(date);
 };
 
-function getCourseById(courses: Course[], id: string): Course | undefined {
-  const term = id.slice(0, 6);
-  const subj = id.slice(6, 9);
-  const num = parseInt(id.slice(9), 10);
-
-  const matchingCourse = courses.find((course) => {
-    return course.Term === parseInt(term, 10) &&
-      course.Subj === subj &&
-      course.Num === num;
+function addUniqueIds (courses: Course[]): Course[] {
+  return courses.map((item) => {
+    return { id: uuidv4(), ...item };
   });
-
-  if (matchingCourse) {
-    console.log("Matching course found:");
-    console.log(matchingCourse);
-    return matchingCourse;
-  } 
-  else {
-    console.log("No matching course found.");
-    return undefined;
-  }
 };

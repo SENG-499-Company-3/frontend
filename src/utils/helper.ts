@@ -113,13 +113,19 @@ export const termOptions = [
   {
     title: "Summer " + year.toString(),
     value: parseInt(year.toString() + "05"),
+    startDate: "01 May " + year.toString(),
+    endDate: "31 Jul " + year.toString(),
   },
   {
     title: "Fall " + year.toString(),
     value: parseInt(year.toString() + "09"),
+    startDate: "01 Sep " + year.toString(),
+    endDate: "30 Nov " + year.toString(),
   },
   {
     title: "Spring " + (year + 1).toString(),
     value: parseInt((year + 1).toString() + "01"),
+    startDate: "01 Jan " + (year + 1).toString(),
+    endDate: "31 Mar " + (year + 1).toString(),
   }
 ];

@@ -8,53 +8,34 @@ import RoomIcon from '@mui/icons-material/Room';
 import EditIcon from '@mui/icons-material/Edit';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import Button from "@mui/material/Button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import EditEventModal from "./EditEventModal";
-import { termOptions } from "../../utils/helper";
+import { convertToTime, termOptions } from "../../utils/helper";
 import { Divider } from "@mui/material";
 
 
-const EventDetailModal = ({ isOpen, onClose, calendarEvent, course, userType }) => {
-    const useDisclosure = () => {
-        const [isEditOpen, setIsEditOpen] = useState(false);
+const EventDetailModal = ({ isOpen, onClose, onCourseUpdate, calendarEvent, initialCourse, userType }) => {
+    const [course, setCourse] = useState(initialCourse);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    console.log(course);
 
-        const onEditOpen = () => {
-            setIsEditOpen(true);
-        };
+    useEffect(() => {
+        setCourse(initialCourse);
+      }, [initialCourse]);
 
-        const onEditClose = () => {
-            setIsEditOpen(false);
-        };
+    const onEditModalSave = (updatedCourse: Course) => {
+        setCourse(updatedCourse);
+        onCourseUpdate(updatedCourse);
+    }
 
-        return { isEditOpen, onEditOpen, onEditClose };
-    };
-    
-    const {
-        isEditOpen: isEditModalOpen,
-        onEditOpen: onEditModalOpen,
-        onEditClose: onEditModalClose,
-    } = useDisclosure();
-
-    
-    const formatDate = (date) => {
-        return date.toLocaleDateString([], {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        });
-      };
-    
-    const formatTime = (date) => {
-        return date.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-        });
+    const onEditModalOpen = () => {
+        setIsEditModalOpen(true);
     };
 
-    const startTime = formatTime(calendarEvent.start.toDate());
-    const endTime = formatTime(calendarEvent.end.toDate());
-
-    const eventDuration = `${startTime} - ${endTime}`;
+    const onEditModalClose = () => {
+        setIsEditModalOpen(false);
+    };
+    
 
     const isUserAdmin = userType === 'admin' ? true : false;
 
@@ -85,7 +66,7 @@ const EventDetailModal = ({ isOpen, onClose, calendarEvent, course, userType }) 
                             }                                
                         </Stack>
                         <Divider sx={{ marginLeft: '0px' }} variant="middle" />
-                        <Typography variant="h5" sx={{ marginBottom: 2 }}>{calendarEvent.body}</Typography>
+                        <Typography variant="h5" sx={{ marginBottom: 2 }}>{course.Title}</Typography>
                         <Stack direction="row" spacing={3} alignItems="center" >
                         <Typography 
                             variant="subtitle1" 
@@ -96,11 +77,8 @@ const EventDetailModal = ({ isOpen, onClose, calendarEvent, course, userType }) 
                                 padding: '3px 10px',
                                 borderRadius: "8px", 
                                 }}>
-                                {calendarEvent.title}
+                                {`${course.Subj} ${course.Num} ${course.Section}`}
                         </Typography>
-                        {/* <Typography variant="subtitle1">
-                                {termOptions.find(option => option.value === course.Term).title}
-                            </Typography> */}
                         </Stack>
                         <Stack direction="row" spacing={2}>
                             <DateRangeIcon />
@@ -111,21 +89,26 @@ const EventDetailModal = ({ isOpen, onClose, calendarEvent, course, userType }) 
                         <Stack direction="row" spacing={2}>
                             <AccessTimeIcon />
                             <Typography variant="subtitle1">
-                                {`${course.Days} ${eventDuration}`}
+                                {`${course.Days} ${convertToTime(course.Begin)} - ${convertToTime(course.End)}`}
                             </Typography>
                         </Stack>
                         <Stack direction="row" spacing={2}>
                             <RoomIcon />
-                            <Typography variant="subtitle1">{calendarEvent.location}</Typography>
+                            <Typography variant="subtitle1">{`${course.Bldg} ${course.Room}`}</Typography>
                         </Stack>
                         <Stack direction="row" spacing={2}>
                             <PersonIcon />
-                            <Typography variant="subtitle1">{calendarEvent.attendees}</Typography>
+                            <Typography variant="subtitle1">{course.Instructor}</Typography>
                         </Stack>
                     </Stack>
                 </Box>
             </div>
         </Modal>
+        <EditEventModal 
+            isOpen={isEditModalOpen} 
+            onClose={onEditModalClose}
+            onSave={onEditModalSave} 
+            course={course} />
     </Box>
   );
 };

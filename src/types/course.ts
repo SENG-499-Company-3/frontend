@@ -1,5 +1,5 @@
 export type Course = {
-
+    id?: number;
     Term: number;
     Subj: string;
     Num: number;
