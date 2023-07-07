@@ -8,7 +8,7 @@ export default function Layout({ children, switchTheme }) {
     const router = useRouter();
 
 	useEffect(() => {
-		if (!authContext.isAuthenticated()) {
+		if (!authContext.isAuthenticated() && router.route !== '/register') {
 			router.push('/login')
 		}
 	}, [AuthContext]);
