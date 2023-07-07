@@ -13,13 +13,12 @@ import { IExistingUserDetails } from '../types/auth.d'
 import { AuthContext } from '../contexts/AuthContext'
 import { useRouter } from 'next/router'
 import useApi from '../hooks/useApi';
-import { set } from 'date-fns';
 
 const LoginPage = () => {
     const router = useRouter();
     const authContext = useContext(AuthContext);
     const api = useApi();
-
+    
     //Variable for plaintext email
     const [email, setEmail] = useState('');
     const handleEmailChange = (event) => {
@@ -33,18 +32,18 @@ const LoginPage = () => {
     }
 
     // When this callback runs, it sets the given user details into the Auth context.
-    const handleSignIn = (userDetails: IExistingUserDetails) => {
-        api.auth.login(userDetails.emailAddress, userDetails.password).then(() => {
-            api.auth.self(userDetails.emailAddress, userDetails.password)
-        })
+    const handleSignIn = async (userDetails: IExistingUserDetails) => {
+        await api.auth.login(userDetails.emailAddress, userDetails.password)
     }
 
     //Variables for loading spinner
     const [loading, setLoading] = React.useState(false);
     const [success, setSuccess] = React.useState(null);
-
     // This useEffect runs only once, when the component first mounts.
     useEffect(() => {
+        if (authContext.userToken() != null && authContext.currentUser() == null) {
+            api.auth.self(email, password)
+        }
         // Check if the user is already signed in. If they are, redirec them to the home page.
         if (authContext.isAuthenticated()) {
             router.push('/'); // Redirect user

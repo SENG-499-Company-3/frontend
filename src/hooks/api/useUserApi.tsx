@@ -10,7 +10,6 @@ const useUserApi = (axios: AxiosInstance) => {
         return axios
             .post('/user/create', { email, password, name, role})
             .then((response: AxiosResponse<void>) => {
-                console.log(response)
                 if (response.status !== 200) {
                     console.log("Error creating user")
                     console.log(response.statusText)

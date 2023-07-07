@@ -1,5 +1,6 @@
-import React, { PropsWithChildren, createContext } from 'react'
+import React, { PropsWithChildren, createContext, useEffect } from 'react'
 import { AuthenticatedUserType, IAuthenticatedUser } from '../types/auth.d'
+import { useRouter } from 'next/router';
 
 interface IAuthContext {
     /**
@@ -51,6 +52,7 @@ export const AuthContext = createContext<IAuthContext>({
 export const AuthContextProvider = (props: PropsWithChildren) => {
     const [currentUser, setCurrentUser] = React.useState<IAuthenticatedUser | null>(null);
     const [userToken, setUserToken] = React.useState<string | null>(null);
+    const router = useRouter();
 
     const authContext: IAuthContext = {
         currentUser: () => currentUser,
@@ -59,8 +61,14 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
         setUserToken,
         resetCurrentUser: () => setCurrentUser(null),
         isAuthenticated: () => Boolean(currentUser),
-        isAdmin: () => currentUser.type === AuthenticatedUserType.ADMIN
+        isAdmin:() => Boolean(currentUser.type === AuthenticatedUserType.ADMIN)
     }
+
+    useEffect(() => {
+        if (!authContext.currentUser() && router.route !== '/register'){
+            router.push('/login')
+        }
+    }, [currentUser])
 
     return (
         <AuthContext.Provider value={authContext}>

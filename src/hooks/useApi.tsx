@@ -15,7 +15,6 @@ const useApi = () => {
     const authContext = useContext(AuthContext);
 
     const axiosInstance = useMemo(() => {
-        console.log("Creating axios instance")
         return axios.create({
             headers: {
               Authorization: `Bearer ${authContext.userToken()}`

@@ -5,10 +5,10 @@ import useApi from '../../hooks/useApi';
 export const TopNavigation = ({switchTheme}) => {
     // TODO: Add useContext for user data
     const authContext = useContext(AuthContext);
-    const api = useApi().auth;
+    const api = useApi();
 
     const signOut = async () => {
-        api.logout();
+        await api.auth.logout();
     }
 
     return (

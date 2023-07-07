@@ -1,7 +1,7 @@
 import { AxiosInstance, AxiosResponse } from 'axios'
 import { IAuthenticatedUser } from '../../types/auth.d';
 import { AuthContext } from '../../contexts/AuthContext';
-import { useContext } from 'react';
+import React, { useContext, useEffect, useMemo } from 'react';
 
 const useAuthApi = (axios: AxiosInstance) => {
     const authContext = useContext(AuthContext);
@@ -16,7 +16,7 @@ const useAuthApi = (axios: AxiosInstance) => {
                 authContext.setUserToken(response.data)
 
                 return { token: response.data }
-            });
+            })
     }
 
     /**
@@ -27,6 +27,7 @@ const useAuthApi = (axios: AxiosInstance) => {
             .post('/auth/self', {email, password})
             .then((response: AxiosResponse<IAuthenticatedUser>) => {
                 authContext.setCurrentUser(response.data)
+
                 return response.data
             })
     }
