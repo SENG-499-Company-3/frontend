@@ -80,16 +80,9 @@ const CourseCalendar = ({
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [selectedTerm, setSelectedTerm] = useState(currentTerm);
   const [allCourses, setAllCourses] = useState<Course[]>(addUniqueIds(courses));
+  const [allCalendarEvents, setAllCalendarEvents] = useState<EventObject[]>([]);
   const [isEventDetailOpen, setIsEventDetailOpen] = useState(false);
 
-
-  const calCourses = useMemo(() => {
-    if (user === "professor") { // TODO: get professor name from auth
-      return createCalendarEvents(mergeCourses(allCourses));
-    } else {
-      return createCalendarEvents(allCourses);
-    }
-  }, [allCourses, user]);
 
   const isSmallScreen = useSmallScreen();
 
@@ -108,9 +101,23 @@ const CourseCalendar = ({
       }
       return course;
     });
+
+    const updatedCalendarEvents = updateCalendarEvents(updatedCourse, allCalendarEvents);
+    
+    setAllCalendarEvents(updatedCalendarEvents);
     setAllCourses(updatedCourses);
+
   };
 
+  const handleCourseDelete = (deletedCourse: Course) => {
+    const deletedCourseId = deletedCourse.id;
+  
+    const updatedCourses = allCourses.filter((course) => course.id !== deletedCourseId);
+    const updatedCalendarEvents = allCalendarEvents.filter((event) => event.id !== deletedCourseId);
+    setAllCourses(updatedCourses);
+    setAllCalendarEvents(updatedCalendarEvents);
+  };
+  
 
   const getCalInstance = useCallback(
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -220,6 +227,26 @@ const CourseCalendar = ({
   }, [view]);
 
   useEffect(() => {
+    const calendarEvents: EventObject[] = [];
+    var colorIndex = 0;
+
+    if (user === "professor") {
+      const mergedCourses = mergeCourses(allCourses);
+      mergedCourses.forEach((course) => {
+        calendarEvents.push(...createCalendarEvents(course, colorIndex++));
+        colorIndex = colorIndex % 7;
+      });
+    }
+    else {
+      allCourses.forEach((course) => {
+        calendarEvents.push(...createCalendarEvents(course, colorIndex++));
+        colorIndex = colorIndex % 7;
+      });
+    }
+    setAllCalendarEvents(calendarEvents);
+  }, []);
+
+  useEffect(() => {
     updateRenderRangeText();
   }, [selectedView, updateRenderRangeText]);
 
@@ -301,7 +328,7 @@ const CourseCalendar = ({
         height="900px"
         calendars={initialCalendars}
         month={{ startDayOfWeek: 0 }}
-        events={calCourses}
+        events={allCalendarEvents}
         view={selectedView}
         week={{
           showTimezoneCollapseButton: true,
@@ -322,6 +349,7 @@ const CourseCalendar = ({
             initialCourse={selectedCourse}
             isOpen={isEventDetailOpen}
             onClose={onEventDetailClose}
+            onDelete={handleCourseDelete}
             onCourseUpdate={handleCourseUpdate}
             userType={user}
           />
@@ -334,56 +362,53 @@ const CourseCalendar = ({
 export default CourseCalendar;
 
 
-// Create all the course events that recur weekly
-function createCalendarEvents(courseScheduleData: Course[]): EventObject[] {
+// Create the calendar events that recur weekly
+function createCalendarEvents(course: Course, colorIndex: number): EventObject[] {
   const events: EventObject[] = [];
-  var colorIndex = 0;
 
-  courseScheduleData.forEach(course => {
-    const startDate = new Date(course.StartDate);
-    const endDate = new Date(course.EndDate);
+  const startDate = new Date(course.StartDate);
+  const endDate = new Date(course.EndDate);
 
-    let currentDate = new Date(startDate);
-    let bgColour = calendarColours[colorIndex % calendarColours.length].color;
-    let darkColour = calendarColours[colorIndex % calendarColours.length].darkColor;
+  let currentDate = new Date(startDate);
+  let bgColour = calendarColours[colorIndex].color;
+  let darkColour = calendarColours[colorIndex].darkColor;
 
-    while (currentDate <= endDate) {
-      var dayOfWeek = currentDate.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
-      dayOfWeek = (dayOfWeek === "THU") ? "R" : dayOfWeek.charAt(0); // convert weekday to one letter
-    
-      if (course.Days.includes(dayOfWeek)) {
-        const startTime = convertToTime(course.Begin);
-        const eventStart = currentDate.setHours(parseInt(startTime.split(":")[0]), parseInt(startTime.split(":")[1]), 0);
-        
-        const endTime = convertToTime(course.End);
-        const eventEnd = currentDate.setHours(parseInt(endTime.split(":")[0]), parseInt(endTime.split(":")[1]), 0);
-        
-        const event: EventObject = {
-          id: course.id, 
-          calendarId: "1",
-          title: course.Subj + ' ' + course.Num.toString() + ' ' + course.Section,
-          body: course.Title,
-          location: course.Bldg + ' ' + course.Room,
-          attendees: [course.Instructor],
-          category: "time",
-          backgroundColor: bgColour, 
-          borderColor: bgColour,
-          dragBackgroundColor: darkColour,
-          start: addDate(new TZDate(eventStart)).toDate().toISOString(),
-          end: addDate(new TZDate(eventEnd)).toDate().toISOString(),
-          isReadOnly: true,
-        };
+  while (currentDate <= endDate) {
+    var dayOfWeek = currentDate.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+    dayOfWeek = (dayOfWeek === "THU") ? "R" : dayOfWeek.charAt(0); // convert weekday to one letter
 
-        events.push(event);
-      }
+    if (course.Days.includes(dayOfWeek)) {
+      const startTime = convertToTime(course.Begin);
+      const eventStart = currentDate.setHours(parseInt(startTime.split(":")[0]), parseInt(startTime.split(":")[1]), 0);
 
-      currentDate.setDate(currentDate.getDate() + 1);
+      const endTime = convertToTime(course.End);
+      const eventEnd = currentDate.setHours(parseInt(endTime.split(":")[0]), parseInt(endTime.split(":")[1]), 0);
+
+      const event: EventObject = {
+        id: course.id,
+        calendarId: "1",
+        title: course.Subj + ' ' + course.Num.toString() + ' ' + course.Section,
+        body: course.Title,
+        location: course.Bldg + ' ' + course.Room,
+        attendees: [course.Instructor],
+        category: "time",
+        backgroundColor: bgColour,
+        borderColor: bgColour,
+        dragBackgroundColor: darkColour,
+        start: addDate(new TZDate(eventStart)).toDate().toISOString(),
+        end: addDate(new TZDate(eventEnd)).toDate().toISOString(),
+        isReadOnly: true,
+      };
+
+      events.push(event);
     }
-    colorIndex++;
-  });
 
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+  
   return events;
 }
+
 
 // Courses with two sections that are taught by the same professor are merged 
 function mergeCourses(events: EventObject[]): EventObject[] {
@@ -428,6 +453,17 @@ function mergeCourses(events: EventObject[]): EventObject[] {
 
   return uniqueEvents;
 }
+
+function updateCalendarEvents(updatedCourse: Course, allCalendarEvents: EventObject[]): EventObject[] {
+  const updatedEvents: EventObject[] = allCalendarEvents.filter((event) => event.id !== updatedCourse.id);
+  const color = allCalendarEvents.find(event => event.id === updatedCourse.id).backgroundColor;
+  const colorIndex = calendarColours.findIndex(colors => colors.color === color);
+  
+  updatedEvents.push(...createCalendarEvents(updatedCourse, colorIndex))
+
+  return updatedEvents;
+}
+
 
 function addDate(d: TZDate) {
   const date = clone(d);
