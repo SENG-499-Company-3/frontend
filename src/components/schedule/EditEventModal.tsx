@@ -10,13 +10,16 @@ import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
+import InputLabel from "@mui/material/InputLabel";
+import FormControl from "@mui/material/FormControl";
+import Typography from "@mui/material/Typography";
 import { courseBlocks } from "../common/sampleData/courseSchedule"
 import { convertToTime, termOptions } from "../../utils/helper";
 import { Divider } from "@mui/material";
 
 
 
-const EditEventModal = ({ isOpen, onClose, onSave, course }) => {
+const EditEventModal = ({ isOpen, onClose, onSave, course, courseBgColor }) => {
   const [editableEvent, setEditableEvent] = useState(course);
   
   useEffect(() => {
@@ -34,15 +37,6 @@ const EditEventModal = ({ isOpen, onClose, onSave, course }) => {
     onClose();
   };
 
-  const onClickTerm = (event) => {
-    const newTerm = parseInt(event.target.value);
-    const startDate = termOptions.find((option) => option.value === newTerm)?.startDate;
-    const endDate = termOptions.find((option) => option.value === newTerm)?.endDate;
-
-    const updatedCourse = { ...editableEvent, Term: parseInt(event.target.value), StartDate: startDate, EndDate: endDate };
-    setEditableEvent(updatedCourse);
-  };
-
   const handleBlockChange = (event) => {
     const selectedBlock = event.target.value.split(" ");
     const days = selectedBlock[0];
@@ -53,25 +47,11 @@ const EditEventModal = ({ isOpen, onClose, onSave, course }) => {
     setEditableEvent(updatedCourse);
   }
 
-  const handleCourseChange = (event) => {
-    const subj = event.target.value.split(" ")[0];
-    const num = event.target.value.split(" ")[1];
-
-    const updatedCourse = { ...editableEvent, Subj: subj, Num: num || "" };
-    setEditableEvent(updatedCourse);
-  };
-
-  const handleSectionChange = (event) => {
-    const updatedCourse = { ...editableEvent, Section: event.target.value };
-    setEditableEvent(updatedCourse);
-  };
-
   const handleLocationChange = (event) => {
     const bldg = event.target.value.split(" ")[0];
     const room = event.target.value.split(" ")[1];
     const updatedCourse = { ...editableEvent, Bldg: bldg, Room: room };
     setEditableEvent(updatedCourse);
-    console.log(editableEvent);
   };
 
   const handleProfessorChange = (event) => {
@@ -96,43 +76,36 @@ const EditEventModal = ({ isOpen, onClose, onSave, course }) => {
       <DialogTitle>Edit Course</DialogTitle>
       <Divider sx={{ marginLeft: '0px' }} variant="middle" />
       <DialogContent>
-        <Stack gap={2}>
-          <ToggleButtonGroup
-              value={editableEvent.Term}
-              exclusive
-              onChange={(event) => onClickTerm(event)}
-            >
-              {termOptions.map((term, index) => (
-                <ToggleButton 
-                  key={index} 
-                  value={term.value}
-                  sx={{ flex: 1, minWidth: 0 }}
-                >
-                  {term.title}
-                </ToggleButton>
-              ))}
-          </ToggleButtonGroup>
-          <Stack direction="row" spacing={2}>
-            <TextField 
-              id="outlined-course" 
-              label="Course" 
-              defaultValue={`${editableEvent.Subj} ${editableEvent.Num.toString()}`}
-              onChange={(event) => handleCourseChange(event)}
-              sx={{ flex: 0.5 }}
-            />
-            <TextField 
-              id="outlined-section" 
-              label="Section" 
-              defaultValue={editableEvent.Section}
-              onChange={(event) => handleSectionChange(event)}
-              sx={{ flex: 0.5 }}
-            />
+        <Stack gap={3}>
+          <Stack direction="row" alignItems="center" spacing={3}>
+            <Typography 
+              variant="subtitle1" 
+              bgcolor={courseBgColor}
+              style={{ 
+                  display: "inline-block", 
+                  width: "fit-content", 
+                  padding: '3px 10px',
+                  borderRadius: "8px", 
+                  }}>
+                  {`${course.Subj} ${course.Num} ${course.Section}`}
+            </Typography>
+            <Typography variant="subtitle1">
+                  {termOptions.find(option => option.value === course.Term).title}
+            </Typography>
           </Stack>
-          <Select value={courseBlock} onChange={(event) => handleBlockChange(event)} >
-            {courseBlocks.map((block, index) => (
-              <MenuItem key={index} value={block}>{block}</MenuItem>
-            ))}
-          </Select>
+          <FormControl>
+          <InputLabel id="select-block-label">Block</InputLabel>
+            <Select 
+              labelId="select-block-label"
+              value={courseBlock} 
+              onChange={(event) => handleBlockChange(event)}
+              label="Block" 
+            >
+              {courseBlocks.map((block, index) => (
+                <MenuItem key={index} value={block}>{block}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <TextField 
               id="outlined-location" 
               label="Location" 

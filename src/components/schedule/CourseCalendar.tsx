@@ -81,7 +81,7 @@ const CourseCalendar = ({
   const [selectedTerm, setSelectedTerm] = useState(currentTerm);
   const [allCourses, setAllCourses] = useState<Course[]>(addUniqueIds(courses));
   const [isEventDetailOpen, setIsEventDetailOpen] = useState(false);
-  
+
 
   const calCourses = useMemo(() => {
     if (user === "professor") { // TODO: get professor name from auth
@@ -90,7 +90,6 @@ const CourseCalendar = ({
       return createCalendarEvents(allCourses);
     }
   }, [allCourses, user]);
-  console.log(allCourses);
 
   const isSmallScreen = useSmallScreen();
 
@@ -180,10 +179,7 @@ const CourseCalendar = ({
     // console.log("MouseEvent : ", res.nativeEvent);
     // console.log("Event Info : ", res.event);
     // console.groupEnd();
-    console.log(res.event);
-    console.log(allCourses)
     const course = allCourses.find((course) => course.id === res.event.id);
-    console.log(course);
 
     setSelectedEvent(res.event);
     setSelectedCourse(course);
@@ -445,7 +441,8 @@ function clone (date: TZDate): TZDate {
 };
 
 function addUniqueIds (courses: Course[]): Course[] {
-  return courses.map((item) => {
-    return { id: uuidv4(), ...item };
+  return courses.map((course) => {
+    const courseId = course.Subj + (course.Num).toString() + course.Section;
+    return { id: courseId, ...course };
   });
 };

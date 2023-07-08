@@ -17,7 +17,6 @@ import { Divider } from "@mui/material";
 const EventDetailModal = ({ isOpen, onClose, onCourseUpdate, calendarEvent, initialCourse, userType }) => {
     const [course, setCourse] = useState(initialCourse);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    console.log(course);
 
     useEffect(() => {
         setCourse(initialCourse);
@@ -108,7 +107,8 @@ const EventDetailModal = ({ isOpen, onClose, onCourseUpdate, calendarEvent, init
             isOpen={isEditModalOpen} 
             onClose={onEditModalClose}
             onSave={onEditModalSave} 
-            course={course} />
+            course={course}
+            courseBgColor={calendarEvent.backgroundColor} />
     </Box>
   );
 };
