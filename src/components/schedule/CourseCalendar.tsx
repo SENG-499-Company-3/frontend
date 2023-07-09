@@ -22,7 +22,8 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import ToggleButton from "@mui/material/ToggleButton";
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import { v4 as uuidv4 } from 'uuid';
+import AddIcon from '@mui/icons-material/Add';
+import AddEventModal from "./AddEventModal";
 
 
 const viewModeOptions = [
@@ -82,9 +83,31 @@ const CourseCalendar = ({
   const [allCourses, setAllCourses] = useState<Course[]>(addUniqueIds(courses));
   const [allCalendarEvents, setAllCalendarEvents] = useState<EventObject[]>([]);
   const [isEventDetailOpen, setIsEventDetailOpen] = useState(false);
+  const [isAddCourseOpen, setIsAddCourseOpen] = useState(false);
 
 
   const isSmallScreen = useSmallScreen();
+
+  useEffect(() => {
+    const calendarEvents: EventObject[] = [];
+    var colorIndex = 0;
+
+    if (user === "professor") {
+      const mergedCourses = mergeCourses(allCourses);
+      mergedCourses.forEach((course) => {
+        calendarEvents.push(...createCalendarEvents(course, colorIndex++));
+        colorIndex = colorIndex % 7;
+      });
+    }
+    else {
+      allCourses.forEach((course) => {
+        calendarEvents.push(...createCalendarEvents(course, colorIndex++));
+        colorIndex = colorIndex % 7;
+      });
+    }
+    
+    setAllCalendarEvents(calendarEvents);
+  }, []); // set all the calendar events when the component first mounts
 
   const onEventDetailOpen = () => {
     setIsEventDetailOpen(true);
@@ -222,29 +245,25 @@ const CourseCalendar = ({
     updateRenderRangeText();
   };
 
+  const onAddCourseModalOpen = () => {
+    setIsAddCourseOpen(true);
+  };
+
+  const onAddCourseModalClose = () => {
+    setIsAddCourseOpen(false);
+  };
+
+  const onAddCourse = (newCourse: Course) => {
+    const randColorIndex = Math.floor(Math.random() * 7);
+    const updatedCourses = [...allCourses, newCourse];
+    const updatedCalendarEvents = [...allCalendarEvents, ...createCalendarEvents(newCourse, randColorIndex)];
+    setAllCourses(updatedCourses);
+    setAllCalendarEvents(updatedCalendarEvents);
+  };
+
   useEffect(() => {
     setSelectedView(view);
   }, [view]);
-
-  useEffect(() => {
-    const calendarEvents: EventObject[] = [];
-    var colorIndex = 0;
-
-    if (user === "professor") {
-      const mergedCourses = mergeCourses(allCourses);
-      mergedCourses.forEach((course) => {
-        calendarEvents.push(...createCalendarEvents(course, colorIndex++));
-        colorIndex = colorIndex % 7;
-      });
-    }
-    else {
-      allCourses.forEach((course) => {
-        calendarEvents.push(...createCalendarEvents(course, colorIndex++));
-        colorIndex = colorIndex % 7;
-      });
-    }
-    setAllCalendarEvents(calendarEvents);
-  }, []);
 
   useEffect(() => {
     updateRenderRangeText();
@@ -319,7 +338,16 @@ const CourseCalendar = ({
                   {option.title}
                 </MenuItem>
               ))}
-            </Select>            
+            </Select>
+            {
+            user === 'admin' && <Button
+              variant="contained"
+              onClick={onAddCourseModalOpen}
+              sx={{ width: isSmallScreen ? "100%" : "30%", maxWidth: "70px" }}
+              >
+                <AddIcon/>
+            </Button>  
+            }          
 
             
           </Stack>
@@ -354,6 +382,13 @@ const CourseCalendar = ({
             userType={user}
           />
         )
+      }
+      {
+      user === 'admin' && <AddEventModal
+        isOpen={isAddCourseOpen}
+        onClose={onAddCourseModalClose}
+        onCreate={onAddCourse}
+      />
       }
     </Box>
   );
