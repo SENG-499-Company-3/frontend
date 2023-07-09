@@ -209,6 +209,7 @@ const CourseCalendar = ({
     // console.log("MouseEvent : ", res.nativeEvent);
     // console.log("Event Info : ", res.event);
     // console.groupEnd();
+
     const course = allCourses.find((course) => course.id === res.event.id);
 
     setSelectedEvent(res.event);
@@ -257,6 +258,7 @@ const CourseCalendar = ({
     const randColorIndex = Math.floor(Math.random() * 7);
     const updatedCourses = [...allCourses, newCourse];
     const updatedCalendarEvents = [...allCalendarEvents, ...createCalendarEvents(newCourse, randColorIndex)];
+
     setAllCourses(updatedCourses);
     setAllCalendarEvents(updatedCalendarEvents);
   };

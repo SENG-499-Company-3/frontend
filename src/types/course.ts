@@ -5,7 +5,7 @@ export type Course = {
     Num: number;
     Section: string;
     Title: string;
-    SchedType: string;
+    SchedType?: string;
     Instructor: string;
     Bldg: string;
     Room: string;
@@ -14,5 +14,5 @@ export type Course = {
     Days: string;
     StartDate: string;
     EndDate: string;
-    Cap: number;
+    Cap?: number;
 }

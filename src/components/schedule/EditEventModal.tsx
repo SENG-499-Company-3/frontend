@@ -75,6 +75,7 @@ const EditEventModal = ({ isOpen, onClose, onSave, course, courseBgColor }) => {
       <Divider sx={{ marginLeft: '0px' }} variant="middle" />
       <DialogContent>
         <Stack gap={3}>
+          <Typography variant="h5">{course.Title}</Typography>
           <Stack direction="row" alignItems="center" spacing={3}>
             <Typography 
               variant="subtitle1" 
