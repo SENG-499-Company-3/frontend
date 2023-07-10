@@ -8,7 +8,7 @@ const Calendar = dynamic(() => import("../components/schedule/CourseCalendar"), 
 
 const CalendarPage = () => {
     return (
-        <Calendar view="week" courses={courseScheduleData.filter(course => course.Instructor == 'Berg, Celina')} /> // TODO: replace mock data
+        <Calendar view="week" courses={courseScheduleData} /> // TODO: replace mock data
     )
 }
 

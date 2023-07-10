@@ -9,7 +9,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
-import { Button } from '@mui/material';
+import { Button, Paper } from '@mui/material';
 
 const initialRows: GridRowsProp = courseScheduleData.map((course: Course, index: number ) => ({
   id: index,
@@ -201,7 +201,7 @@ const ScheduleList = () => {
     ];
 
     return (
-        <div style={{ height: '97%', width: '100%', verticalAlign: 'top'}}>
+        <Paper sx={{ p: 2 }}>
             <Button size="small" startIcon={<AddIcon />} onClick={() => handleAddRow(numRows)}>
                 Add Course
             </Button>
@@ -226,7 +226,7 @@ const ScheduleList = () => {
                     },
                 }}
             />
-        </div>
+        </Paper>
     )
 }
 

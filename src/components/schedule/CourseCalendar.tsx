@@ -2,13 +2,10 @@ import { EventObject, ExternalEventTypes, TZDate } from "@toast-ui/calendar";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import ButtonGroup from "@mui/material/ButtonGroup";
-import Select from "@mui/material/Select";
-import { SelectChangeEvent } from "@mui/material/Select";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
-import { createTheme } from "@mui/material/styles";
 import {
   convertIntoReadableMonth,
   convertIntoReadableRange,
@@ -19,17 +16,15 @@ import { ViewType } from "../../types/calendar";
 import { Course } from "../../types/course";
 import Calendar from "@toast-ui/react-calendar";
 import "@toast-ui/calendar/dist/toastui-calendar.min.css";
-import { ThemeProvider } from "@emotion/react";
 import EventDetailModal from "./EventDetailModal";
 import { calendarColours } from "../common/sampleData/courseSchedule";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import ToggleButton from "@mui/material/ToggleButton";
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import AddIcon from '@mui/icons-material/Add';
+import AddEventModal from "./AddEventModal";
 
-const buttoneGroupTheme = createTheme({
-  palette: {
-    primary: {
-      main: "#000000",
-    },
-  },
-});
 
 const viewModeOptions = [
   {
@@ -42,6 +37,36 @@ const viewModeOptions = [
   },
 ];
 
+const currentYear = new Date().getFullYear();
+const currentMonth = new Date().getMonth();
+var currentTerm = "Spring"
+
+if (currentMonth > 7) {
+  currentTerm = "Fall";
+}
+else if (currentMonth > 3) {
+  currentTerm = "Summer";
+}
+
+const termStartDates = {
+  Spring: `${(currentYear + 1).toString()}-1-1`,  // First week of January
+  Summer: `${currentYear.toString()}-5-1`,        // First week of May
+  Fall: `${currentYear.toString()}-9-1`,          // First week of September
+};  
+
+const user = "admin" // TODO: replace with actual user type
+const termOptions = ["Summer", "Fall", "Spring"];
+const initialCalendars = [
+  {
+    id: "1",
+    name: "calendar-1",
+    color: "#ffffff",
+    // bgColor: "#9e5fff",
+    // dragBgColor: "#9e5fff",
+  },
+];
+
+
 const CourseCalendar = ({
   view,
   courses,
@@ -49,47 +74,73 @@ const CourseCalendar = ({
   view: ViewType;
   courses: Course[];
 }) => {
-  const calCourses = useMemo(
-    () => createCalendarEvents(mergeCourses(courses)),
-    [courses]
-  );
-
   const calendarRef = useRef<typeof Calendar>(null);
   const [selectedDateRangeText, setSelectedDateRangeText] = useState("");
   const [selectedView, setSelectedView] = useState(view);
   const [selectedEvent, setSelectedEvent] = useState<EventObject | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [selectedTerm, setSelectedTerm] = useState(currentTerm);
+  const [allCourses, setAllCourses] = useState<Course[]>(addUniqueIds(courses));
+  const [allCalendarEvents, setAllCalendarEvents] = useState<EventObject[]>([]);
+  const [isEventDetailOpen, setIsEventDetailOpen] = useState(false);
+  const [isAddCourseOpen, setIsAddCourseOpen] = useState(false);
+
 
   const isSmallScreen = useSmallScreen();
 
-  const initialCalendars = [
-    {
-      id: "1",
-      name: "calendar-1",
-      color: "#ffffff",
-      // bgColor: "#9e5fff",
-      // dragBgColor: "#9e5fff",
-    },
-  ];
+  useEffect(() => {
+    const calendarEvents: EventObject[] = [];
+    var colorIndex = 0;
 
-  const useDisclosure = () => {
-    const [isOpen, setIsOpen] = useState(false);
+    if (user === "professor") {
+      const mergedCourses = mergeCourses(allCourses);
+      mergedCourses.forEach((course) => {
+        calendarEvents.push(...createCalendarEvents(course, colorIndex++));
+        colorIndex = colorIndex % 7;
+      });
+    }
+    else {
+      allCourses.forEach((course) => {
+        calendarEvents.push(...createCalendarEvents(course, colorIndex++));
+        colorIndex = colorIndex % 7;
+      });
+    }
+    
+    setAllCalendarEvents(calendarEvents);
+  }, []); // set all the calendar events when the component first mounts
 
-    const onOpen = () => {
-      setIsOpen(true);
-    };
-
-    const onClose = () => {
-      setIsOpen(false);
-    };
-
-    return { isOpen, onOpen, onClose };
+  const onEventDetailOpen = () => {
+    setIsEventDetailOpen(true);
   };
 
-  const {
-    isOpen: isEventDetailOpen,
-    onOpen: onEventDetailOpen,
-    onClose: onEventDetailClose,
-  } = useDisclosure();
+  const onEventDetailClose = () => {
+    setIsEventDetailOpen(false);
+  };
+
+  const handleCourseUpdate = (updatedCourse: Course) => {
+    const updatedCourses = allCourses.map((course) => {
+      if ((course.id) === updatedCourse.id) {
+        return updatedCourse;
+      }
+      return course;
+    });
+
+    const updatedCalendarEvents = updateCalendarEvents(updatedCourse, allCalendarEvents);
+    
+    setAllCalendarEvents(updatedCalendarEvents);
+    setAllCourses(updatedCourses);
+
+  };
+
+  const handleCourseDelete = (deletedCourse: Course) => {
+    const deletedCourseId = deletedCourse.id;
+  
+    const updatedCourses = allCourses.filter((course) => course.id !== deletedCourseId);
+    const updatedCalendarEvents = allCalendarEvents.filter((event) => event.id !== deletedCourseId);
+    setAllCourses(updatedCourses);
+    setAllCalendarEvents(updatedCalendarEvents);
+  };
+  
 
   const getCalInstance = useCallback(
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -123,28 +174,30 @@ const CourseCalendar = ({
         year = rangeStart.getFullYear();
         month = rangeStart.getMonth() + 1;
         date = rangeStart.getDate();
+        const endYear = rangeEnd.getFullYear();
         const endMonth = rangeEnd.getMonth() + 1;
         const endDate = rangeEnd.getDate();
 
         const start = `${year}-${month < 10 ? "0" : ""}${month}-${
           date < 10 ? "0" : ""
         }${date}`;
-        const end = `${year}-${endMonth < 10 ? "0" : ""}${endMonth}-${
+        const end = `${endYear}-${endMonth < 10 ? "0" : ""}${endMonth}-${
           endDate < 10 ? "0" : ""
         }${endDate}`;
         dateRangeText = `${start} ~ ${end}`;
         break;
       }
-      default:
+      default: {
         dateRangeText = `${year}-${month}-${date}`;
+      }
     }
-
     setSelectedDateRangeText(dateRangeText);
   }, [getCalInstance]);
 
   const onClickNav = (option: "prev" | "next" | "today") => {
     getCalInstance()[option]();
     updateRenderRangeText();
+    updateTerm();
   };
 
   const onChangeSelect = (event: SelectChangeEvent) => {
@@ -152,12 +205,62 @@ const CourseCalendar = ({
   };
 
   const onClickEvent: ExternalEventTypes["clickEvent"] = (res) => {
-    console.group("onClickEvent");
-    console.log("MouseEvent : ", res.nativeEvent);
-    console.log("Event Info : ", res.event);
-    console.groupEnd();
+    // console.group("onClickEvent");
+    // console.log("MouseEvent : ", res.nativeEvent);
+    // console.log("Event Info : ", res.event);
+    // console.groupEnd();
+
+    const course = allCourses.find((course) => course.id === res.event.id);
+
     setSelectedEvent(res.event);
+    setSelectedCourse(course);
     onEventDetailOpen();
+  };
+
+  const setStartDate = (term) => {
+    const calInstance = getCalInstance();
+    calInstance.setDate(termStartDates[term]);
+  };
+
+  const updateTerm = () => {
+    const calInstance = getCalInstance();
+    const currentMonth = calInstance.getDate().getMonth();
+    var currentTerm = selectedTerm;
+
+    if (currentMonth > 7) {
+      currentTerm = "Fall";
+    }
+    else if (currentMonth > 3) {
+      currentTerm = "Summer";
+    }
+    else {
+      currentTerm = "Spring";
+    }
+
+    setSelectedTerm(currentTerm);
+  };
+
+  const onClickTerm = (term) => {
+    setSelectedTerm(term.target.value);
+    setStartDate(term.target.value);
+    updateRenderRangeText();
+  };
+
+  const onAddCourseModalOpen = () => {
+    setIsAddCourseOpen(true);
+  };
+
+  const onAddCourseModalClose = () => {
+    setIsAddCourseOpen(false);
+  };
+
+  const onAddCourse = (newCourse: Course) => {
+    const randColorIndex = Math.floor(Math.random() * 7);
+    const updatedCourses = [...allCourses, newCourse];
+    const updatedCalendarEvents = [...allCalendarEvents, ...createCalendarEvents(newCourse, randColorIndex)];
+
+    setAllCourses(updatedCourses);
+    setAllCalendarEvents(updatedCalendarEvents);
   };
 
   useEffect(() => {
@@ -169,63 +272,125 @@ const CourseCalendar = ({
   }, [selectedView, updateRenderRangeText]);
 
   return (
-    <Box display="flex" flexDirection="column" height="100%">
-      <Stack padding={2} direction={isSmallScreen ? "column" : "row"} alignContent="center" gap={4}>
-        <Select
-          sx={{ width: isSmallScreen ? "100%" : "30%", maxWidth: "200px" }}
-          variant="outlined"
-          onChange={onChangeSelect}
-          value={selectedView}
-        >
-          {viewModeOptions.map((option, index) => (
-            <MenuItem value={option.value} key={index}>
-              {option.title}
-            </MenuItem>
-          ))}
-        </Select>
-        <Stack direction="row" width="100%" justifyContent="space-between">
-          <ThemeProvider theme={buttoneGroupTheme}>
-            <ButtonGroup variant="outlined">
-              <Button onClick={() => onClickNav("today")}>Today</Button>
-              <Button onClick={() => onClickNav("prev")}>Prev</Button>
-              <Button onClick={() => onClickNav("next")}>Next</Button>
-            </ButtonGroup>
-          </ThemeProvider>
+    <Box display="flex" flexDirection="column" height="100%" width="100%" maxWidth="1536px"> {/* Calendar's max width is 1536px */}
+      <Stack padding={2} direction={isSmallScreen ? "column" : "row"} justifyContent="flex-end">
+          <Stack py={isSmallScreen ? 2: 0} direction="row" width="100%">
 
-          <Box>
-            <Typography variant="h5" sx={{ display: "flex", height: '100%', alignItems: 'center' }}>
-              {selectedDateRangeText && selectedView === "month"
-                ? convertIntoReadableMonth(selectedDateRangeText)
-                : convertIntoReadableRange(selectedDateRangeText)}
-            </Typography>
-          </Box>
-        </Stack>
+            <Button 
+              variant="outlined" 
+              onClick={() => onClickNav("today")} 
+              sx={{ 
+                marginY: "4px", 
+                marginRight: "8px", 
+                color: "black", 
+                borderColor: "gray", 
+                ":hover": { borderColor: "gray", bgcolor: "#F0F0F0" }  }}>
+              Today
+            </Button>
+            <Button 
+              onClick={() => onClickNav("prev")} 
+              sx={{ 
+                marginY: "4px", 
+                color: "black", 
+                ":hover": { bgcolor: "#F0F0F0" } }}>
+              <ArrowBackIosIcon />
+            </Button>
+            <Button 
+              onClick={() => onClickNav("next")} 
+              sx={{ 
+                marginY: "4px", 
+                color: "black", 
+                ":hover": { bgcolor: "#F0F0F0" } }}>
+              <ArrowForwardIosIcon />
+            </Button>
+
+            <Box>
+              <Typography variant="h5" sx={{ display: "flex", height: '100%', alignItems: 'center', marginLeft: "10px" }}>
+                {selectedDateRangeText && selectedView === "month"
+                  ? convertIntoReadableMonth(selectedDateRangeText)
+                  : convertIntoReadableRange(selectedDateRangeText)}
+              </Typography>
+            </Box>
+          </Stack>
+
+          <Stack direction="row" width="100%" justifyContent={isSmallScreen ? "left": "right"} gap="15px">
+            <ToggleButtonGroup
+                value={selectedTerm}
+                exclusive
+                onChange={(term) => onClickTerm(term)}
+              >
+                {termOptions.map((term, index) => (
+                  <ToggleButton 
+                    key={index} 
+                    value={term}
+                    sx={{ flex: 1, minWidth: 0 }}
+                  >
+                    {term}
+                  </ToggleButton>
+                ))}
+            </ToggleButtonGroup>
+            <Select
+              sx={{ width: isSmallScreen ? "100%" : "30%", maxWidth: "200px" }}
+              variant="outlined"
+              onChange={onChangeSelect}
+              value={selectedView}
+            >
+              {viewModeOptions.map((option, index) => (
+                <MenuItem value={option.value} key={index}>
+                  {option.title}
+                </MenuItem>
+              ))}
+            </Select>
+            {
+            user === 'admin' && <Button
+              variant="contained"
+              onClick={onAddCourseModalOpen}
+              sx={{ width: isSmallScreen ? "100%" : "30%", maxWidth: "70px" }}
+              >
+                <AddIcon/>
+            </Button>  
+            }          
+
+            
+          </Stack>
       </Stack>
       <Calendar
         height="900px"
         calendars={initialCalendars}
         month={{ startDayOfWeek: 0 }}
-        events={calCourses}
+        events={allCalendarEvents}
         view={selectedView}
         week={{
           showTimezoneCollapseButton: true,
           timezonesCollapsed: false,
           eventView: ["time"],
           taskView: false,
+          hourStart: 7,
+          hourEnd: 21,
         }}
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         ref={calendarRef}
-        // useDetailPopup={true}
         onClickEvent={onClickEvent}
       />{
         selectedEvent && (
           <EventDetailModal
-            event={selectedEvent}
+            calendarEvent={selectedEvent}
+            initialCourse={selectedCourse}
             isOpen={isEventDetailOpen}
             onClose={onEventDetailClose}
+            onDelete={handleCourseDelete}
+            onCourseUpdate={handleCourseUpdate}
+            userType={user}
           />
         )
+      }
+      {
+      user === 'admin' && <AddEventModal
+        isOpen={isAddCourseOpen}
+        onClose={onAddCourseModalClose}
+        onCreate={onAddCourse}
+      />
       }
     </Box>
   );
@@ -234,54 +399,53 @@ const CourseCalendar = ({
 export default CourseCalendar;
 
 
-// Create all the course events that recur weekly
-function createCalendarEvents(courseScheduleData: Course[]): EventObject[] {
+// Create the calendar events that recur weekly
+function createCalendarEvents(course: Course, colorIndex: number): EventObject[] {
   const events: EventObject[] = [];
-  var colorIndex = 0;
 
-  courseScheduleData.forEach(course => {
-    const startDate = new Date(course.StartDate);
-    const endDate = new Date(course.EndDate);
+  const startDate = new Date(course.StartDate);
+  const endDate = new Date(course.EndDate);
 
-    let currentDate = new Date(startDate);
+  let currentDate = new Date(startDate);
+  let bgColour = calendarColours[colorIndex].color;
+  let darkColour = calendarColours[colorIndex].darkColor;
 
-    while (currentDate <= endDate) {
-      var dayOfWeek = currentDate.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
-      dayOfWeek = (dayOfWeek === "THU") ? "R" : dayOfWeek.charAt(0); // convert weekday to one letter
-    
-      if (course.Days.includes(dayOfWeek)) {
-        const startTime = convertToTime(course.Begin);
-        const eventStart = currentDate.setHours(parseInt(startTime.split(":")[0]), parseInt(startTime.split(":")[1]), 0);
-        
-        const endTime = convertToTime(course.End);
-        const eventEnd = currentDate.setHours(parseInt(endTime.split(":")[0]), parseInt(endTime.split(":")[1]), 0);
-        
-        const event: EventObject = {
-          id: course.Term.toString() + course.Subj + course.Num.toString() + course.Section, // generate a unique id
-          calendarId: "1",
-          title: course.Subj + ' ' + course.Num.toString() + ' ' + course.Section,
-          body: course.Title,
-          location: course.Bldg + ' ' + course.Room,
-          attendees: [course.Instructor],
-          category: "time",
-          backgroundColor: calendarColours[colorIndex % calendarColours.length].color, 
-          borderColor: calendarColours[colorIndex % calendarColours.length].color,
-          dragBackgroundColor: calendarColours[colorIndex % calendarColours.length].darkColor,
-          start: addDate(new TZDate(eventStart)).toDate().toISOString(),
-          end: addDate(new TZDate(eventEnd)).toDate().toISOString(),
-          isReadOnly: true,
-        };
+  while (currentDate <= endDate) {
+    var dayOfWeek = currentDate.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+    dayOfWeek = (dayOfWeek === "THU") ? "R" : dayOfWeek.charAt(0); // convert weekday to one letter
 
-        events.push(event);
-      }
+    if (course.Days.includes(dayOfWeek)) {
+      const startTime = convertToTime(course.Begin);
+      const eventStart = currentDate.setHours(parseInt(startTime.split(":")[0]), parseInt(startTime.split(":")[1]), 0);
 
-      currentDate.setDate(currentDate.getDate() + 1);
-      colorIndex++;
+      const endTime = convertToTime(course.End);
+      const eventEnd = currentDate.setHours(parseInt(endTime.split(":")[0]), parseInt(endTime.split(":")[1]), 0);
+
+      const event: EventObject = {
+        id: course.id,
+        calendarId: "1",
+        title: course.Subj + ' ' + course.Num.toString() + ' ' + course.Section,
+        body: course.Title,
+        location: course.Bldg + ' ' + course.Room,
+        attendees: [course.Instructor],
+        category: "time",
+        backgroundColor: bgColour,
+        borderColor: bgColour,
+        dragBackgroundColor: darkColour,
+        start: addDate(new TZDate(eventStart)).toDate().toISOString(),
+        end: addDate(new TZDate(eventEnd)).toDate().toISOString(),
+        isReadOnly: true,
+      };
+
+      events.push(event);
     }
-  });
 
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+  
   return events;
 }
+
 
 // Courses with two sections that are taught by the same professor are merged 
 function mergeCourses(events: EventObject[]): EventObject[] {
@@ -327,6 +491,17 @@ function mergeCourses(events: EventObject[]): EventObject[] {
   return uniqueEvents;
 }
 
+function updateCalendarEvents(updatedCourse: Course, allCalendarEvents: EventObject[]): EventObject[] {
+  const updatedEvents: EventObject[] = allCalendarEvents.filter((event) => event.id !== updatedCourse.id);
+  const color = allCalendarEvents.find(event => event.id === updatedCourse.id).backgroundColor;
+  const colorIndex = calendarColours.findIndex(colors => colors.color === color);
+  
+  updatedEvents.push(...createCalendarEvents(updatedCourse, colorIndex))
+
+  return updatedEvents;
+}
+
+
 function addDate(d: TZDate) {
   const date = clone(d);
   date.setDate(d.getDate());
@@ -336,4 +511,11 @@ function addDate(d: TZDate) {
 
 function clone (date: TZDate): TZDate {
   return new TZDate(date);
+};
+
+function addUniqueIds (courses: Course[]): Course[] {
+  return courses.map((course) => {
+    const courseId = course.Subj + (course.Num).toString() + course.Section;
+    return { id: courseId, ...course };
+  });
 };

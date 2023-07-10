@@ -46,20 +46,6 @@ export const convertIntoReadableRange = (rangeString: string): string => {
   if (!rangeString) {
     return "";
   }
-  const monthsShort: string[] = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
 
   function formatDate(date: string): {
     month: string;
@@ -76,7 +62,7 @@ export const convertIntoReadableRange = (rangeString: string): string => {
 
     const [year, month, day] = date.split("-").map((x) => parseInt(x, 10));
     return {
-      month: monthsShort[month - 1],
+      month: getMonthName(month - 1),
       day,
       year,
     };
@@ -86,8 +72,29 @@ export const convertIntoReadableRange = (rangeString: string): string => {
   const start = formatDate(startDate);
   const end = formatDate(endDate);
 
-  return `${start.month} ${start.day} - ${end.day}, ${start.year}`;
+  if (start.year !== end.year) {
+    return `${getShortMonthName(start.month)} ${start.year} - ${getShortMonthName(end.month)} ${end.year}`;
+  }
+  else if (start.month !== end.month) {
+    return `${getShortMonthName(start.month)} - ${getShortMonthName(end.month)}, ${end.year}`;
+  }
+
+  return `${start.month}, ${start.year}`;
 };
+
+// get string month from month index
+function getMonthName(monthIndex: number): string {
+  const date = new Date();
+  date.setMonth(monthIndex);
+  return date.toLocaleString('en-us', { month: 'long' });
+}
+
+function getShortMonthName(month: string): string {
+  const date = new Date(`${month} 1, 2023`); // put random day and year
+  const monthIndex = date.getMonth();
+  date.setMonth(monthIndex);
+  return date.toLocaleString('en-us', { month: 'short' });
+}
 
 // convert time from hhmm to hh:mm
 export const convertToTime = (time: number): string => {
@@ -100,3 +107,25 @@ export const convertToTime = (time: number): string => {
 
   return formattedTime;
 };
+
+const year = new Date().getFullYear();
+export const termOptions = [
+  {
+    title: "Summer " + year.toString(),
+    value: parseInt(year.toString() + "05"),
+    startDate: "01 May " + year.toString(),
+    endDate: "31 Jul " + year.toString(),
+  },
+  {
+    title: "Fall " + year.toString(),
+    value: parseInt(year.toString() + "09"),
+    startDate: "01 Sep " + year.toString(),
+    endDate: "30 Nov " + year.toString(),
+  },
+  {
+    title: "Spring " + (year + 1).toString(),
+    value: parseInt((year + 1).toString() + "01"),
+    startDate: "01 Jan " + (year + 1).toString(),
+    endDate: "31 Mar " + (year + 1).toString(),
+  }
+];
