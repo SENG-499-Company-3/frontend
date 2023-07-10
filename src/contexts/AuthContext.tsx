@@ -36,7 +36,12 @@ interface IAuthContext {
     /**
      * Returns `true` if the currently signed in user is an administrator; `false` otherwise.
      */
-    isAdmin: () => boolean
+    isAdmin: () => boolean;
+
+    /**
+     * Returns string displayed in user avatar
+     */
+    avatarInitials: () => string;
 }
 
 export const AuthContext = createContext<IAuthContext>({
@@ -46,7 +51,8 @@ export const AuthContext = createContext<IAuthContext>({
     setUserToken: () => {},
     resetCurrentUser: () => {},
     isAuthenticated: () => false,
-    isAdmin: () => false
+    isAdmin: () => false,
+    avatarInitials: () => ''
 });
 
 export const AuthContextProvider = (props: PropsWithChildren) => {
@@ -61,7 +67,19 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
         setUserToken,
         resetCurrentUser: () => setCurrentUser(null),
         isAuthenticated: () => Boolean(currentUser),
-        isAdmin:() => Boolean(currentUser.type === AuthenticatedUserType.ADMIN)
+        isAdmin: () => currentUser.type === AuthenticatedUserType.ADMIN,
+        avatarInitials: () => {
+            if (!currentUser?.displayName) {
+                return '';
+            }
+
+            const stringParts = currentUser.displayName.split(' ');
+            return stringParts
+                .slice(Math.max(stringParts.length - 2, 1))
+                .map((stringPart) => stringPart.charAt(0))
+                .join('')
+                .toLocaleUpperCase();
+        }
     }
 
     useEffect(() => {

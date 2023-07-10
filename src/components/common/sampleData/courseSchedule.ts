@@ -1,6 +1,6 @@
 export const courseScheduleData = [
     {
-      Term: 202205,
+      Term: 202305,
       Subj: 'CSC',
       Num: 110,
       Section: 'A01',
@@ -17,7 +17,7 @@ export const courseScheduleData = [
       Cap: 8,
     },
     {
-      Term: 202205,
+      Term: 202305,
       Subj: 'CSC',
       Num: 110,
       Section: 'A02',
@@ -34,7 +34,7 @@ export const courseScheduleData = [
       Cap: 70,
     },
     {
-      Term: 202205,
+      Term: 202305,
       Subj: 'CSC',
       Num: 115,
       Section: 'A01',
@@ -51,7 +51,7 @@ export const courseScheduleData = [
       Cap: 8,
     },
     {
-      Term: 202205,
+      Term: 202305,
       Subj: 'CSC',
       Num: 115,
       Section: 'A02',
@@ -68,7 +68,7 @@ export const courseScheduleData = [
       Cap: 70,
     },
     {
-      Term: 202205,
+      Term: 202305,
       Subj: 'CSC',
       Num: 225,
       Section: 'A01',
@@ -85,7 +85,7 @@ export const courseScheduleData = [
       Cap: 55,
     },
     {
-      Term: 202205,
+      Term: 202305,
       Subj: 'CSC',
       Num: 225,
       Section: 'A02',
@@ -102,7 +102,7 @@ export const courseScheduleData = [
       Cap: 20,
     },
     {
-      Term: 202205,
+      Term: 202305,
       Subj: 'CSC',
       Num: 226,
       Section: 'A01',
@@ -119,7 +119,7 @@ export const courseScheduleData = [
       Cap: 70,
     },
     {
-      Term: 202205,
+      Term: 202305,
       Subj: 'CSC',
       Num: 226,
       Section: 'A02',
@@ -136,7 +136,7 @@ export const courseScheduleData = [
       Cap: 30,
     },
     {
-      Term: 202205,
+      Term: 202305,
       Subj: 'CSC',
       Num: 230,
       Section: 'A01',
@@ -153,7 +153,7 @@ export const courseScheduleData = [
       Cap: 55,
     },
     {
-      Term: 202205,
+      Term: 202305,
       Subj: 'CSC',
       Num: 230,
       Section: 'A02',
@@ -200,3 +200,21 @@ export const courseScheduleData = [
       darkColor: "#9C4221",
     }
   ]
+
+  export const courseBlocks = [
+    'MR 08:30 09:50', //A
+    'MR 10:00 11:20', //B
+    'MR 11:30 12:50', //C
+    'MR 13:00 14:20', //D
+    'MWR 14:30 15:20', //E
+    'MWR 15:30 16:20', //F
+    'MW 16:30 17:50', //G
+    'TWF 08:30 09:20', //H
+    'TWF 09:30 10:20', //I
+    'TWF 10:30 11:20', //J
+    'TWF 11:30 12:20', //K
+    'TWF 12:30 13:20', //L
+    'TWF 13:30 14:20', //M
+    'TF 14:30 16:30', //N
+    'TR 16:30 17:50', //O
+];
