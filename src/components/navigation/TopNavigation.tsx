@@ -8,6 +8,7 @@ import Link from "next/link";
 
 interface ITopNavigationProps {
     onToggleThemeMode: () => void
+    onToggleSideNav: () => void
 }
 
 export const TopNavigation = (props: ITopNavigationProps) => {
@@ -25,11 +26,13 @@ export const TopNavigation = (props: ITopNavigationProps) => {
                 <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
                     {authContext.isAuthenticated() && (
                         <IconButton
+                            className="hidden md:block"
                             size="large"
                             edge="start"
                             color="inherit"
                             aria-label="menu"
                             sx={{ mr: 2 }}
+                            onClick={props.onToggleSideNav}
                         >
                             <MenuIcon />
                         </IconButton>
