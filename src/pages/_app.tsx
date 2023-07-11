@@ -4,9 +4,10 @@ import '../assets/styles/main.scss'
 
 import type { AppProps } from 'next/app';
 import { AuthContextProvider } from '../contexts/AuthContext';
-import Layout from '../components/Layout';
+import Layout from '../components/layout/AppLayout';
 
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import defaultAppTheme from '../assets/defaultAppTheme';
 
 const darkTheme = createTheme({
 	palette: {
@@ -28,6 +29,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
 	const theme = useMemo(
 		() =>
 			createTheme({
+				...defaultAppTheme,
 				palette: {
 					mode,
 				},
@@ -38,7 +40,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
 	return (
 		<AuthContextProvider>
 			<ThemeProvider theme={theme}>
-				<Layout switchTheme={switchTheme}>
+				<Layout onToggleThemeMode={switchTheme}>
 					<Component {...pageProps} />
 				</Layout>
 			</ThemeProvider>
