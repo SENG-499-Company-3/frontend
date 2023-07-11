@@ -10,8 +10,8 @@ export enum AuthenticatedUserType {
  * Details pertaining to the currently signed in user
  */
 export interface IAuthenticatedUserDetails {
-    displayName: string
-    emailAddress: string
+    name: string
+    email: string
 }
 
 export interface IExistingUserDetails {
@@ -27,11 +27,11 @@ export interface INewUserDetails {
 }
 
 export interface IAuthenticatedAdmin extends IAuthenticatedUserDetails {
-    type: AuthenticatedUserType.ADMIN
+    role: AuthenticatedUserType.ADMIN
 }
 
 export interface IAuthenticatedProfessor extends IAuthenticatedUserDetails {
-    type: AuthenticatedUserType.PROFESSOR
+    role: AuthenticatedUserType.PROFESSOR
 }
 
 export type IAuthenticatedUser = 

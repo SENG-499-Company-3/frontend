@@ -67,15 +67,17 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
         setUserToken,
         resetCurrentUser: () => setCurrentUser(null),
         isAuthenticated: () => Boolean(currentUser),
-        isAdmin: () => currentUser.type === AuthenticatedUserType.ADMIN,
+        isAdmin: () => currentUser.role === AuthenticatedUserType.ADMIN,
         avatarInitials: () => {
-            if (!currentUser?.displayName) {
+            if (!currentUser?.name) {
                 return '';
             }
 
-            const stringParts = currentUser.displayName.split(' ');
+            const stringParts = currentUser.name.split(' ');
+
+
             return stringParts
-                .slice(Math.max(stringParts.length - 2, 1))
+                .slice(0, Math.max(stringParts.length - 2, 2))
                 .map((stringPart) => stringPart.charAt(0))
                 .join('')
                 .toLocaleUpperCase();
