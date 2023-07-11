@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import defaultAppTheme from '../assets/defaultAppTheme';
+import type { AppProps } from 'next/app';
 
 import '../assets/styles/main.scss'
 
-import type { AppProps } from 'next/app';
 import { AuthContextProvider } from '../contexts/AuthContext';
 import Layout from '../components/layout/AppLayout';
 
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import defaultAppTheme from '../assets/defaultAppTheme';
 
 const darkTheme = createTheme({
 	palette: {
