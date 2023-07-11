@@ -88,7 +88,16 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
         if (!authContext.currentUser() && router.route !== '/register'){
             router.push('/login')
         }
-    }, [currentUser])
+    }, [currentUser]);
+
+    useEffect(() => {
+        authContext.setCurrentUser({
+            name: 'Rich Little',
+            email: 'richlittle@uvic.ca',
+            role:  AuthenticatedUserType.ADMIN
+
+        })
+    })
 
     return (
         <AuthContext.Provider value={authContext}>
