@@ -355,7 +355,7 @@ const CourseCalendar = ({
           </Stack>
       </Stack>
       <Calendar
-        height="900px"
+        height="1100px"
         calendars={initialCalendars}
         month={{ startDayOfWeek: 0 }}
         events={allCalendarEvents}
