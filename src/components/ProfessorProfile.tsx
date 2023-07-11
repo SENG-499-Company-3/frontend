@@ -1,8 +1,11 @@
 import { Avatar, Box, Paper, Tab, Tabs, Typography } from "@mui/material"
+import { useState } from 'react'
 import AppPage from "./layout/AppPage"
 import PageHeader from "./layout/PageHeader"
 import dynamic from "next/dynamic";
 import { courseScheduleData } from "./common/sampleData/courseSchedule";
+import PageContent from "./layout/PageContent";
+import PreferencesViewer from "./PreferencesViewer";
 
 interface IProfessorProfileProps {
     name: string;
@@ -16,6 +19,8 @@ const NoSsrCalendar = dynamic(() => import("./schedule/CourseCalendar"), {
 });
 
 const ProfessorProfile = (props: IProfessorProfileProps) => {
+    const [tab, setTab] = useState<number>(0);
+
     return (
         <AppPage>
             <PageHeader>
@@ -32,18 +37,26 @@ const ProfessorProfile = (props: IProfessorProfileProps) => {
             </PageHeader>
             <Paper elevation={0} square>
                 <Tabs
-                    value={0}
+                    value={tab}
                     indicatorColor="secondary"
                     textColor="inherit"
                     variant="fullWidth"
+                    onChange={(_event, value) => setTab(value)}
                     >
                     <Tab label="Schedule" />
                     <Tab label="Preferences" />
                 </Tabs>
             </Paper>
-            <Paper elevation={0} square>
-                <NoSsrCalendar view="week" courses={courseScheduleData} />
-            </Paper>
+            {tab === 0 && (
+                <Paper elevation={0} square>
+                    <NoSsrCalendar view="week" courses={courseScheduleData} />
+                </Paper>
+            )}
+            {tab === 1 && (
+                <PageContent>
+                    <PreferencesViewer initialPreferences={null} editable={props.canEditPreferences} />
+                </PageContent>
+            )}
         </AppPage>
     )
 }
