@@ -1,6 +1,6 @@
 import React from 'react'
 import AddIcon from '@mui/icons-material/Add';
-import ScheduleList from '../../components/schedule/ScheduleList'
+import ProfessorTable from '../../components/professors/ProfessorTable'
 import AppPage from '../../components/layout/AppPage'
 import PageHeader from '../../components/layout/PageHeader'
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material'
@@ -21,7 +21,7 @@ const HomePage = () => {
                 </Box>
             </PageHeader>
             <PageContent>
-                <ScheduleList />
+                <ProfessorTable />
             </PageContent>
         </AppPage>
     )

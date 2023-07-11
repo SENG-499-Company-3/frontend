@@ -94,7 +94,8 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
         authContext.setCurrentUser({
             name: 'Rich Little',
             email: 'richlittle@uvic.ca',
-            role:  AuthenticatedUserType.ADMIN
+            isMissingPreferenceSubmission: false,
+            role:  AuthenticatedUserType.ADMIN,
 
         })
     })
