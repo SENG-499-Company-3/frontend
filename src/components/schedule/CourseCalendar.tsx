@@ -272,7 +272,7 @@ const CourseCalendar = ({
   }, [selectedView, updateRenderRangeText]);
 
   return (
-    <Box display="flex" flexDirection="column" height="100%" width="100%" maxWidth="1536px"> {/* Calendar's max width is 1536px */}
+    <Box display="flex" flexDirection="column" height="100%" width="100%"> {/* Calendar's max width is 1536px */}
       <Stack padding={2} direction={isSmallScreen ? "column" : "row"} justifyContent="flex-end">
           <Stack py={isSmallScreen ? 2: 0} direction="row" width="100%">
 

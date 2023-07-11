@@ -84,12 +84,6 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
         }
     }
 
-    useEffect(() => {
-        if (!authContext.currentUser() && router.route !== '/register'){
-            router.push('/login')
-        }
-    }, [currentUser])
-
     return (
         <AuthContext.Provider value={authContext}>
             {props.children}
