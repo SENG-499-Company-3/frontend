@@ -1,5 +1,6 @@
-import React, { PropsWithChildren, createContext } from 'react'
+import React, { PropsWithChildren, createContext, useEffect } from 'react'
 import { AuthenticatedUserType, IAuthenticatedUser } from '../types/auth.d'
+import { useRouter } from 'next/router';
 
 interface IAuthContext {
     /**
@@ -57,6 +58,7 @@ export const AuthContext = createContext<IAuthContext>({
 export const AuthContextProvider = (props: PropsWithChildren) => {
     const [currentUser, setCurrentUser] = React.useState<IAuthenticatedUser | null>(null);
     const [userToken, setUserToken] = React.useState<string | null>(null);
+    const router = useRouter();
 
     const authContext: IAuthContext = {
         currentUser: () => currentUser,
@@ -65,20 +67,28 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
         setUserToken,
         resetCurrentUser: () => setCurrentUser(null),
         isAuthenticated: () => Boolean(currentUser),
-        isAdmin: () => currentUser.type === AuthenticatedUserType.ADMIN,
+        isAdmin: () => currentUser.role === AuthenticatedUserType.ADMIN,
         avatarInitials: () => {
-            if (!currentUser?.displayName) {
+            if (!currentUser?.name) {
                 return '';
             }
 
-            const stringParts = currentUser.displayName.split(' ');
+            const stringParts = currentUser.name.split(' ');
+
+
             return stringParts
-                .slice(Math.max(stringParts.length - 2, 1))
+                .slice(0, Math.max(stringParts.length - 2, 2))
                 .map((stringPart) => stringPart.charAt(0))
                 .join('')
                 .toLocaleUpperCase();
         }
     }
+
+    useEffect(() => {
+        if (!authContext.currentUser() && router.route !== '/register'){
+            router.push('/login')
+        }
+    }, [currentUser])
 
     return (
         <AuthContext.Provider value={authContext}>
