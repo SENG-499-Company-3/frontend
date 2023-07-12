@@ -17,4 +17,4 @@ const ProfessorPage = () => {
     )
 }
 
-export default ProfessorProfile
+export default ProfessorPage
