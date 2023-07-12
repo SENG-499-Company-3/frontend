@@ -362,6 +362,11 @@ const CourseCalendar = ({
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         ref={calendarRef}
+        template={{
+          timegridDisplayPrimaryTime({ time }) {
+            return `${time.getHours()}:${time.getMinutes()}0`;
+          },
+        }}
         onClickEvent={onClickEvent}
       />{
         selectedEvent && (
