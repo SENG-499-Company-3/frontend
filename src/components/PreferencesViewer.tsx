@@ -11,10 +11,15 @@ import PageContent from "./layout/PageContent"
 import Breadcrumbs from "./layout/Breadcrumbs"
 import PageHeaderActions from "./layout/PageHeaderActions"
 
-interface IPreference {
+interface ICoursePreference {
     courseName: string;
     willingness: 'WILLING' | 'UNWILLING'
     ability: 'ABLE' | 'WITH_DIFFICULTY' | 'UNABLE'
+}
+
+export interface IPreferences {
+    coursePreferences: ICoursePreference[]
+    additionalDetails: string
 }
 
 const COURSES = [
@@ -37,27 +42,26 @@ const COURSES = [
     'ENGR 110',
 ];
 
-const initialPreferences: IPreference[] = COURSES.map((course) => ({
+export const defaultCoursePreferences: ICoursePreference[] = COURSES.map((course) => ({
     courseName: course,
     willingness: 'WILLING',
     ability: 'ABLE'
 }));
 
+export const defaultPreferences: IPreferences = {
+    coursePreferences: defaultCoursePreferences,
+    additionalDetails: ''
+}
+
 
 interface IPreferencesViewerProps {
-    initialPreferences: {
-        coursePreferences: IPreference[]
-        additionalDetails: string
-    }
-    // onChange: (preferences: any) => void
-    editable: boolean
+    preferences: IPreferences
+    onChange: (preferences: IPreferences) => void
+    editing: boolean
 }
 
 const PreferencesViewer = (props: IPreferencesViewerProps) => {
-    const [preferences, setPreferences] = useState<IPreference[]>(initialPreferences);
-    const [additionalDetails, setAdditionalDetails] = useState<string>();
-    
-    const coursePreferenceColumns: GridColDef<IPreference>[] = [
+    const coursePreferenceColumns: GridColDef<ICoursePreference>[] = [
         {
             field: 'courseName',
             headerName: 'Course',
@@ -67,12 +71,18 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
             field: 'willingness',
             headerName: 'Willingness',
             flex: 1,
-            renderCell: (params) => {
+            valueFormatter: !props.editing && ((params) => {
+                return {
+                    'WILLING': 'Willing',
+                    'UNWILLING': 'Unwilling'
+                }[params.value]
+            }),
+            renderCell: props.editing && ((params) => {
                 const handleChange = (event: SelectChangeEvent) => {
-                    const willingness = event.target.value as IPreference['willingness'];
-                    const updatedPreferences = [...preferences];
-                    updatedPreferences.find((preference) => preference.courseName === params.row.courseName).willingness = willingness;
-                    setPreferences(updatedPreferences)
+                    const willingness = event.target.value as ICoursePreference['willingness'];
+                    const updatedCoursePreferences = [...props.preferences.coursePreferences];
+                    updatedCoursePreferences.find((preference) => preference.courseName === params.row.courseName).willingness = willingness;
+                    props.onChange({ ...props.preferences, coursePreferences: updatedCoursePreferences });
                 };
 
                 return (
@@ -86,18 +96,25 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
                         <MenuItem value='UNWILLING'>Unilling</MenuItem>
                     </Select>
                 )
-            }
+            })
         },
         {
             field: 'ability',
             headerName: 'Ability',
             flex: 1,
-            renderCell: (params) => {
+            valueFormatter: !props.editing && ((params) => {
+                return {
+                    'ABLE': 'Able',
+                    'WITH_DIFFICULTY': 'With Difficulty',
+                    'UNABLE': 'Unable'
+                }[params.value]
+            }),
+            renderCell: props.editing && ((params) => {
                 const handleChange = (event: SelectChangeEvent) => {
-                    const ability = event.target.value as IPreference['ability'];
-                    const updatedPreferences = [...preferences];
-                    updatedPreferences.find((preference) => preference.courseName === params.row.courseName).ability = ability;
-                    setPreferences(updatedPreferences)
+                    const ability = event.target.value as ICoursePreference['ability'];
+                    const updatedCoursePreferences = [...props.preferences.coursePreferences];
+                    updatedCoursePreferences.find((preference) => preference.courseName === params.row.courseName).ability = ability;
+                    props.onChange({ ...props.preferences, coursePreferences: updatedCoursePreferences });
                 };
 
                 return (
@@ -112,27 +129,9 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
                         <MenuItem value='UNABLE'>Unable</MenuItem>
                     </Select>
                 )
-            }
+            })
         }
     ];
-
-    const handleSave = () => {
-        const savedPreferences = JSON.stringify({
-            preferences,
-            additionalDetails
-        });
-
-        console.log({ savedPreferences })
-    }
-
-    const handleCancel = () => {
-
-    }
-
-    const PageActions = () => <>
-        <Button variant='contained' onClick={() => handleSave()}>Save</Button>
-        <Button variant='outlined' onClick={() => handleCancel()}>Cancel</Button>
-    </>
 
     return (
         <Paper>
@@ -146,10 +145,10 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
                     </Grid>
                     <Grid item xs={12} lg={8}>
                         <DataGrid
-                            getRowId={(row: IPreference) => row.courseName}
+                            getRowId={(row: ICoursePreference) => row.courseName}
                             sx={{ p: 0, height: 500 }}
                             columns={coursePreferenceColumns}
-                            rows={preferences}
+                            rows={props.preferences.coursePreferences}
                         />
                     </Grid>
                 </Grid>
@@ -172,16 +171,15 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
                                 multiline
                                 fullWidth
                                 rows={4}
-                                value={additionalDetails}
-                                onChange={(event) => setAdditionalDetails(event.target.value)}
+                                disabled={!props.editing}
+                                value={props.preferences.additionalDetails}
+                                onChange={(event) => {
+                                    props.onChange({ ...props.preferences, additionalDetails: event.target.value });
+                                }}
                             />
                         </Box>
                     </Grid>
                 </Grid>
-
-                <Box pt={4} sx={{ display: 'flex', gap: 1, justifyContent: "flex-end" }}>
-                    <PageActions />
-                </Box>
             </Box>
         </Paper>
     )

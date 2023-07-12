@@ -1,11 +1,12 @@
-import { Avatar, Box, Paper, Tab, Tabs, Typography } from "@mui/material"
+import { Avatar, Box, Button, Paper, Tab, Tabs, Typography } from "@mui/material"
 import { useState } from 'react'
 import AppPage from "./layout/AppPage"
 import PageHeader from "./layout/PageHeader"
 import dynamic from "next/dynamic";
 import { courseScheduleData } from "./common/sampleData/courseSchedule";
 import PageContent from "./layout/PageContent";
-import PreferencesViewer from "./PreferencesViewer";
+import PreferencesViewer, { IPreferences, defaultPreferences } from "./PreferencesViewer";
+import PageHeaderActions from "./layout/PageHeaderActions";
 
 interface IProfessorProfileProps {
     name: string;
@@ -20,6 +21,9 @@ const NoSsrCalendar = dynamic(() => import("./schedule/CourseCalendar"), {
 
 const ProfessorProfile = (props: IProfessorProfileProps) => {
     const [tab, setTab] = useState<number>(0);
+    const [preferences, setPreferences] = useState<IPreferences>(defaultPreferences)
+    const [isEditingPreferences, setIsEditingPreferences] = useState<boolean>(false);
+    console.log({ props })
 
     return (
         <AppPage>
@@ -53,9 +57,44 @@ const ProfessorProfile = (props: IProfessorProfileProps) => {
                 </Paper>
             )}
             {tab === 1 && (
-                <PageContent>
-                    <PreferencesViewer initialPreferences={null} editable={props.canEditPreferences} />
-                </PageContent>
+                <>
+                    <PageHeader>
+                        <Box display='flex'>
+                            <Box flex='1'>
+                                <Typography mb={1} variant='h4'>Professor Preferences</Typography>
+                                <Typography>Enter your preferences for the given teaching term.</Typography>
+                            </Box>
+                            {props.canEditPreferences && (
+                                <PageHeaderActions>
+                                    {isEditingPreferences ? (
+                                        <>
+                                            <Button
+                                                variant='contained'
+                                                onClick={() => setIsEditingPreferences(false)}
+                                            >Save</Button>
+                                            <Button
+                                                variant='outlined'
+                                                onClick={() => {
+                                                    setPreferences(defaultPreferences);
+                                                    setIsEditingPreferences(false);
+                                                }}
+                                            >Cancel</Button>
+                                        </>
+                                    ) : (
+                                        <Button variant='contained' onClick={() => setIsEditingPreferences(true)}>Edit Preferences</Button>
+                                    )}
+                                </PageHeaderActions>
+                            )}
+                        </Box>
+                    </PageHeader>
+                    <PageContent>
+                        <PreferencesViewer
+                            preferences={preferences}
+                            editing={props.canEditPreferences && isEditingPreferences}
+                            onChange={setPreferences}
+                        />
+                    </PageContent>
+                </>
             )}
         </AppPage>
     )
