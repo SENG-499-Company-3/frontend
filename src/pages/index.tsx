@@ -30,9 +30,7 @@ const HomePage = () => {
                     </PageHeaderActions>
                 </Box>
             </PageHeader>
-            <PageContent>
-                <ScheduleList />
-            </PageContent>
+            <ScheduleList />
         </AppPage>
     )
 }

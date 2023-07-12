@@ -4,42 +4,31 @@ import { professorListData } from '../common/sampleData/professorList';
 import { Professor } from '../../types/professor';
 import { Button, Paper } from '@mui/material';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 const initialRows: GridRowsProp = professorListData.map((professor: Professor) => ({
     id: professor.id,
     instructor: professor.Name,
     email: professor.Email,
-    profile: professor.id,
-    preferencesSubmitted: !professor.IsMissingPreferenceSubmission,
+    preferencesSubmitted: professor.IsMissingPreferenceSubmission ? null : new Date(),
 }));
 //IF isMissingPreferenceSubmission = true, professor has not submitted -- display false
 
 const ProfessorTable = () => {
-    const [rows, setRows] = useState(initialRows);
     const columns: GridColDef[] = [
-        { field: 'instructor', headerName: 'Instructor', width: 200 },
-        { field: 'email', headerName: 'Email', width: 200 },
-        {
-            field: 'profile', headerName: 'Profile', width: 100, type: 'string',
-           renderCell: (params) => <ProfileButton pid={params} />
-        },
-        { field: 'preferencesSubmitted', headerName: 'Preferences Submitted', type: 'boolean', width: 200 },
+        { field: 'instructor', headerName: 'Instructor', flex: 1, renderCell: (params) => {
+            return (
+                <Link href={`/professors/${params.row.id}`}>{params.value}</Link>
+            )
+        } },
+        { field: 'email', headerName: 'Email', flex: 1 },
+        { field: 'preferencesSubmitted', headerName: 'Preferences Submitted', type: 'date', flex: 1 },
     ];
-
-    const router = useRouter();
-
-    //TODO: this isn't creating new links properly
-    const ProfileButton = ({ pid }: { pid: any }) => {
-        const link = '/professors/'+ pid;
-        return (
-            <Button onClick={() => router.push(link)} variant="contained">Profile</Button>
-        );
-    };
 
     return (
         <Paper sx={{ p: 2 }}>
             <DataGrid
-                rows={rows}
+                rows={initialRows}
                 columns={columns}
                 initialState={{
                     sorting: {
@@ -53,6 +42,7 @@ const ProfessorTable = () => {
                         quickFilterProps: { debounceMs: 500 },
                     },
                 }}
+                sx={{ border: 0 }}
             />
         </Paper>
     )
