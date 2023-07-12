@@ -40,16 +40,18 @@ const ProfessorProfile = (props: IProfessorProfileProps) => {
                 
             </PageHeader>
             <Paper elevation={0} square>
-                <Tabs
-                    value={tab}
-                    indicatorColor="secondary"
-                    textColor="inherit"
-                    variant="fullWidth"
-                    onChange={(_event, value) => setTab(value)}
-                    >
-                    <Tab label="Schedule" />
-                    <Tab label="Preferences" />
-                </Tabs>
+                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                    <Tabs
+                        value={tab}
+                        indicatorColor="secondary"
+                        textColor="inherit"
+                        variant="fullWidth"
+                        onChange={(_event, value) => setTab(value)}
+                        >
+                        <Tab label="Schedule" />
+                        <Tab label="Preferences" />
+                    </Tabs>
+                </Box>
             </Paper>
             {tab === 0 && (
                 <Paper elevation={0} square>
