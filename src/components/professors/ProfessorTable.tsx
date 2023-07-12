@@ -10,23 +10,27 @@ const initialRows: GridRowsProp = professorListData.map((professor: Professor) =
     instructor: professor.Name,
     email: professor.Email,
     profile: professor.id,
-    status: professor.IsMissingPreferenceSubmission,
+    preferencesSubmitted: !professor.IsMissingPreferenceSubmission,
 }));
+//IF isMissingPreferenceSubmission = true, professor has not submitted -- display false
+
 const ProfessorTable = () => {
     const [rows, setRows] = useState(initialRows);
     const columns: GridColDef[] = [
         { field: 'instructor', headerName: 'Instructor', width: 200 },
         { field: 'email', headerName: 'Email', width: 200 },
         {
-            field: 'profile', headerName: 'Profile', width: 100,
-           renderCell: (params) => <ProfileButton uid={params.toString()} />
+            field: 'profile', headerName: 'Profile', width: 100, type: 'string',
+           renderCell: (params) => <ProfileButton pid={params} />
         },
-        { field: 'status', headerName: 'Status', width: 100 },
+        { field: 'preferencesSubmitted', headerName: 'Preferences Submitted', type: 'boolean', width: 200 },
     ];
 
     const router = useRouter();
-    const ProfileButton = (uid : any) => {
-        const link = '/professors/'+ uid;
+
+    //TODO: this isn't creating new links properly
+    const ProfileButton = ({ pid }: { pid: any }) => {
+        const link = '/professors/'+ pid;
         return (
             <Button onClick={() => router.push(link)} variant="contained">Profile</Button>
         );
