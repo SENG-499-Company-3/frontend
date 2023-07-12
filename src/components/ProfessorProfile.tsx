@@ -56,7 +56,7 @@ const ProfessorProfile = (props: IProfessorProfileProps) => {
             </Paper>
             {tab === 0 && (
                 <Paper elevation={0} square>
-                    <NoSsrCalendar view="week" courses={courseScheduleData} canEdit={props.canEditCalendar} userName={props.name}/>
+                    <NoSsrCalendar view="week" courses={profCourses} canEdit={props.canEditCalendar}/>
                 </Paper>
             )}
             {tab === 1 && (

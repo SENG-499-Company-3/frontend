@@ -70,12 +70,10 @@ const CourseCalendar = ({
   view,
   courses,
   canEdit,
-  userName,
 }: {
   view: ViewType;
   courses: Course[];
   canEdit: boolean;
-  userName: string;
 }) => {
   const calendarRef = useRef<typeof Calendar>(null);
   const [selectedDateRangeText, setSelectedDateRangeText] = useState("");
@@ -87,7 +85,6 @@ const CourseCalendar = ({
   const [allCalendarEvents, setAllCalendarEvents] = useState<EventObject[]>([]);
   const [isEventDetailOpen, setIsEventDetailOpen] = useState(false);
   const [isAddCourseOpen, setIsAddCourseOpen] = useState(false);
-
 
   const isSmallScreen = useSmallScreen();
 
