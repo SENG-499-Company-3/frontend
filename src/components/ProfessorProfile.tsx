@@ -16,6 +16,8 @@ const NoSsrCalendar = dynamic(() => import("./schedule/CourseCalendar"), {
 });
 
 const ProfessorProfile = (props: IProfessorProfileProps) => {
+    const profCourses = courseScheduleData.filter(course => course.Instructor === props.name);
+
     return (
         <AppPage>
             <PageHeader>
@@ -42,7 +44,7 @@ const ProfessorProfile = (props: IProfessorProfileProps) => {
                 </Tabs>
             </Paper>
             <Paper elevation={0} square>
-                <NoSsrCalendar view="week" courses={courseScheduleData} />
+                <NoSsrCalendar view="week" courses={profCourses} canEdit={props.canEditCalendar} userName={props.name} />
             </Paper>
         </AppPage>
     )

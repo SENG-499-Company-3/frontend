@@ -54,7 +54,6 @@ const termStartDates = {
   Fall: `${currentYear.toString()}-9-1`,          // First week of September
 };  
 
-const user = "admin" // TODO: replace with actual user type
 const termOptions = ["Summer", "Fall", "Spring"];
 const initialCalendars = [
   {
@@ -70,9 +69,13 @@ const initialCalendars = [
 const CourseCalendar = ({
   view,
   courses,
+  canEdit,
+  userName,
 }: {
   view: ViewType;
   courses: Course[];
+  canEdit: boolean;
+  userName: string;
 }) => {
   const calendarRef = useRef<typeof Calendar>(null);
   const [selectedDateRangeText, setSelectedDateRangeText] = useState("");
@@ -92,19 +95,10 @@ const CourseCalendar = ({
     const calendarEvents: EventObject[] = [];
     var colorIndex = 0;
 
-    if (user === "professor") {
-      const mergedCourses = mergeCourses(allCourses);
-      mergedCourses.forEach((course) => {
-        calendarEvents.push(...createCalendarEvents(course, colorIndex++));
-        colorIndex = colorIndex % 7;
-      });
-    }
-    else {
-      allCourses.forEach((course) => {
-        calendarEvents.push(...createCalendarEvents(course, colorIndex++));
-        colorIndex = colorIndex % 7;
-      });
-    }
+    allCourses.forEach((course) => {
+      calendarEvents.push(...createCalendarEvents(course, colorIndex++));
+      colorIndex = colorIndex % 7;
+    });
     
     setAllCalendarEvents(calendarEvents);
   }, []); // set all the calendar events when the component first mounts
@@ -342,7 +336,7 @@ const CourseCalendar = ({
               ))}
             </Select>
             {
-            user === 'admin' && <Button
+            canEdit && <Button
               variant="contained"
               onClick={onAddCourseModalOpen}
               sx={{ width: isSmallScreen ? "100%" : "30%", maxWidth: "70px" }}
@@ -381,12 +375,12 @@ const CourseCalendar = ({
             onClose={onEventDetailClose}
             onDelete={handleCourseDelete}
             onCourseUpdate={handleCourseUpdate}
-            userType={user}
+            canEdit={canEdit}
           />
         )
       }
       {
-      user === 'admin' && <AddEventModal
+      canEdit && <AddEventModal
         isOpen={isAddCourseOpen}
         onClose={onAddCourseModalClose}
         onCreate={onAddCourse}
