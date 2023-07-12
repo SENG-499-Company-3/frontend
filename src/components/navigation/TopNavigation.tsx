@@ -1,7 +1,6 @@
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import useApi from '../../hooks/useApi';
-import { AuthenticatedUserType } from "../../types/auth.d";
 import { AppBar, Avatar, Box, Button, IconButton, Toolbar, Typography } from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
 import Link from "next/link";
@@ -24,9 +23,8 @@ export const TopNavigation = (props: ITopNavigationProps) => {
         <AppBar position="static">
             <Toolbar>
                 <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
-                    {authContext.isAuthenticated() && (
+                    {authContext.isAuthenticated() && authContext.isAdmin() && (
                         <IconButton
-                            className="hidden md:block"
                             size="large"
                             edge="start"
                             color="inherit"
