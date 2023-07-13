@@ -20,6 +20,7 @@ const NoSsrCalendar = dynamic(() => import("./schedule/CourseCalendar"), {
 });
 
 const ProfessorProfile = (props: IProfessorProfileProps) => {
+    const profCourses = courseScheduleData.filter(course => course.Instructor === props.name);
     const [tab, setTab] = useState<number>(0);
     const [preferences, setPreferences] = useState<IPreferences>(defaultPreferences)
     const [isEditingPreferences, setIsEditingPreferences] = useState<boolean>(false);
@@ -55,7 +56,7 @@ const ProfessorProfile = (props: IProfessorProfileProps) => {
             </Paper>
             {tab === 0 && (
                 <Paper elevation={0} square>
-                    <NoSsrCalendar view="week" courses={courseScheduleData} />
+                    <NoSsrCalendar view="week" courses={profCourses} canEdit={props.canEditCalendar}/>
                 </Paper>
             )}
             {tab === 1 && (
