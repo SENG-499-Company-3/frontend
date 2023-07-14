@@ -16,8 +16,7 @@ import Divider from "@mui/material/Divider";
 import Box from "@mui/material/Box";
 import Alert from "@mui/material/Alert";
 import Modal from "@mui/material/Modal";
-import { courseBlocks } from "../common/sampleData/courseSchedule"
-import { termOptions } from "../../utils/helper";
+import { courseBlocks, termOptions } from "../../utils/helper";
 
 
 const AddEventModal = ({ isOpen, onClose, onCreate }) => {

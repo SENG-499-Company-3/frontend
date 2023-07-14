@@ -3,13 +3,16 @@ import { DataGrid, GridRowsProp, GridColDef, GridToolbar, GridRowModel, GridEven
 import { courseScheduleData } from '../common/sampleData/courseSchedule'
 import WeekdayTable  from './WeekdayTable'
 import { Course } from '../../types/course'
-import { convertToTime } from '../../utils/helper';
+import { convertToTime, courseBlocks } from '../../utils/helper';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 import { Button, Paper } from '@mui/material';
+import AddEventModal from "./AddEventModal";
+import EditEventModal from "./EditEventModal";
+import DeleteConfirmModal from './DeleteConfirmModal';
 
 const initialRows: GridRowsProp = courseScheduleData.map((course: Course, index: number ) => ({
   id: index,
@@ -30,10 +33,29 @@ const createRow = (id: number) => {
     return { id, days: '', isNew: true }; //Update with defaults if desired. Days must be empty string
 };
 
+const addRow = (course: Course, id: number) => {
+    return {
+        id,
+        term: course.Term,
+        course: course.Subj + ' ' + course.Num,
+        section: course.Section,
+        title: course.Title,
+        scheduleType: course.SchedType,
+        instructor: course.Instructor,
+        location: course.Bldg + ' ' + course.Room,
+        start: convertToTime(course.Begin),
+        end: convertToTime(course.End),
+        days: course.Days,
+        //capacity: course.Cap,
+        isNew: true
+    };
+};
+
 /* Map incoming schedule's terms and professors into array for dropdowns. CONFIRM this functions with incoming data */
 const termList = courseScheduleData.map((course: Course) => course.Term).filter((value, index, self) => self.indexOf(value) === index);
 const professorList = courseScheduleData.map((course: Course) => course.Instructor).filter((value, index, self) => self.indexOf(value) === index);
 
+//REPLACE
 const daysTimeSlots = [
     'MR 08:30 09:50', //A
     'MR 10:00 11:20', //B
@@ -78,8 +100,11 @@ const ScheduleList = () => {
     const [rows, setRows] = useState(initialRows);
     const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
     const numRows = rows.length;
+    const [isAddCourseOpen, setIsAddCourseOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-    /* Add rows function for use with the added button */
+    /* DEPRECATED Add rows function for use with the added button */
     const handleAddRow = (newIndex: number) => {
         setRows((prevRows) => [...prevRows, createRow(newIndex)]);
         setRowModesModel((oldModel) => ({
@@ -88,9 +113,39 @@ const ScheduleList = () => {
         }));
     };
 
+    //On click of Add course, set modal = true
+    const handleAddCourse = () => {
+        setIsAddCourseOpen(true);
+    }
+
+    const onAddCourseModalClose = () => {
+        setIsAddCourseOpen(false);
+    };
+
+    const onAddCourse = (newCourse: Course) => {
+        setRows((prevRows) => [...prevRows, addRow(newCourse, numRows)]);
+        setRowModesModel((oldModel) => ({
+            ...oldModel,
+            [numRows]: { mode: GridRowModes.Edit, fieldToFocus: 'actions' },
+        }));
+    };
+    
     /* Functions from the CRUD table in the documentation */
     const handleEditClick = (id: GridRowId) => () => {
         setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
+    };
+
+    const onEditModalSave = (updatedCourse: Course) => {
+        setCourse(updatedCourse);
+        onCourseUpdate(updatedCourse);
+    };
+
+    const onEditModalOpen = () => {
+        setIsEditModalOpen(true);
+    };
+
+    const onEditModalClose = () => {
+        setIsEditModalOpen(false);
     };
 
     const handleSaveClick = (id: GridRowId) => () => {
@@ -99,6 +154,20 @@ const ScheduleList = () => {
 
     const handleDeleteClick = (id: GridRowId) => () => {
         setRows(rows.filter((row) => row.id !== id));
+    };
+
+    const onDeleteModalOpen = () => {
+        setIsDeleteModalOpen(true);
+    };
+
+    const onDeleteModalClose = () => {
+        setIsDeleteModalOpen(false);
+    };
+
+    const handleDeleteConfirmation = () => {
+        onDeleteModalClose();
+        onDelete(course);
+        onClose();
     };
 
     const handleCancelClick = (id: GridRowId) => () => {
@@ -145,13 +214,13 @@ const ScheduleList = () => {
         },
         { field: 'start', headerName: 'Start', width: 100 },
         { field: 'end', headerName: 'End', width: 100 },
-        {
+        /*{
             field: 'daysTime', headerName: 'Block', width: 100, editable: true,
             type: 'singleSelect',
             valueOptions: daysTimeSlots,
             valueGetter: getDaysTime,
             valueSetter: setDaysTime,
-        },
+        },*/
         {
             field: 'actions',
             type: 'actions',
@@ -202,7 +271,7 @@ const ScheduleList = () => {
 
     return (
         <Paper sx={{ p: 2 }}>
-            <Button size="small" startIcon={<AddIcon />} onClick={() => handleAddRow(numRows)}>
+            <Button size="small" startIcon={<AddIcon />} onClick={() => handleAddCourse()}>
                 Add Course
             </Button>
             <DataGrid
@@ -226,6 +295,23 @@ const ScheduleList = () => {
                     },
                 }}
             />
+            <AddEventModal
+                isOpen={isAddCourseOpen}
+                onClose={onAddCourseModalClose}
+                onCreate={onAddCourse}
+            />
+            {/*<EditEventModal
+                isOpen={isEditModalOpen}
+                onClose={onEditModalClose}
+                onSave={onEditModalSave}
+                course={course}
+                courseBgColor={calendarEvent.backgroundColor}
+            />
+            <DeleteConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={onDeleteModalClose}
+                onConfirm={handleDeleteConfirmation}
+            />*/}
         </Paper>
     )
 }
