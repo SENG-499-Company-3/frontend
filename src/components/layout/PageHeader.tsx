@@ -1,9 +1,17 @@
-import { Container, Paper } from "@mui/material";
-import { PropsWithChildren } from "react";
+import { Container, Paper, PaperProps } from "@mui/material";
 
-const PageHeader = (props: PropsWithChildren) => {
+const PageHeader = (props: Partial<PaperProps>) => {
+
+    const paperProps: PaperProps = {
+        sx: {
+            pt: 5, pb: 3
+        },
+        square: true,
+        elevation: 0,
+        ...props
+    }
     return (
-        <Paper sx={{ pt: 5, pb: 3 }} component='section' square elevation={0}>
+        <Paper {...paperProps} component='section'>
             <Container maxWidth='xl'>
                 {props.children}
             </Container>

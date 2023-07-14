@@ -201,10 +201,12 @@ const ScheduleList = () => {
     ];
 
     return (
-        <Paper sx={{ p: 2 }}>
-            <Button size="small" startIcon={<AddIcon />} onClick={() => handleAddRow(numRows)}>
-                Add Course
-            </Button>
+        <Paper sx={{ p: 2 }} square elevation={0}>
+            {/*
+                <Button size="small" startIcon={<AddIcon />} onClick={() => handleAddRow(numRows)}>
+                    Add Course
+                </Button>
+            */}
             <DataGrid
                 rows={rows} 
                 columns={columns}

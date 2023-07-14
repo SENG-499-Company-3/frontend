@@ -1,6 +1,13 @@
 import { AxiosInstance, AxiosResponse } from 'axios'
 import { IAuthenticatedUser } from '../../types/auth.d';
 
+export interface IUser {
+    _id: string;
+    email: string;
+    name: string;
+    role: string;
+}
+
 const useUserApi = (axios: AxiosInstance) => {
 
     /**
@@ -19,8 +26,22 @@ const useUserApi = (axios: AxiosInstance) => {
             });
     }
 
+    const getUserById = async (id: string): Promise<IUser> => {
+        const { data } = await axios.get(`/user/${id}`);
+
+        return data;
+    }
+
+    const listUsers = async (): Promise<IUser[]> => {
+        const { data } = await axios.get('/user/list');
+
+        return data;
+    }
+
     return {
         create,
+        listUsers,
+        getUserById
     }
 }
 
