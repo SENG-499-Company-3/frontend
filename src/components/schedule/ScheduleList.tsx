@@ -33,6 +33,23 @@ const createRow = (id: number) => {
     return { id, days: '', isNew: true }; //Update with defaults if desired. Days must be empty string
 };
 
+const parseCourse = (course: Course) => {
+    return {
+        id: course.id,
+        term: course.Term,
+        course: course.Subj + ' ' + course.Num,
+        section: course.Section,
+        title: course.Title,
+        scheduleType: course.SchedType,
+        instructor: course.Instructor,
+        location: course.Bldg + ' ' + course.Room,
+        start: convertToTime(course.Begin),
+        end: convertToTime(course.End),
+        days: course.Days,
+        capacity: course.Cap,
+    };
+};
+
 const addRow = (course: Course, id: number) => {
     return {
         id,
@@ -55,42 +72,6 @@ const addRow = (course: Course, id: number) => {
 const termList = courseScheduleData.map((course: Course) => course.Term).filter((value, index, self) => self.indexOf(value) === index);
 const professorList = courseScheduleData.map((course: Course) => course.Instructor).filter((value, index, self) => self.indexOf(value) === index);
 
-//REPLACE
-const daysTimeSlots = [
-    'MR 08:30 09:50', //A
-    'MR 10:00 11:20', //B
-    'MR 11:30 12:50', //C
-    'MR 13:00 14:20', //D
-    'MWR 14:30 15:20', //E
-    'MWR 15:30 16:20', //F
-    'MW 16:30 17:50', //G
-    'TWF 08:30 09:20', //H
-    'TWF 09:30 10:20', //I
-    'TWF 10:30 11:20', //J
-    'TWF 11:30 12:20', //K
-    'TWF 12:30 13:20', //L
-    'TWF 13:30 14:20', //M
-    'TF 14:30 16:30', //N
-    'TR 16:30 17:50', //O
-];
-
-/* Getter and Setter for column Block, to use the singular column to update the days, start, and end
-   Note that days/times currently cannot be manually entered. This could be updated by adding blocks VWXYZ (MTWRF) and enable edit on start/end
-   Column block can be overwritten by string */
-function getDaysTime(params: GridValueGetterParams) {
-    const inString = `${params.row.days || ''} ${params.row.start || ''} ${params.row.end || ''}`;
-    for (let i = 0; i < 15; i++) {
-        if (inString === daysTimeSlots[i]) {
-            return daysTimeSlots[i];
-        }
-    }
-    return inString;
-}
-function setDaysTime(params: GridValueSetterParams) {
-    const [days, start, end] = params.value!.toString().split(' ');
-    return { ...params.row, days, start, end };
-}
-
 /* Parser for course, section, and location to force caps entry */
 function parseToCaps(value: any) {
     return String(value).toUpperCase();
@@ -99,24 +80,18 @@ function parseToCaps(value: any) {
 const ScheduleList = () => {
     const [rows, setRows] = useState(initialRows);
     const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+
+    /* PROBLEM: when rows start getting deleted, this is going to get super wonky */
     const numRows = rows.length;
     const [isAddCourseOpen, setIsAddCourseOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [currentRowID, setCurrentRowID] = useState<GridRowId>(null);
 
-    /* DEPRECATED Add rows function for use with the added button */
-    const handleAddRow = (newIndex: number) => {
-        setRows((prevRows) => [...prevRows, createRow(newIndex)]);
-        setRowModesModel((oldModel) => ({
-            ...oldModel,
-            [newIndex]: { mode: GridRowModes.Edit, fieldToFocus: 'term' },
-        }));
-    };
-
-    //On click of Add course, set modal = true
+    /* Add row functions */
     const handleAddCourse = () => {
         setIsAddCourseOpen(true);
-    }
+    };
 
     const onAddCourseModalClose = () => {
         setIsAddCourseOpen(false);
@@ -130,8 +105,9 @@ const ScheduleList = () => {
         }));
     };
     
-    /* Functions from the CRUD table in the documentation */
+    /* Edit row functions */
     const handleEditClick = (id: GridRowId) => () => {
+        setIsEditModalOpen(true);
         setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
     };
 
@@ -140,24 +116,19 @@ const ScheduleList = () => {
         onCourseUpdate(updatedCourse);
     };
 
-    const onEditModalOpen = () => {
-        setIsEditModalOpen(true);
-    };
-
     const onEditModalClose = () => {
         setIsEditModalOpen(false);
     };
 
+    /* Save row functions */
     const handleSaveClick = (id: GridRowId) => () => {
         setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
     };
 
+    /* Delete row functions */
     const handleDeleteClick = (id: GridRowId) => () => {
-        setRows(rows.filter((row) => row.id !== id));
-    };
-
-    const onDeleteModalOpen = () => {
         setIsDeleteModalOpen(true);
+        setCurrentRowID(id);
     };
 
     const onDeleteModalClose = () => {
@@ -166,10 +137,11 @@ const ScheduleList = () => {
 
     const handleDeleteConfirmation = () => {
         onDeleteModalClose();
-        onDelete(course);
-        onClose();
+        setRows(rows.filter((row) => row.id !== currentRowID));
+        setCurrentRowID(null);
     };
 
+    /* Cancel click functions */
     const handleCancelClick = (id: GridRowId) => () => {
         setRowModesModel({
             ...rowModesModel,
@@ -304,14 +276,14 @@ const ScheduleList = () => {
                 isOpen={isEditModalOpen}
                 onClose={onEditModalClose}
                 onSave={onEditModalSave}
-                course={course}
-                courseBgColor={calendarEvent.backgroundColor}
-            />
+                course={rows}
+                courseBgColor={null}
+            />*/}
             <DeleteConfirmModal
                 isOpen={isDeleteModalOpen}
                 onClose={onDeleteModalClose}
                 onConfirm={handleDeleteConfirmation}
-            />*/}
+            />
         </Paper>
     )
 }
