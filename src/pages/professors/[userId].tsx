@@ -34,7 +34,7 @@ const ProfessorPage = () => {
             })
     }, [userId])
 
-    if (!loading && professor) {
+    if (true || !loading && professor) {
         return (
             <ProfessorProfile
                 professor={professor}
