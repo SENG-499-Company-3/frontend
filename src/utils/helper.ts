@@ -108,6 +108,12 @@ export const convertToTime = (time: number): string => {
   return formattedTime;
 };
 
+export const convertTimeToNumber = (timeString: string): number => {
+    const valueTime = timeString.replace(/:/, '');
+    const numTime = Number(valueTime);
+    return numTime;
+};
+
 const year = new Date().getFullYear();
 export const termOptions = [
   {

@@ -3,7 +3,7 @@ import { DataGrid, GridRowsProp, GridColDef, GridToolbar, GridRowModel, GridEven
 import { courseScheduleData } from '../common/sampleData/courseSchedule'
 import WeekdayTable  from './WeekdayTable'
 import { Course } from '../../types/course'
-import { convertToTime, courseBlocks } from '../../utils/helper';
+import { convertToTime, convertTimeToNumber } from '../../utils/helper';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
@@ -29,11 +29,7 @@ const initialRows: GridRowsProp = courseScheduleData.map((course: Course, index:
   capacity: course.Cap,
 }));
 
-const createRow = (id: number) => {
-    return { id, days: '', isNew: true }; //Update with defaults if desired. Days must be empty string
-};
-
-const parseCourse = (course: Course) => {
+const parseCourseToRow = (course: Course): GridRowModel => {
     return {
         id: course.id,
         term: course.Term,
@@ -48,6 +44,27 @@ const parseCourse = (course: Course) => {
         days: course.Days,
         capacity: course.Cap,
     };
+};
+
+const parseRowToCourse = (row: GridRowModel): Course => {
+    return {
+        id: row.id,
+        Term: row.term,
+        Subj: row.course.split(' ')[0],
+        Num: row.course.split(' ')[1],
+        Section: row.section,
+        Title: row.course,
+        SchedType: row.SchedType,
+        Instructor: row.instructor,
+        Bldg: row.location.split(' ')[0],
+        Room: row.location.split(' ')[1],
+        Begin: convertTimeToNumber(row.start),
+        End: convertTimeToNumber(row.end),
+        Days: row.days,
+        StartDate: null,
+        EndDate: null,
+        Cap: row.capacity,
+    }
 };
 
 const addRow = (course: Course, id: number) => {
@@ -80,13 +97,13 @@ function parseToCaps(value: any) {
 const ScheduleList = () => {
     const [rows, setRows] = useState(initialRows);
     const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
-
-    /* PROBLEM: when rows start getting deleted, this is going to get super wonky */
-    const numRows = rows.length;
+    const [numRows, setNumRows] = useState<number>(initialRows.length);
     const [isAddCourseOpen, setIsAddCourseOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [currentRowID, setCurrentRowID] = useState<GridRowId>(null);
+    const [currentCourse, setCurrentCourse] = useState<Course>(parseRowToCourse(rows[0]));
+    //NOTE: Expect currentCourse to break if there is no schedule to display. Unfortunately, EditEventModal doesn't accept Null values
 
     /* Add row functions */
     const handleAddCourse = () => {
@@ -103,21 +120,26 @@ const ScheduleList = () => {
             ...oldModel,
             [numRows]: { mode: GridRowModes.Edit, fieldToFocus: 'actions' },
         }));
+        setNumRows(numRows + 1);
     };
     
     /* Edit row functions */
     const handleEditClick = (id: GridRowId) => () => {
         setIsEditModalOpen(true);
+        setCurrentRowID(id);
+        const editingRow = rows.find((row) => row.id === id);
+        setCurrentCourse(parseRowToCourse(editingRow));
         setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
     };
 
     const onEditModalSave = (updatedCourse: Course) => {
-        setCourse(updatedCourse);
-        onCourseUpdate(updatedCourse);
+        const editedCourseRow = parseCourseToRow(updatedCourse);
+        processRowUpdate(editedCourseRow);
     };
 
     const onEditModalClose = () => {
         setIsEditModalOpen(false);
+        setCurrentRowID(null);
     };
 
     /* Save row functions */
@@ -133,6 +155,7 @@ const ScheduleList = () => {
 
     const onDeleteModalClose = () => {
         setIsDeleteModalOpen(false);
+        setCurrentRowID(null);
     };
 
     const handleDeleteConfirmation = () => {
@@ -272,13 +295,13 @@ const ScheduleList = () => {
                 onClose={onAddCourseModalClose}
                 onCreate={onAddCourse}
             />
-            {/*<EditEventModal
+            <EditEventModal
                 isOpen={isEditModalOpen}
                 onClose={onEditModalClose}
                 onSave={onEditModalSave}
-                course={rows}
+                course={currentCourse}
                 courseBgColor={null}
-            />*/}
+            />
             <DeleteConfirmModal
                 isOpen={isDeleteModalOpen}
                 onClose={onDeleteModalClose}
