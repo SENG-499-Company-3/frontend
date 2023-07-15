@@ -11,11 +11,13 @@ import DialogActions from "@mui/material/DialogActions";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
 import Typography from "@mui/material/Typography";
+import Autocomplete from "@mui/material/Autocomplete";
 import { courseBlocks } from "../common/sampleData/courseSchedule"
 import { convertToTime, termOptions } from "../../utils/helper";
 import { Divider } from "@mui/material";
 
-
+const mockInstructors = ["Michael Zastre", "John Smith", "Jane Doe", "Bob", "Jabbari, Hosna"];
+const mockLocations = ["ECS 123", "ECS 115", "ELW 220", "CLE 225", "HSD A240"];
 
 const EditEventModal = ({ isOpen, onClose, onSave, course, courseBgColor }) => {
   const [editableEvent, setEditableEvent] = useState(course);
@@ -45,15 +47,15 @@ const EditEventModal = ({ isOpen, onClose, onSave, course, courseBgColor }) => {
     setEditableEvent(updatedCourse);
   }
 
-  const handleLocationChange = (event) => {
-    const bldg = event.target.value.split(" ")[0];
-    const room = event.target.value.split(" ")[1];
+  const handleLocationChange = (event, value) => {
+    const bldg = value.split(" ")[0];
+    const room = value.split(" ")[1];
     const updatedCourse = { ...editableEvent, Bldg: bldg, Room: room };
     setEditableEvent(updatedCourse);
   };
 
-  const handleProfessorChange = (event) => {
-    const updatedCourse = { ...editableEvent, Instructor: event.target.value };
+  const handleProfessorChange = (event, value) => {
+    const updatedCourse = { ...editableEvent, Instructor: value };
     setEditableEvent(updatedCourse);
   };
 
@@ -92,31 +94,37 @@ const EditEventModal = ({ isOpen, onClose, onSave, course, courseBgColor }) => {
                   {termOptions.find(option => option.value === course.Term).title}
             </Typography>
           </Stack>
-          <FormControl>
-          <InputLabel id="select-block-label">Block</InputLabel>
-            <Select 
-              labelId="select-block-label"
-              value={courseBlock} 
-              onChange={(event) => handleBlockChange(event)}
-              label="Block" 
-            >
-              {courseBlocks.map((block, index) => (
-                <MenuItem key={index} value={block}>{block}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <TextField 
-              id="outlined-location" 
-              label="Location" 
-              defaultValue={`${editableEvent.Bldg} ${editableEvent.Room}`}
-              onChange={(event) => handleLocationChange(event)}
-          />
-          <TextField 
-            id="outlined-professor" 
-            label="Professor" 
-            defaultValue={`${editableEvent.Instructor}`}
-            onChange={(event) => handleProfessorChange(event)}
-          />
+          <Stack spacing={2}>
+            <FormControl>
+            <InputLabel id="select-block-label">Block</InputLabel>
+              <Select 
+                labelId="select-block-label"
+                value={courseBlock} 
+                onChange={(event) => handleBlockChange(event)}
+                label="Block" 
+              >
+                {courseBlocks.map((block, index) => (
+                  <MenuItem key={index} value={block}>{block}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Autocomplete
+              disablePortal
+              id="autocomplete-location"
+              options={mockLocations}
+              value={`${editableEvent.Bldg} ${editableEvent.Room}`}
+              onChange={handleLocationChange}
+              renderInput={(params) => <TextField {...params} label="Location" />}
+            />
+            <Autocomplete
+              disablePortal
+              id="autocomplete-instructor"
+              options={mockInstructors}
+              value={editableEvent.Instructor}
+              onChange={handleProfessorChange}
+              renderInput={(params) => <TextField {...params} label="Instructor" />}
+            />
+          </Stack>
           <DialogActions>
             <Button sx={{ px: '30px' }} color="error" onClick={handleClose}>Cancel</Button>
             <Button variant="contained" onClick={handleSaveChanges}>Save</Button>

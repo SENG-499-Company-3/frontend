@@ -18,6 +18,11 @@ import Alert from "@mui/material/Alert";
 import Modal from "@mui/material/Modal";
 import { courseBlocks } from "../common/sampleData/courseSchedule"
 import { termOptions } from "../../utils/helper";
+import Autocomplete from "@mui/material/Autocomplete";
+
+
+const mockInstructors = ["Michael Zastre", "John Smith", "Jane Doe", "Bob"];
+const mockLocations = ["ECS 123", "ECS 115", "ELW 220", "CLE 225"];
 
 
 const AddEventModal = ({ isOpen, onClose, onCreate }) => {
@@ -52,17 +57,17 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
         setSection(event.target.value);
     };
 
-    const handleLocationChange = (event) => {
-        setLocation(event.target.value);
+    const handleLocationChange = (event, value) => {
+        setLocation(value);
     };
 
-    const handleProfessorChange = (event) => {
-        setProfessor(event.target.value);
+    const handleProfessorChange = (event, value) => {
+        setProfessor(value);
     };
 
     const handleCreate = () => {
         // check if all fields are entered
-        if (!courseName.trim() || !courseCode.trim() || !section.trim() || !term || !block || !location.trim() || !professor.trim()) {
+        if (!courseName.trim() || !courseCode.trim() || !section.trim() || !term || !block || !location || !professor) {
             setErrorMessage("Please fill out all fields.");
             setIsError(true);
             return;
@@ -201,15 +206,19 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
                     ))}
                     </Select>
                 </FormControl>
-                <TextField 
-                    id="outlined-location" 
-                    label="Location" 
-                    onChange={(event) => handleLocationChange(event)}
+                <Autocomplete
+                    disablePortal
+                    id="autocomplete-location"
+                    options={mockLocations}
+                    onChange={handleLocationChange}
+                    renderInput={(params) => <TextField {...params} label="Location" />}
                 />
-                <TextField 
-                    id="outlined-professor" 
-                    label="Professor" 
-                    onChange={(event) => handleProfessorChange(event)}
+                <Autocomplete
+                    disablePortal
+                    id="autocomplete-instructor"
+                    options={mockInstructors}
+                    onChange={handleProfessorChange}
+                    renderInput={(params) => <TextField {...params} label="Instructor" />}
                 />
                 <DialogActions>
                     <Button sx={{ px: '30px' }} color="error" onClick={handleClose}>Cancel</Button>
