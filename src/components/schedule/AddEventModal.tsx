@@ -33,6 +33,7 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
     const [block, setBlock] = useState("");
     const [location, setLocation] = useState("");
     const [professor, setProfessor] = useState("");
+    const [capacity, setCapacity] = useState(null);
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
 
@@ -63,6 +64,10 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
 
     const handleProfessorChange = (event, value) => {
         setProfessor(value);
+    };
+
+    const handleCapacityChange = (event) => {
+        setCapacity(event.target.value);
     };
 
     const handleCreate = () => {
@@ -137,6 +142,7 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
         setBlock("");
         setLocation("");
         setProfessor("");
+        setCapacity(null);
     };
 
 
@@ -219,6 +225,16 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
                     options={mockInstructors}
                     onChange={handleProfessorChange}
                     renderInput={(params) => <TextField {...params} label="Instructor" />}
+                />
+                <TextField 
+                    id="outlined-capacity" 
+                    label="Capacity" 
+                    type="number"
+                    InputProps={{
+                        inputProps: { min: 0 }
+                    }}
+                    defaultValue={capacity}
+                    onChange={(event) => handleCapacityChange(event)}
                 />
                 <DialogActions>
                     <Button sx={{ px: '30px' }} color="error" onClick={handleClose}>Cancel</Button>

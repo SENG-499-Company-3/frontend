@@ -59,6 +59,11 @@ const EditEventModal = ({ isOpen, onClose, onSave, course, courseBgColor }) => {
     setEditableEvent(updatedCourse);
   };
 
+  const handleCapacityChange = (event) => {
+    const updatedCourse = { ...editableEvent, Cap: event.target.value};
+    setEditableEvent(updatedCourse);
+  };
+
 
   return (
     <Dialog 
@@ -123,6 +128,16 @@ const EditEventModal = ({ isOpen, onClose, onSave, course, courseBgColor }) => {
               value={editableEvent.Instructor}
               onChange={handleProfessorChange}
               renderInput={(params) => <TextField {...params} label="Instructor" />}
+            />
+            <TextField 
+              id="outlined-capacity" 
+              label="Capacity" 
+              type="number"
+              InputProps={{
+                inputProps: { min: 0 }
+              }}
+              defaultValue={`${editableEvent.Cap}`}
+              onChange={(event) => handleCapacityChange(event)}
             />
           </Stack>
           <DialogActions>

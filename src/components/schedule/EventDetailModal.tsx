@@ -8,6 +8,7 @@ import RoomIcon from '@mui/icons-material/Room';
 import EditIcon from '@mui/icons-material/Edit';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import DeleteIcon from '@mui/icons-material/Delete';
+import GroupIcon from '@mui/icons-material/Group';
 import Button from "@mui/material/Button";
 import { useState, useEffect } from "react";
 import EditEventModal from "./EditEventModal";
@@ -121,6 +122,10 @@ const EventDetailModal = ({ isOpen, onClose, onCourseUpdate, onDelete, calendarE
                             <Stack direction="row" spacing={2}>
                                 <PersonIcon />
                                 <Typography variant="subtitle1">{course.Instructor}</Typography>
+                            </Stack>
+                            <Stack direction="row" spacing={2}>
+                                <GroupIcon />
+                                <Typography variant="subtitle1">{course.Cap}</Typography>
                             </Stack>
                         </Stack>
                     </Box>
