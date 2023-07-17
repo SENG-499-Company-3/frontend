@@ -7,10 +7,10 @@ import { courseScheduleData } from "./common/sampleData/courseSchedule";
 import PageContent from "./layout/PageContent";
 import PreferencesViewer, { IPreferences, defaultPreferences } from "./PreferencesViewer";
 import PageHeaderActions from "./layout/PageHeaderActions";
+import { IUser } from "../hooks/api/useUserApi";
 
 interface IProfessorProfileProps {
-    name: string;
-    email: string;
+    professor: IUser;
     canEditPreferences: boolean;
     canEditCalendar: boolean;
 }
@@ -24,7 +24,6 @@ const ProfessorProfile = (props: IProfessorProfileProps) => {
     const [tab, setTab] = useState<number>(0);
     const [preferences, setPreferences] = useState<IPreferences>(defaultPreferences)
     const [isEditingPreferences, setIsEditingPreferences] = useState<boolean>(false);
-    console.log({ props })
 
     return (
         <AppPage>
@@ -33,8 +32,8 @@ const ProfessorProfile = (props: IProfessorProfileProps) => {
                     <Box sx={{ display: 'flex', flexFlow: 'row nowrap', gap: 2 }}>
                         <Avatar alt="Jane Doe" sx={{ width: 64, height: 64 }} />
                         <Box sx={{ lineHeight: 0.5 }}>
-                            <Typography variant="h5" sx={{ fontWeight: 600 }}>{props.name}</Typography>
-                            <Typography variant="h6">{props.email}</Typography>
+                            <Typography variant="h5" sx={{ fontWeight: 600 }}>{props.professor?.name ?? ''}</Typography>
+                            <Typography variant="h6">{props.professor?.email ?? ''}</Typography>
                         </Box>
                     </Box>
                 </Box>
