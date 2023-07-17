@@ -13,6 +13,7 @@ import { Button, Paper } from '@mui/material';
 import AddEventModal from "./AddEventModal";
 import EditEventModal from "./EditEventModal";
 import DeleteConfirmModal from './DeleteConfirmModal';
+import Link from 'next/link';
 
 const initialRows: GridRowsProp = courseScheduleData.map((course: Course, index: number ) => ({
   id: index,
@@ -21,7 +22,8 @@ const initialRows: GridRowsProp = courseScheduleData.map((course: Course, index:
   section: course.Section,
   title: course.Title,
   scheduleType: course.SchedType,
-  instructor: course.Instructor,
+  instructor: course.Instructor, 
+  profID: course.ProfessorID,
   location: course.Bldg + ' ' + course.Room,
   start: convertToTime(course.Begin),
   end: convertToTime(course.End),
@@ -38,6 +40,7 @@ const parseCourseToRow = (course: Course): GridRowModel => {
         title: course.Title,
         scheduleType: course.SchedType,
         instructor: course.Instructor,
+        profID: course.ProfessorID,
         location: course.Bldg + ' ' + course.Room,
         start: convertToTime(course.Begin),
         end: convertToTime(course.End),
@@ -56,6 +59,7 @@ const parseRowToCourse = (row: GridRowModel): Course => {
         Title: row.course,
         SchedType: row.SchedType,
         Instructor: row.instructor,
+        ProfessorID: row.profID,
         Bldg: row.location.split(' ')[0],
         Room: row.location.split(' ')[1],
         Begin: convertTimeToNumber(row.start),
@@ -80,19 +84,10 @@ const addRow = (course: Course, id: number) => {
         start: convertToTime(course.Begin),
         end: convertToTime(course.End),
         days: course.Days,
-        //capacity: course.Cap,
+        capacity: course.Cap,
         isNew: true
     };
 };
-
-/* Map incoming schedule's terms and professors into array for dropdowns. CONFIRM this functions with incoming data */
-const termList = courseScheduleData.map((course: Course) => course.Term).filter((value, index, self) => self.indexOf(value) === index);
-const professorList = courseScheduleData.map((course: Course) => course.Instructor).filter((value, index, self) => self.indexOf(value) === index);
-
-/* Parser for course, section, and location to force caps entry */
-function parseToCaps(value: any) {
-    return String(value).toUpperCase();
-}
 
 const ScheduleList = () => {
     const [rows, setRows] = useState(initialRows);
@@ -193,12 +188,18 @@ const ScheduleList = () => {
 
     /* Columns moved to be internal due to Actions requiring the above functions */
     const columns: GridColDef[] = [
-        { field: 'term', headerName: 'Term', flex: 2, /*editable: true, type:'singleSelect', valueOptions:termList*/ },
-        { field: 'course', headerName: 'Course', flex: 3, /*editable: true, valueParser: parseToCaps*/ },
-        { field: 'section', headerName: 'Section', flex: 2, /*editable: true, valueParser: parseToCaps*/ },
-        { field: 'instructor', headerName: 'Instructor', flex: 3, /*editable: true, type: 'singleSelect', valueOptions:professorList*/ },
-        { field: 'capacity', headerName: 'Capacity', type: 'number', flex: 1, /*editable: true*/ },
-        { field: 'location', headerName: 'Location', flex: 3, /*editable: true, valueParser: parseToCaps*/ },
+        { field: 'term', headerName: 'Term', flex: 2 },
+        { field: 'course', headerName: 'Course', flex: 3 },
+        { field: 'section', headerName: 'Section', flex: 2 },
+        {
+            field: 'instructor', headerName: 'Instructor', flex:3,  renderCell: (params) => {
+                return (
+                    <Link href={`/professors/${params.row.profID}`}>{params.value}</Link>
+                )
+            }
+        },
+        { field: 'capacity', headerName: 'Capacity', type: 'number', flex: 2 },
+        { field: 'location', headerName: 'Location', flex: 3 },
         {
             field: 'days',
             headerName: 'Days',
@@ -207,13 +208,6 @@ const ScheduleList = () => {
         },
         { field: 'start', headerName: 'Start', flex: 2 },
         { field: 'end', headerName: 'End', flex: 2 },
-        /*{
-            field: 'daysTime', headerName: 'Block', width: 100, editable: true,
-            type: 'singleSelect',
-            valueOptions: daysTimeSlots,
-            valueGetter: getDaysTime,
-            valueSetter: setDaysTime,
-        },*/
         {
             field: 'actions',
             type: 'actions',
