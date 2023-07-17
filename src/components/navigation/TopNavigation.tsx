@@ -1,20 +1,20 @@
-import { useContext, useEffect } from "react";
+import { useContext, useState } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import useApi from '../../hooks/useApi';
-import { AppBar, Avatar, Box, Button, IconButton, Toolbar, Typography } from "@mui/material";
+import { AppBar, Avatar, Box, Button, Drawer, IconButton, Toolbar, Typography } from "@mui/material";
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import MenuIcon from '@mui/icons-material/Menu';
 import Link from "next/link";
+import { SideNavigation } from "./SideNavigation";
 
 interface ITopNavigationProps {
     onToggleThemeMode: () => void
-    onToggleSideNav: () => void
 }
 
 export const TopNavigation = (props: ITopNavigationProps) => {
-    // TODO: Add useContext for user data
     const authContext = useContext(AuthContext);
     const api = useApi();
+    const [showSideNav, setShowSideNav] = useState<boolean>(false);
 
     const signOut = async () => {
         await api.auth.logout();
@@ -31,11 +31,18 @@ export const TopNavigation = (props: ITopNavigationProps) => {
                             color="inherit"
                             aria-label="menu"
                             sx={{ mr: 2 }}
-                            onClick={props.onToggleSideNav}
+                            onClick={() => setShowSideNav(true)}
                         >
                             <MenuIcon />
                         </IconButton>
                     )}
+
+                    <Drawer
+                        open={showSideNav}
+                        onClose={() => setShowSideNav(false)}
+                    >
+                        <SideNavigation onClose={() => setShowSideNav(false)} />    
+                    </Drawer>
 
                     <div>
                         <Typography

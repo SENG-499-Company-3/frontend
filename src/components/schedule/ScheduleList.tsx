@@ -131,22 +131,22 @@ const ScheduleList = () => {
 
     /* Columns moved to be internal due to Actions requiring the above functions */
     const columns: GridColDef[] = [
-        { field: 'term', headerName: 'Term', width: 100, editable: true, type:'singleSelect', valueOptions:termList },
-        { field: 'course', headerName: 'Course', width: 150, editable: true, valueParser: parseToCaps },
-        { field: 'section', headerName: 'Section', width: 100, editable: true, valueParser: parseToCaps },
-        { field: 'instructor', headerName: 'Instructor', width: 150, editable: true, type: 'singleSelect', valueOptions:professorList },
-        { field: 'capacity', headerName: 'Capacity', type: 'number', width: 100, editable: true },
-        { field: 'location', headerName: 'Location', width: 150, editable: true, valueParser: parseToCaps },
+        { field: 'term', headerName: 'Term', flex: 2, editable: true, type:'singleSelect', valueOptions:termList },
+        { field: 'course', headerName: 'Course', flex: 3, editable: true, valueParser: parseToCaps },
+        { field: 'section', headerName: 'Section', flex: 2, editable: true, valueParser: parseToCaps },
+        { field: 'instructor', headerName: 'Instructor', flex: 3, editable: true, type: 'singleSelect', valueOptions:professorList },
+        { field: 'capacity', headerName: 'Capacity', type: 'number', flex: 1, editable: true },
+        { field: 'location', headerName: 'Location', flex: 3, editable: true, valueParser: parseToCaps },
         {
             field: 'days',
             headerName: 'Days',
             width: 200,
             renderCell: (params) => <WeekdayTable days={params.value.split('')} />,
         },
-        { field: 'start', headerName: 'Start', width: 100 },
-        { field: 'end', headerName: 'End', width: 100 },
+        { field: 'start', headerName: 'Start', flex: 2 },
+        { field: 'end', headerName: 'End', flex: 2 },
         {
-            field: 'daysTime', headerName: 'Block', width: 100, editable: true,
+            field: 'daysTime', headerName: 'Block', flex: 2, editable: true,
             type: 'singleSelect',
             valueOptions: daysTimeSlots,
             valueGetter: getDaysTime,
@@ -156,7 +156,7 @@ const ScheduleList = () => {
             field: 'actions',
             type: 'actions',
             headerName: 'Actions',
-            width: 100,
+            flex: 2,
             cellClassName: 'actions',
             getActions: ({ id }) => {
                 const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
@@ -201,10 +201,12 @@ const ScheduleList = () => {
     ];
 
     return (
-        <Paper sx={{ p: 2 }}>
-            <Button size="small" startIcon={<AddIcon />} onClick={() => handleAddRow(numRows)}>
-                Add Course
-            </Button>
+        <Paper sx={{ p: 2 }} square elevation={0}>
+            
+                <Button size="small" startIcon={<AddIcon />} onClick={() => handleAddRow(numRows)}>
+                    Add Course
+                </Button>
+            
             <DataGrid
                 rows={rows} 
                 columns={columns}
