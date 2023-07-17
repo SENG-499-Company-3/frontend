@@ -60,7 +60,6 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
     const [currentUser, setCurrentUser] = React.useState<IAuthenticatedUser | null>(null);
     const [userToken, setUserToken] = React.useState<string | null>(null);
     const router = useRouter();
-    const api = useApi();
 
     const authContext: IAuthContext = {
         currentUser: () => currentUser,
