@@ -16,7 +16,7 @@ import { Divider } from "@mui/material";
 import DeleteConfirmModal from "./DeleteConfirmModal";
 
 
-const EventDetailModal = ({ isOpen, onClose, onCourseUpdate, onDelete, calendarEvent, initialCourse, userType }) => {
+const EventDetailModal = ({ isOpen, onClose, onCourseUpdate, onDelete, calendarEvent, initialCourse, canEdit }) => {
     const [course, setCourse] = useState(initialCourse);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -52,8 +52,6 @@ const EventDetailModal = ({ isOpen, onClose, onCourseUpdate, onDelete, calendarE
         onClose();
     };
 
-    const isUserAdmin = userType === 'admin' ? true : false;
-
 
     return (
         <Box>
@@ -75,12 +73,12 @@ const EventDetailModal = ({ isOpen, onClose, onCourseUpdate, onDelete, calendarE
                             <Stack direction="row" justifyContent="space-between">
                                 <Typography variant="h6">Course Details</Typography>
                                 <Stack direction="row" spacing={-2}>
-                                    {isUserAdmin && (
+                                    {canEdit && (
                                         <Button onClick={onEditModalOpen}>
                                             <EditIcon sx={{ color: 'text.primary' }} />
                                         </Button>
                                     )}
-                                    {isUserAdmin && (
+                                    {canEdit && (
                                         <Button onClick={onDeleteModalOpen}>
                                             <DeleteIcon sx={{ color: 'text.primary' }} />
                                         </Button>
