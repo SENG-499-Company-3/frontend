@@ -23,7 +23,7 @@ const AppLayout = (props: PropsWithChildren<ILayoutProps>) => {
 
     return (
         <Box sx={{ minHeight: '100vh', backgroundColor: (theme) => theme.palette.mode === 'light' ? '#EEE' : '#444' }}>
-            <TopNavigation onToggleSideNav={() => {setIsSideNavigationShown(prev => !prev)}} onToggleThemeMode={props.onToggleThemeMode} />
+            <TopNavigation onToggleThemeMode={props.onToggleThemeMode} />
             <Box component='main'>
                 {props.children}
             </Box>

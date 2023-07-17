@@ -3,7 +3,7 @@ import { Toolbar } from '@mui/material'
 
 const PageHeaderActions = (props: PropsWithChildren) => {
     return (
-        <Toolbar sx={{ gap: 1 }}>{props.children}</Toolbar>
+        <Toolbar disableGutters sx={{ gap: 1, ml: 4 }}>{props.children}</Toolbar>
     )
 }
 
