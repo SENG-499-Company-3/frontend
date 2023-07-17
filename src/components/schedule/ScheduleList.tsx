@@ -102,8 +102,7 @@ const ScheduleList = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [currentRowID, setCurrentRowID] = useState<GridRowId>(null);
-    const [currentCourse, setCurrentCourse] = useState<Course>(parseRowToCourse(rows[0]));
-    //NOTE: Expect currentCourse to break if there is no schedule to display. Unfortunately, EditEventModal doesn't accept Null values
+    const [currentCourse, setCurrentCourse] = useState<Course>(null);
 
     /* Add row functions */
     const handleAddCourse = () => {
@@ -116,10 +115,7 @@ const ScheduleList = () => {
 
     const onAddCourse = (newCourse: Course) => {
         setRows((prevRows) => [...prevRows, addRow(newCourse, numRows)]);
-        setRowModesModel((oldModel) => ({
-            ...oldModel,
-            [numRows]: { mode: GridRowModes.Edit, fieldToFocus: 'actions' },
-        }));
+        setRowModesModel((oldModel) => ({ ...oldModel, [numRows]: { mode: GridRowModes.View }, }));
         setNumRows(numRows + 1);
     };
     
@@ -135,11 +131,13 @@ const ScheduleList = () => {
     const onEditModalSave = (updatedCourse: Course) => {
         const editedCourseRow = parseCourseToRow(updatedCourse);
         processRowUpdate(editedCourseRow);
+        setRowModesModel({ ...rowModesModel, [currentRowID]: { mode: GridRowModes.View } });
     };
 
     const onEditModalClose = () => {
         setIsEditModalOpen(false);
         setCurrentRowID(null);
+        setCurrentCourse(null);
     };
 
     /* Save row functions */
@@ -195,12 +193,12 @@ const ScheduleList = () => {
 
     /* Columns moved to be internal due to Actions requiring the above functions */
     const columns: GridColDef[] = [
-        { field: 'term', headerName: 'Term', width: 100, editable: true, type:'singleSelect', valueOptions:termList },
-        { field: 'course', headerName: 'Course', width: 150, editable: true, valueParser: parseToCaps },
-        { field: 'section', headerName: 'Section', width: 100, editable: true, valueParser: parseToCaps },
-        { field: 'instructor', headerName: 'Instructor', width: 150, editable: true, type: 'singleSelect', valueOptions:professorList },
-        { field: 'capacity', headerName: 'Capacity', type: 'number', width: 100, editable: true },
-        { field: 'location', headerName: 'Location', width: 150, editable: true, valueParser: parseToCaps },
+        { field: 'term', headerName: 'Term', width: 100, /*editable: true, type:'singleSelect', valueOptions:termList*/ },
+        { field: 'course', headerName: 'Course', width: 150, /*editable: true, valueParser: parseToCaps*/ },
+        { field: 'section', headerName: 'Section', width: 100, /*editable: true, valueParser: parseToCaps*/ },
+        { field: 'instructor', headerName: 'Instructor', width: 150, /*editable: true, type: 'singleSelect', valueOptions:professorList*/ },
+        { field: 'capacity', headerName: 'Capacity', type: 'number', width: 100, /*editable: true*/ },
+        { field: 'location', headerName: 'Location', width: 150, /*editable: true, valueParser: parseToCaps*/ },
         {
             field: 'days',
             headerName: 'Days',
@@ -295,18 +293,18 @@ const ScheduleList = () => {
                 onClose={onAddCourseModalClose}
                 onCreate={onAddCourse}
             />
-            <EditEventModal
-                isOpen={isEditModalOpen}
-                onClose={onEditModalClose}
-                onSave={onEditModalSave}
-                course={currentCourse}
-                courseBgColor={null}
-            />
             <DeleteConfirmModal
                 isOpen={isDeleteModalOpen}
                 onClose={onDeleteModalClose}
                 onConfirm={handleDeleteConfirmation}
             />
+            {(currentCourse != null) && <EditEventModal
+                isOpen={isEditModalOpen}
+                onClose={onEditModalClose}
+                onSave={onEditModalSave}
+                course={currentCourse}
+                courseBgColor={null}
+            />}
         </Paper>
     )
 }
