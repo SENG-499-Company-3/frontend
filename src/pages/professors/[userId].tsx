@@ -50,4 +50,4 @@ const ProfessorPage = () => {
     )
 }
 
-export default ProfessorPage
+export default ProfessorPage;
