@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { DataGrid, GridRowsProp, GridColDef, GridToolbar, GridRowModel, GridEventListener, GridRowEditStopReasons, GridRowId, GridRowModes, GridActionsCellItem, GridRowModesModel, GridValueGetterParams, GridValueSetterParams } from '@mui/x-data-grid';
 import { courseScheduleData } from '../common/sampleData/courseSchedule'
 import WeekdayTable  from './WeekdayTable'
@@ -11,20 +11,6 @@ import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 import { Button, Paper } from '@mui/material';
 
-const initialRows: GridRowsProp = courseScheduleData.map((course: Course, index: number ) => ({
-  id: index,
-  term: course.Term,
-  course: course.Subj + ' ' + course.Num,
-  section: course.Section,
-  title: course.Title,
-  scheduleType: course.SchedType,
-  instructor: course.Instructor,
-  location: course.Bldg + ' ' + course.Room,
-  start: convertToTime(course.Begin),
-  end: convertToTime(course.End),
-  days: course.Days,
-  capacity: course.Cap,
-}));
 
 const createRow = (id: number) => {
     return { id, days: '', isNew: true }; //Update with defaults if desired. Days must be empty string
@@ -74,10 +60,32 @@ function parseToCaps(value: any) {
     return String(value).toUpperCase();
 }
 
-const ScheduleList = () => {
-    const [rows, setRows] = useState(initialRows);
+function getRows(courses: Course[]) {
+    const initialRows: GridRowsProp = courses.map((course: Course, index: number ) => ({
+        id: index,
+        term: course.Term,
+        course: course.Subj + ' ' + course.Num,
+        section: course.Section,
+        title: course.Title,
+        scheduleType: course.SchedType,
+        instructor: course.Instructor,
+        location: course.Bldg + ' ' + course.Room,
+        start: convertToTime(course.Begin),
+        end: convertToTime(course.End),
+        days: course.Days,
+        capacity: course.Cap,
+      }));
+    return initialRows;
+}
+
+const ScheduleList = ({courses}) => {
+    const [rows, setRows] = useState(getRows(courses));
     const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
     const numRows = rows.length;
+
+    useEffect(() => {
+        setRows(getRows(courses));
+      }, [courses]);
 
     /* Add rows function for use with the added button */
     const handleAddRow = (newIndex: number) => {
@@ -230,4 +238,4 @@ const ScheduleList = () => {
     )
 }
 
-export default ScheduleList
+export default ScheduleList;
