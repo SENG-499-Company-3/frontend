@@ -3,8 +3,8 @@ import ProfessorProfile from "../../components/ProfessorProfile"
 const ProfessorPage = () => {
 
     const professor = {
-        user: 'Jane Doe',
-        email: 'janedoe@uvic.ca'
+        user: 'Celina Berg',
+        email: 'celinaberg@uvic.ca'
     }
 
     return (
@@ -17,4 +17,4 @@ const ProfessorPage = () => {
     )
 }
 
-export default ProfessorPage
+export default ProfessorPage;
