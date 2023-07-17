@@ -5,6 +5,7 @@ import { Professor } from '../../types/professor';
 import { Button, Paper } from '@mui/material';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { IUser } from '../../hooks/api/useUserApi';
 
 const initialRows: GridRowsProp = professorListData.map((professor: Professor) => ({
     id: professor.id,
@@ -12,9 +13,12 @@ const initialRows: GridRowsProp = professorListData.map((professor: Professor) =
     email: professor.Email,
     preferencesSubmitted: professor.IsMissingPreferenceSubmission ? null : new Date(),
 }));
-//IF isMissingPreferenceSubmission = true, professor has not submitted -- display false
 
-const ProfessorTable = () => {
+interface IProfessorTableProps {
+    professors: IUser[]
+}
+
+const ProfessorTable = (props: IProfessorTableProps) => {
     const columns: GridColDef[] = [
         { field: 'instructor', headerName: 'Instructor', flex: 1, renderCell: (params) => {
             return (
