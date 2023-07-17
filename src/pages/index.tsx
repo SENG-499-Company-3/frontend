@@ -59,24 +59,26 @@ const HomePage = () => {
                         <Typography>View and edit course schedules by term.</Typography>
                     </Box>
                     <PageHeaderActions>
-                        <FormControl>
-                            <InputLabel id='term-select-label'>Term</InputLabel>
-                            <Select
-                                label='Term'
-                                value={term}
-                                labelId='term-select-label'
-                                variant="outlined"
-                                onChange={handleTermChange}
-                                sx={{ minWidth: 150 }}
-                                size='small'
-                            >
-                                {termOptions.map((term, index) => (
-                                    <MenuItem value={term.title} key={index}>
-                                    {term.title}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
+                        <Box>
+                            <FormControl>
+                                <InputLabel id='term-select-label'>Term</InputLabel>
+                                <Select
+                                    label='Term'
+                                    value={term}
+                                    labelId='term-select-label'
+                                    variant="outlined"
+                                    onChange={handleTermChange}
+                                    sx={{ minWidth: 150 }}
+                                    size='small'
+                                >
+                                    {termOptions.map((term, index) => (
+                                        <MenuItem value={term.title} key={index}>
+                                        {term.title}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Box>
                         <Button variant='outlined' startIcon={<PublicIcon />}>Validate and Publish</Button>
                         <Button disabled variant='outlined' startIcon={<SchoolIcon />} endIcon={<ExpandMoreIcon />}>Course Options</Button>
                         <Button variant='outlined' startIcon={<CalendarMonthIcon />} endIcon={<ExpandMoreIcon />}>Schedule Options</Button>
