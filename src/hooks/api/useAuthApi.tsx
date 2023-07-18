@@ -23,9 +23,9 @@ const useAuthApi = (axios: AxiosInstance) => {
     /**
      * Fetches the currently authenticated user
      */
-    const self = async (email: string, password: string): Promise<IAuthenticatedUser> => {
+    const self = async (): Promise<IAuthenticatedUser> => {
         return axios
-            .post('/auth/self', {email, password})
+            .post('/auth/self')
             .then((response: AxiosResponse<IAuthenticatedUser>) => {
                 authContext.setCurrentUser(response.data)
 

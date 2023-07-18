@@ -1,18 +1,8 @@
 import React, { useState, useEffect} from 'react';
 import { DataGrid, GridRowsProp, GridColDef, GridToolbar } from '@mui/x-data-grid';
-import { professorListData } from '../common/sampleData/professorList';
-import { Professor } from '../../types/professor';
-import { Button, Paper } from '@mui/material';
-import { useRouter } from 'next/router';
+import { Paper } from '@mui/material';
 import Link from 'next/link';
 import { IUser } from '../../hooks/api/useUserApi';
-
-const initialRows: GridRowsProp = professorListData.map((professor: Professor) => ({
-    id: professor.id,
-    instructor: professor.Name,
-    email: professor.Email,
-    preferencesSubmitted: professor.IsMissingPreferenceSubmission ? null : new Date(),
-}));
 
 interface IProfessorTableProps {
     professors: IUser[]
@@ -33,10 +23,10 @@ const ProfessorTable = (props: IProfessorTableProps) => {
 
     useEffect(() => {
         setProfessorList(props.professors.map((professor: IUser) => ({
-            id: professor._id,
+            id: professor.id,
             instructor: professor.name,
             email: professor.email,
-            preferencesSubmitted: null,
+            preferencesSubmitted: professor.submittedPreferences ? new Date() : null,
         })))
     }, [props.professors])
 

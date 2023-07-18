@@ -41,7 +41,6 @@ const useApi = () => {
 	const user = useUserApi(axiosUserInstance);
 
 	return {
-
 		auth,
 		user
 	}
