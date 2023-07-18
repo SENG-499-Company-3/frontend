@@ -10,7 +10,7 @@ import useApi from '../../hooks/useApi';
 import { IUser } from '../../hooks/api/useUserApi';
 import LoadingSpinner from '../../components/layout/LoadingSpinner';
 
-const HomePage = () => {
+const ProfessorListPage = () => {
     const [professors, setProfessors] = useState<IUser[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
 
@@ -53,4 +53,4 @@ const HomePage = () => {
     )
 }
 
-export default HomePage
+export default ProfessorListPage
