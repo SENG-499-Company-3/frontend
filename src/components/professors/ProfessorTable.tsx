@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 import { DataGrid, GridRowsProp, GridColDef, GridToolbar } from '@mui/x-data-grid';
 import { professorListData } from '../common/sampleData/professorList';
 import { Professor } from '../../types/professor';
@@ -19,6 +19,8 @@ interface IProfessorTableProps {
 }
 
 const ProfessorTable = (props: IProfessorTableProps) => {
+    const [professorList, setProfessorList] = useState<GridRowsProp>([]);
+
     const columns: GridColDef[] = [
         { field: 'instructor', headerName: 'Instructor', flex: 1, renderCell: (params) => {
             return (
@@ -29,10 +31,19 @@ const ProfessorTable = (props: IProfessorTableProps) => {
         { field: 'preferencesSubmitted', headerName: 'Preferences Submitted', type: 'date', flex: 1 },
     ];
 
+    useEffect(() => {
+        setProfessorList(props.professors.map((professor: IUser) => ({
+            id: professor._id,
+            instructor: professor.name,
+            email: professor.email,
+            preferencesSubmitted: null,
+        })))
+    }, [props.professors])
+
     return (
         <Paper sx={{ p: 2 }}>
             <DataGrid
-                rows={initialRows}
+                rows={professorList}
                 columns={columns}
                 initialState={{
                     sorting: {
