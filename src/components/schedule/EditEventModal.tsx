@@ -15,16 +15,44 @@ import Autocomplete from "@mui/material/Autocomplete";
 import { courseBlocks } from "../common/sampleData/courseSchedule"
 import { convertToTime, termOptions } from "../../utils/helper";
 import { Divider } from "@mui/material";
+import useApi from "../../hooks/useApi";
+import { IUser } from "../../hooks/api/useUserApi";
+import { IClassroom } from "../../hooks/api/useClassroomApi";
 
 const mockInstructors = ["Michael Zastre", "John Smith", "Jane Doe", "Bob", "Jabbari, Hosna"];
 const mockLocations = ["ECS 123", "ECS 115", "ELW 220", "CLE 225", "HSD A240"];
 
 const EditEventModal = ({ isOpen, onClose, onSave, course, courseBgColor }) => {
   const [editableEvent, setEditableEvent] = useState(course);
+  const [instructors, setInstructors] = useState([]);
+  const [classrooms, setClassrooms] = useState([]);
+  const api = useApi();
   
   useEffect(() => {
     setEditableEvent(course);
   }, [course]);
+
+  useEffect(() => {
+    api.user.listUsers()
+        .then((users: IUser[]) => {
+          setInstructors(users.map((user) => user.name));
+        })
+        .catch(() => {
+            console.error("Failed to fetch professors.")
+        })
+  }, [])
+
+  useEffect(() => {
+    api.classroom.listClassrooms()
+        .then((classrooms: IClassroom[]) => {
+          setClassrooms(classrooms.map((classroom) => classroom.buildingName + ' ' + classroom.roomNumber));
+        })
+        .catch(() => {
+            console.error("Failed to fetch classrooms.")
+        })
+  }, [])
+
+  console.log(classrooms)
 
   const courseBlock = editableEvent.Days + ' ' + convertToTime(editableEvent.Begin) + ' ' + convertToTime(editableEvent.End);
 
@@ -124,7 +152,7 @@ const EditEventModal = ({ isOpen, onClose, onSave, course, courseBgColor }) => {
             <Autocomplete
               disablePortal
               id="autocomplete-instructor"
-              options={mockInstructors}
+              options={instructors}
               value={editableEvent.Instructor}
               onChange={handleProfessorChange}
               renderInput={(params) => <TextField {...params} label="Instructor" />}

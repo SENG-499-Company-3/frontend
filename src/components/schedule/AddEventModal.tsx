@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Select from "@mui/material/Select";
@@ -19,6 +19,9 @@ import Modal from "@mui/material/Modal";
 import { courseBlocks } from "../common/sampleData/courseSchedule"
 import { termOptions } from "../../utils/helper";
 import Autocomplete from "@mui/material/Autocomplete";
+import useApi from "../../hooks/useApi";
+import { IUser } from "../../hooks/api/useUserApi";
+import { IClassroom } from "../../hooks/api/useClassroomApi";
 
 
 const mockInstructors = ["Michael Zastre", "John Smith", "Jane Doe", "Bob"];
@@ -36,6 +39,30 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
     const [capacity, setCapacity] = useState(null);
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
+    const [instructors, setInstructors] = useState([]);
+    const [classrooms, setClassrooms] = useState([]);
+    const api = useApi();
+    
+  
+    useEffect(() => {
+      api.user.listUsers()
+          .then((users: IUser[]) => {
+            setInstructors(users.map((user) => user.name));
+          })
+          .catch(() => {
+              console.error("Failed to fetch professors.")
+          })
+    }, [])
+  
+    useEffect(() => {
+      api.classroom.listClassrooms()
+          .then((classrooms: IClassroom[]) => {
+            setClassrooms(classrooms.map((classroom) => classroom.buildingName + ' ' + classroom.roomNumber));
+          })
+          .catch(() => {
+              console.error("Failed to fetch classrooms.")
+          })
+    }, [])
 
 
     const onClickTerm = (event) => {
@@ -222,7 +249,7 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
                 <Autocomplete
                     disablePortal
                     id="autocomplete-instructor"
-                    options={mockInstructors}
+                    options={instructors}
                     onChange={handleProfessorChange}
                     renderInput={(params) => <TextField {...params} label="Instructor" />}
                 />
