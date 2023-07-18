@@ -9,8 +9,6 @@ interface IProfessorTableProps {
 }
 
 const ProfessorTable = (props: IProfessorTableProps) => {
-    const [professorList, setProfessorList] = useState<GridRowsProp>([]);
-
     const columns: GridColDef[] = [
         { field: 'instructor', headerName: 'Instructor', flex: 1, renderCell: (params) => {
             return (
@@ -21,14 +19,12 @@ const ProfessorTable = (props: IProfessorTableProps) => {
         { field: 'preferencesSubmitted', headerName: 'Preferences Submitted', type: 'date', flex: 1 },
     ];
 
-    useEffect(() => {
-        setProfessorList(props.professors.map((professor: IUser) => ({
-            id: professor.id,
-            instructor: professor.name,
-            email: professor.email,
-            preferencesSubmitted: professor.submittedPreferences ? new Date() : null,
-        })))
-    }, [props.professors])
+    const professorList = props.professors.map((professor: IUser) => ({
+        id: professor.id,
+        instructor: professor.name,
+        email: professor.email,
+        preferencesSubmitted: professor.submittedPreferences ? new Date() : null,
+    }))
 
     return (
         <Paper sx={{ p: 2 }}>
