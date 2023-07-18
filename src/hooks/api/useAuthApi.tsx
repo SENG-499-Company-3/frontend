@@ -14,6 +14,7 @@ const useAuthApi = (axios: AxiosInstance) => {
             .post('/auth/login', { email, password})
             .then((response: AxiosResponse<string>) => {
                 authContext.setUserToken(response.data)
+                localStorage.setItem('userToken', response.data)
 
                 return { token: response.data }
             })
@@ -35,6 +36,7 @@ const useAuthApi = (axios: AxiosInstance) => {
     const logout = async (): Promise<void> => {
         authContext.resetCurrentUser()
         authContext.setUserToken(null)
+        localStorage.removeItem('userToken')
     }
 
     return {
