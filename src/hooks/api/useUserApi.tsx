@@ -6,6 +6,7 @@ export interface IUser {
     email: string;
     name: string;
     role: string;
+    submittedPreferences: boolean;
 }
 
 const useUserApi = (axios: AxiosInstance) => {
@@ -34,7 +35,6 @@ const useUserApi = (axios: AxiosInstance) => {
 
     const listUsers = async (): Promise<IUser[]> => {
         const { data } = await axios.get('/user/list');
-
         return data;
     }
 

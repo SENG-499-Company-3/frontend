@@ -14,7 +14,7 @@ const AppLayout = (props: PropsWithChildren<ILayoutProps>) => {
     const [isSideNavigationShown, setIsSideNavigationShown] = useState(false);
 
     useEffect(() => {
-        authApi.self("", "").then((user) => {
+        authApi.self().then((user) => {
             console.log("Set user: ", user)
         }).catch((error) => {
             console.log(error)
