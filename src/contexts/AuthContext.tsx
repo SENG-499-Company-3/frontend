@@ -85,6 +85,7 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
         }
     }
 
+    /*
     useEffect(() => {
         if (!authContext.currentUser() && router.route !== '/register') {
             if (localStorage.getItem('userToken')) {
@@ -94,15 +95,16 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
             }
         }
     }, [currentUser]);
+    */
 
-    // useEffect(() => {
-    //     authContext.setCurrentUser({
-    //         name: 'Rich Little',
-    //         email: 'richlittle@uvic.ca',
-    //         role:  AuthenticatedUserType.ADMIN
-
-    //     })
-    // })
+    useEffect(() => {
+        authContext.setCurrentUser({
+            name: 'Rich Little',
+            email: 'richlittle@uvic.ca',
+            role:  AuthenticatedUserType.ADMIN,
+            isMissingPreferenceSubmission: false
+        });
+    }, []);
 
     return (
         <AuthContext.Provider value={authContext}>
