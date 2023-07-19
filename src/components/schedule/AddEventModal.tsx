@@ -36,6 +36,7 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
     const [block, setBlock] = useState("");
     const [location, setLocation] = useState("");
     const [professor, setProfessor] = useState("");
+    const [profID, setProfID] = useState("");
     const [capacity, setCapacity] = useState(null);
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
@@ -47,7 +48,10 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
     useEffect(() => {
       api.user.listUsers()
           .then((users: IUser[]) => {
-            setInstructors(users.map((user) => user.name));
+              setInstructors(users.map((user) => ({
+                  name: user.name,
+                  id: user.id,
+              })));
           })
           .catch(() => {
               console.error("Failed to fetch professors.")
@@ -90,7 +94,8 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
     };
 
     const handleProfessorChange = (event, value) => {
-        setProfessor(value);
+        setProfessor(value.name);
+        setProfID(value.id);
     };
 
     const handleCapacityChange = (event) => {
@@ -145,6 +150,7 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
             Bldg: bldg, 
             Room: room, 
             Instructor: professor,
+            ProfessorID: profID,
             Title: courseName,
         });
         onCreate(newCourse);
@@ -169,6 +175,7 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
         setBlock("");
         setLocation("");
         setProfessor("");
+        setProfID("");
         setCapacity(null);
     };
 
@@ -250,6 +257,7 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
                     disablePortal
                     id="autocomplete-instructor"
                     options={instructors}
+                    getOptionLabel={(instructors) => instructors.name}
                     onChange={handleProfessorChange}
                     renderInput={(params) => <TextField {...params} label="Instructor" />}
                 />

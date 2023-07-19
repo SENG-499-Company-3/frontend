@@ -27,6 +27,8 @@ const initialRows: GridRowsProp = courseScheduleData.map((course: Course, index:
   location: course.Bldg + ' ' + course.Room,
   start: convertToTime(course.Begin),
   end: convertToTime(course.End),
+  startDate: course.StartDate,
+  endDate: course.EndDate,
   days: course.Days,
   capacity: course.Cap,
 }));
@@ -56,7 +58,7 @@ const parseRowToCourse = (row: GridRowModel): Course => {
         Subj: row.course.split(' ')[0],
         Num: row.course.split(' ')[1],
         Section: row.section,
-        Title: row.course,
+        Title: row.title,
         SchedType: row.SchedType,
         Instructor: row.instructor,
         ProfessorID: row.profID,
@@ -65,8 +67,8 @@ const parseRowToCourse = (row: GridRowModel): Course => {
         Begin: convertTimeToNumber(row.start),
         End: convertTimeToNumber(row.end),
         Days: row.days,
-        StartDate: null,
-        EndDate: null,
+        StartDate: row.startDate,
+        EndDate: row.endDate,
         Cap: row.capacity,
     }
 };
@@ -80,9 +82,12 @@ const addRow = (course: Course, id: number) => {
         title: course.Title,
         scheduleType: course.SchedType,
         instructor: course.Instructor,
+        profID: course.ProfessorID,
         location: course.Bldg + ' ' + course.Room,
         start: convertToTime(course.Begin),
         end: convertToTime(course.End),
+        startDate: course.StartDate,
+        endDate: course.EndDate,
         days: course.Days,
         capacity: course.Cap,
         isNew: true
