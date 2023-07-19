@@ -46,6 +46,8 @@ const parseCourseToRow = (course: Course): GridRowModel => {
         location: course.Bldg + ' ' + course.Room,
         start: convertToTime(course.Begin),
         end: convertToTime(course.End),
+        startDate: course.StartDate,
+        endDate: course.EndDate,
         days: course.Days,
         capacity: course.Cap,
     };
@@ -90,7 +92,7 @@ const addRow = (course: Course, id: number) => {
         endDate: course.EndDate,
         days: course.Days,
         capacity: course.Cap,
-        isNew: true
+        isNew: true,
     };
 };
 
