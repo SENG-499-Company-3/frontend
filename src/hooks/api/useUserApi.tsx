@@ -2,10 +2,11 @@ import { AxiosInstance, AxiosResponse } from 'axios'
 import { IAuthenticatedUser } from '../../types/auth.d';
 
 export interface IUser {
-    _id: string;
+    id: string;
     email: string;
     name: string;
     role: string;
+    submittedPreferences: boolean;
 }
 
 const useUserApi = (axios: AxiosInstance) => {
@@ -34,7 +35,6 @@ const useUserApi = (axios: AxiosInstance) => {
 
     const listUsers = async (): Promise<IUser[]> => {
         const { data } = await axios.get('/user/list');
-
         return data;
     }
 
