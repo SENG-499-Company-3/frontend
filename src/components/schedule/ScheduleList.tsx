@@ -133,10 +133,10 @@ const ScheduleList = () => {
     const onEditModalSave = (updatedCourse: Course) => {
         const editedCourseRow = parseCourseToRow(updatedCourse);
         processRowUpdate(editedCourseRow);
-        setRowModesModel({ ...rowModesModel, [currentRowID]: { mode: GridRowModes.View } });
     };
 
     const onEditModalClose = () => {
+        setRowModesModel({ ...rowModesModel, [currentRowID]: { mode: GridRowModes.View } });
         setIsEditModalOpen(false);
         setCurrentRowID(null);
         setCurrentCourse(null);
@@ -159,9 +159,8 @@ const ScheduleList = () => {
     };
 
     const handleDeleteConfirmation = () => {
-        onDeleteModalClose();
         setRows(rows.filter((row) => row.id !== currentRowID));
-        setCurrentRowID(null);
+        onDeleteModalClose();
     };
 
     /* Cancel click functions */
