@@ -85,8 +85,14 @@ const EditEventModal = ({ isOpen, onClose, onSave, course, courseBgColor }) => {
   };
 
   const handleProfessorChange = (event, value) => {
-    const updatedCourse = { ...editableEvent, Instructor: value.name, ProfessorID: value.id };
-    setEditableEvent(updatedCourse);
+    if (!value) {
+      // When the value is null or undefined, clear the instructor details.
+      const updatedCourse = { ...editableEvent, Instructor: "", ProfessorID: "" };
+      setEditableEvent(updatedCourse);
+    } else {
+      const updatedCourse = { ...editableEvent, Instructor: value.name, ProfessorID: value.id };
+      setEditableEvent(updatedCourse);
+    }
   };
 
   const handleCapacityChange = (event) => {
@@ -155,7 +161,7 @@ const EditEventModal = ({ isOpen, onClose, onSave, course, courseBgColor }) => {
               disablePortal
               id="autocomplete-instructor"
               options={instructors}
-              //value={editableEvent.Instructor}
+              value={editableEvent.Instructor ? { name: editableEvent.Instructor, id: editableEvent.ProfessorID } : null}
               getOptionLabel={(instructors) => instructors.name}
               onChange={handleProfessorChange}
               renderInput={(params) => <TextField {...params} label="Instructor" />}

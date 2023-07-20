@@ -31,7 +31,7 @@ const mockLocations = ["ECS 123", "ECS 115", "ELW 220", "CLE 225"];
 const AddEventModal = ({ isOpen, onClose, onCreate }) => {
     const [term, setTerm] = useState(null);
     const [courseCode, setCourseCode] = useState("");
-    const [courseName, setCourseName] = useState("");
+    const [courseTitle, setCourseTitle] = useState("");
     const [section, setSection] = useState("");
     const [block, setBlock] = useState("");
     const [location, setLocation] = useState("");
@@ -77,8 +77,8 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
         setBlock(event.target.value);
     }
 
-    const handleCourseNameChange = (event) => {
-        setCourseName(event.target.value);
+    const handleCourseTitleChange = (event) => {
+        setCourseTitle(event.target.value);
     };
 
     const handleCourseCodeChange = (event) => {
@@ -94,8 +94,8 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
     };
 
     const handleProfessorChange = (event, value) => {
-        setProfessor(value.name);
-        setProfID(value.id);
+        setProfessor(value ? value.name : "");
+        setProfID(value ? value.id : "");
     };
 
     const handleCapacityChange = (event) => {
@@ -104,7 +104,7 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
 
     const handleCreate = () => {
         // check if all fields are entered
-        if (!courseName.trim() || !courseCode.trim() || !section.trim() || !term || !block || !location || !professor) {
+        if (!courseTitle.trim() || !courseCode.trim() || !section.trim() || !term || !block || !location || !professor) {
             setErrorMessage("Please fill out all fields.");
             setIsError(true);
             return;
@@ -151,7 +151,7 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
             Room: room, 
             Instructor: professor,
             ProfessorID: profID,
-            Title: courseName,
+            Title: courseTitle,
             Cap: capacity,
         });
         onCreate(newCourse);
@@ -170,7 +170,7 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
 
     const clearFields = () => {
         setTerm(null);
-        setCourseName("");
+        setCourseTitle("");
         setCourseCode("");
         setSection("");
         setBlock("");
@@ -215,9 +215,9 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
                     ))}
                 </ToggleButtonGroup>
                 <TextField 
-                    id="outlined-course-name" 
-                    label="Course Name" 
-                    onChange={(event) => handleCourseNameChange(event)}
+                    id="outlined-course-title" 
+                    label="Course Title" 
+                    onChange={(event) => handleCourseTitleChange(event)}
                     sx={{ flex: 0.5 }}
                     />
                 <Stack direction="row" spacing={2}>

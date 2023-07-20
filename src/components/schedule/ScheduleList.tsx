@@ -304,7 +304,7 @@ const ScheduleList = () => {
                 onClose={onEditModalClose}
                 onSave={onEditModalSave}
                 course={currentCourse}
-                courseBgColor={null}
+                courseBgColor={"#DCDCDC"}
             />}
         </Paper>
     )
