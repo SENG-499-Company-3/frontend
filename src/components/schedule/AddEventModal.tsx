@@ -152,6 +152,7 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
             Instructor: professor,
             ProfessorID: profID,
             Title: courseName,
+            Cap: capacity,
         });
         onCreate(newCourse);
         handleClose();

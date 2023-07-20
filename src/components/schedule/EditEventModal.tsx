@@ -155,7 +155,7 @@ const EditEventModal = ({ isOpen, onClose, onSave, course, courseBgColor }) => {
               disablePortal
               id="autocomplete-instructor"
               options={instructors}
-              value={editableEvent.Instructor}
+              //value={editableEvent.Instructor}
               getOptionLabel={(instructors) => instructors.name}
               onChange={handleProfessorChange}
               renderInput={(params) => <TextField {...params} label="Instructor" />}
