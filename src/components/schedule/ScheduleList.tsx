@@ -96,7 +96,11 @@ const addRow = (course: Course, id: number) => {
     };
 };
 
-const ScheduleList = () => {
+interface IScheduleListProps {
+    onChange: () => void
+}
+
+const ScheduleList = (props: IScheduleListProps) => {
     const [rows, setRows] = useState(initialRows);
     const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
     const [numRows, setNumRows] = useState<number>(initialRows.length);
@@ -119,6 +123,7 @@ const ScheduleList = () => {
         setRows((prevRows) => [...prevRows, addRow(newCourse, numRows)]);
         setRowModesModel((oldModel) => ({ ...oldModel, [numRows]: { mode: GridRowModes.View }, }));
         setNumRows(numRows + 1);
+        props.onChange();
     };
     
     /* Edit row functions */
