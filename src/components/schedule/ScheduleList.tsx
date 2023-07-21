@@ -98,6 +98,7 @@ const addRow = (course: Course, id: number) => {
 
 interface IScheduleListProps {
     onChange: () => void
+    onValidate: (courses: Course[]) => void
 }
 
 const ScheduleList = (props: IScheduleListProps) => {
@@ -109,6 +110,14 @@ const ScheduleList = (props: IScheduleListProps) => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [currentRowID, setCurrentRowID] = useState<GridRowId>(null);
     const [currentCourse, setCurrentCourse] = useState<Course>(null);
+
+    const handleValidate = () => {
+        const [courseArray, setCourseArray] = useState<Course[]>(null);
+        for (let i = 0; i < rows.length; i++) {
+            setCourseArray((prevArray) => [...prevArray, parseRowToCourse(rows[i])]);
+        }
+        props.onValidate(courseArray);
+    };
 
     /* Add row functions */
     const handleAddCourse = () => {

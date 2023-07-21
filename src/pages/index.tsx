@@ -93,6 +93,10 @@ const HomePage = () => {
         }, 4000)
     }
 
+    const getCourses = (courses: Course[]) => {
+        return courses;
+    };
+
     const handlePublish = () => {
         setPulbishing(true);
         setTimeout(() => {
@@ -186,7 +190,10 @@ const HomePage = () => {
                     </Container>
                 </PageContent>
             ) : (
-                <ScheduleList onChange={() => handleChangeSchedule()} />
+                <ScheduleList 
+                    onChange={() => handleChangeSchedule()}
+                    onValidate={() => getCourses(null)}
+                />
             )}
         </AppPage>
     )
