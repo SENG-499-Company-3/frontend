@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import ScheduleList from '../components/schedule/ScheduleList'
 import AppPage from '../components/layout/AppPage'
 import PageHeader from '../components/layout/PageHeader'
@@ -13,19 +13,15 @@ import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { LoadingButton } from '@mui/lab'
 import PageContent from '../components/layout/PageContent'
-
-type ScheduleStatus =
-    | 'UNDEFINED'
-    | 'PENDING'
-    | 'VALID_UNPUBLISHED'
-    | 'VALID_PUBLISHED'
-    | 'INVALID'
+import { ScheduleContext, ScheduleStatus } from '../contexts/ScheduleContext'
 
 const HomePage = () => {
-    const [scheduleStatus, setScheduleStatus] = useState<ScheduleStatus>('UNDEFINED')
     const [generating, setGenerating] = useState<boolean>(false);
     const [validating, setValidating] = useState<boolean>(false);
     const [publishing, setPulbishing] = useState<boolean>(false);
+    const scheduleContext = useContext(ScheduleContext);
+
+    const scheduleStatus = scheduleContext.currentSchedule()?.status || 'UNDEFINED';
 
     let scheduleStatusTitle = ''; 
     let scheduleStatusText = 'Text'
@@ -59,25 +55,32 @@ const HomePage = () => {
             alertBackground = '#f0d8d8'
             alertSeverity = 'error'
             break;
+    }
 
+    const handleSetScheduleStatus = (status: ScheduleStatus) => {
+        scheduleContext._setCurrentSchedule({ status })
+    }
 
+    const _handleGenerate = () => {
+        setGenerating(true);
+        setTimeout(() => {
+            setGenerating(false);
+            handleSetScheduleStatus('VALID_PUBLISHED');
+        }, 2000)
     }
 
     const handleGenerate = () => {
         setGenerating(true);
-        setTimeout(() => {
-            setGenerating(false);
-            setScheduleStatus('VALID_PUBLISHED');
-        }, 2000)
+        scheduleContext.generateSchedule().finally(() => setGenerating(false))
     }
 
     const handleChangeSchedule = () => {
-        setScheduleStatus('PENDING');
+        handleSetScheduleStatus('PENDING');
     }
 
     const handleDiscard = () => {
         if (confirm('Discard changes?')) {
-            setScheduleStatus('VALID_PUBLISHED');
+            handleSetScheduleStatus('VALID_PUBLISHED');
         }
     }
 
@@ -86,9 +89,9 @@ const HomePage = () => {
         setTimeout(() => {
             setValidating(false);
             if (Math.random() > 0.5) {
-                setScheduleStatus('INVALID');
+                handleSetScheduleStatus('INVALID');
             } else {
-                setScheduleStatus('VALID_UNPUBLISHED')
+                handleSetScheduleStatus('VALID_UNPUBLISHED')
             }
         }, 4000)
     }
@@ -97,7 +100,7 @@ const HomePage = () => {
         setPulbishing(true);
         setTimeout(() => {
             setPulbishing(false);
-            setScheduleStatus('VALID_PUBLISHED');
+            handleSetScheduleStatus('VALID_PUBLISHED');
         }, 2000)
     }
 
@@ -178,7 +181,7 @@ const HomePage = () => {
                                 variant='contained'
                                 startIcon={<PublicIcon />}
                                 loading={generating}
-                                onClick={() => handleGenerate()}
+                                onClick={() => _handleGenerate()}
                             >
                                 Generate Schedule
                             </LoadingButton>
