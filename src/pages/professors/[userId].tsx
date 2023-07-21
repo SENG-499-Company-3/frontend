@@ -28,6 +28,7 @@ const ProfessorPage = () => {
             })
             .catch(() => {
                 console.error("Failed to get professor")
+                setProfessor({ id: userId } as unknown as IUser);
             })
             .finally(() => {
                 setLoading(false);
