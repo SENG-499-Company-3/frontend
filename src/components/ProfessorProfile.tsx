@@ -20,7 +20,7 @@ const NoSsrCalendar = dynamic(() => import("./schedule/CourseCalendar"), {
 });
 
 const ProfessorProfile = (props: IProfessorProfileProps) => {
-    const profCourses = courseScheduleData.filter(course => course.Instructor === props.name);
+    const profCourses = courseScheduleData.filter(course => course.Instructor === props.professor?.name);
     const [tab, setTab] = useState<number>(0);
     const [preferences, setPreferences] = useState<IPreferences>(defaultPreferences)
     const [isEditingPreferences, setIsEditingPreferences] = useState<boolean>(false);
