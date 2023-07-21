@@ -172,7 +172,7 @@ const HomePage = () => {
                 <PageContent>
                     <Container maxWidth='md'>
                         <Paper sx={{ p: 8, textAlign: 'center' }}>
-                            <Typography variant='h4' mb={2}>There is no existing schedule.</Typography>
+                            <Typography variant='h4' mb={2}>There is no existing schedule</Typography>
                             <Typography variant='body1' mb={2}>Click to generate a schedule.</Typography>
                             <LoadingButton
                                 variant='contained'
