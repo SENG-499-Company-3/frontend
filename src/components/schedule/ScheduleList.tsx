@@ -74,7 +74,11 @@ function parseToCaps(value: any) {
     return String(value).toUpperCase();
 }
 
-const ScheduleList = () => {
+interface IScheduleListProps {
+    onChange: () => void
+}
+
+const ScheduleList = (props: IScheduleListProps) => {
     const [rows, setRows] = useState(initialRows);
     const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
     const numRows = rows.length;
@@ -86,6 +90,8 @@ const ScheduleList = () => {
             ...oldModel,
             [newIndex]: { mode: GridRowModes.Edit, fieldToFocus: 'term' },
         }));
+
+        props.onChange();
     };
 
     /* Functions from the CRUD table in the documentation */
