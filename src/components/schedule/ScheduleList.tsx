@@ -97,7 +97,8 @@ const addRow = (course: Course, id: number) => {
 };
 
 interface IScheduleListProps {
-    onChange: () => void
+    onChange: () => void,
+    courses: Course[]
 }
 
 function getRows(courses: Course[]) {
@@ -118,8 +119,8 @@ function getRows(courses: Course[]) {
     return initialRows;
 }
 
-const ScheduleList = ({courses, props}: {courses: Course[], props: IScheduleListProps}) => {
-    const [rows, setRows] = useState(getRows(courses));
+const ScheduleList = (props: IScheduleListProps) => {
+    const [rows, setRows] = useState(getRows(props.courses));
     const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
     const [numRows, setNumRows] = useState<number>(initialRows.length);
     const [isAddCourseOpen, setIsAddCourseOpen] = useState(false);
