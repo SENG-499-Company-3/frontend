@@ -3,14 +3,14 @@ import ScheduleList from '../components/schedule/ScheduleList'
 import AppPage from '../components/layout/AppPage'
 import PageHeader from '../components/layout/PageHeader'
 import { Alert, AlertColor, AlertProps, AlertTitle, Box, Button, Collapse, Container, FormControl, InputLabel, MenuItem, Paper, Select, Typography } from '@mui/material'
-
 import PageHeaderActions from '../components/layout/PageHeaderActions'
-import PageContent from '../components/layout/PageContent'
 import { courseScheduleData } from '../components/common/sampleData/courseSchedule'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SchoolIcon from '@mui/icons-material/School';
 import PublicIcon from '@mui/icons-material/Public';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import { LoadingButton } from '@mui/lab'
+import PageContent from '../components/layout/PageContent'
 import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 
@@ -32,8 +32,6 @@ const termOptions = [
         value: [202305, 202309, 202401],
     }, 
 ]
-import { LoadingButton } from '@mui/lab'
-import PageContent from '../components/layout/PageContent'
 
 type ScheduleStatus =
     | 'UNDEFINED'
@@ -42,22 +40,32 @@ type ScheduleStatus =
     | 'VALID_PUBLISHED'
     | 'INVALID'
 
+
 const HomePage = () => {
     const [term, setTerm] = React.useState(termOptions[3].title);
     const [courses, setCourses] = React.useState(courseScheduleData);
-    
-    const handleTermChange = (event) => {
-        const selectedTerm = event.target.value;
-        const selectedTermValue = termOptions.find((option) => option.title === selectedTerm).value;
-          const [scheduleStatus, setScheduleStatus] = useState<ScheduleStatus>('UNDEFINED')
     const [generating, setGenerating] = useState<boolean>(false);
     const [validating, setValidating] = useState<boolean>(false);
     const [publishing, setPulbishing] = useState<boolean>(false);
+    const [scheduleStatus, setScheduleStatus] = useState<ScheduleStatus>('UNDEFINED')
 
     let scheduleStatusTitle = ''; 
     let scheduleStatusText = 'Text'
     let alertBackground = '#e8f4fd'
     let alertSeverity: AlertColor = 'info'
+    
+    const handleTermChange = (event) => {
+        const selectedTerm = event.target.value;
+        const selectedTermValue = termOptions.find((option) => option.title === selectedTerm).value;
+        setTerm(selectedTerm);
+      
+        if (selectedTermValue.length > 1) { // 'All' is selected
+          setCourses(courseScheduleData);
+        } else {
+          setCourses(courseScheduleData.filter((item) => item.Term === selectedTermValue[0]));
+        }
+      };
+    
 
     switch (scheduleStatus) {
         case 'UNDEFINED':
@@ -86,17 +94,6 @@ const HomePage = () => {
             alertBackground = '#f0d8d8'
             alertSeverity = 'error'
             break;
-
-        setTerm(selectedTerm);
-      
-        if (selectedTermValue.length > 1) { // 'All' is selected
-          setCourses(courseScheduleData);
-        } else {
-          setCourses(courseScheduleData.filter((item) => item.Term === selectedTermValue[0]));
-        }
-      };
-
-
     }
 
     const handleGenerate = () => {
@@ -207,7 +204,7 @@ const HomePage = () => {
                     </Container>
                 </PageContent>
             ) : (
-                <ScheduleList onChange={() => handleChangeSchedule()} />
+                <ScheduleList courses={courses} onChange={() => handleChangeSchedule()} />
             )}
         </AppPage>
     )

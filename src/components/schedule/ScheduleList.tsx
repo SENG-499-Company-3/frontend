@@ -118,7 +118,7 @@ function getRows(courses: Course[]) {
     return initialRows;
 }
 
-const ScheduleList = ({courses}) => {
+const ScheduleList = ({courses, props}: {courses: Course[], props: IScheduleListProps}) => {
     const [rows, setRows] = useState(getRows(courses));
     const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
     const [numRows, setNumRows] = useState<number>(initialRows.length);
