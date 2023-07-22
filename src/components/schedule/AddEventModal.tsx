@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Select from "@mui/material/Select";
@@ -16,20 +16,57 @@ import Divider from "@mui/material/Divider";
 import Box from "@mui/material/Box";
 import Alert from "@mui/material/Alert";
 import Modal from "@mui/material/Modal";
-import { courseBlocks } from "../common/sampleData/courseSchedule"
-import { termOptions } from "../../utils/helper";
+import { courseBlocks, termOptions } from "../../utils/helper";
+import Autocomplete from "@mui/material/Autocomplete";
+import useApi from "../../hooks/useApi";
+import { IUser } from "../../hooks/api/useUserApi";
+import { IClassroom } from "../../hooks/api/useClassroomApi";
+
+
+const mockInstructors = ["Michael Zastre", "John Smith", "Jane Doe", "Bob"];
+const mockLocations = ["ECS 123", "ECS 115", "ELW 220", "CLE 225"];
+
 
 
 const AddEventModal = ({ isOpen, onClose, onCreate }) => {
     const [term, setTerm] = useState(null);
     const [courseCode, setCourseCode] = useState("");
-    const [courseName, setCourseName] = useState("");
+    const [courseTitle, setCourseTitle] = useState("");
     const [section, setSection] = useState("");
     const [block, setBlock] = useState("");
     const [location, setLocation] = useState("");
     const [professor, setProfessor] = useState("");
+    const [profID, setProfID] = useState("");
+    const [capacity, setCapacity] = useState(null);
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
+    const [instructors, setInstructors] = useState([]);
+    const [classrooms, setClassrooms] = useState([]);
+    const api = useApi();
+    
+  
+    useEffect(() => {
+      api.user.listUsers()
+          .then((users: IUser[]) => {
+              setInstructors(users.map((user) => ({
+                  name: user.name,
+                  id: user.id,
+              })));
+          })
+          .catch(() => {
+              console.error("Failed to fetch professors.")
+          })
+    }, [])
+  
+    useEffect(() => {
+      api.classroom.listClassrooms()
+          .then((classrooms: IClassroom[]) => {
+            setClassrooms(classrooms.map((classroom) => classroom.buildingName + ' ' + classroom.roomNumber));
+          })
+          .catch(() => {
+              console.error("Failed to fetch classrooms.")
+          })
+    }, [])
 
 
     const onClickTerm = (event) => {
@@ -40,8 +77,8 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
         setBlock(event.target.value);
     }
 
-    const handleCourseNameChange = (event) => {
-        setCourseName(event.target.value);
+    const handleCourseTitleChange = (event) => {
+        setCourseTitle(event.target.value);
     };
 
     const handleCourseCodeChange = (event) => {
@@ -52,17 +89,22 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
         setSection(event.target.value);
     };
 
-    const handleLocationChange = (event) => {
-        setLocation(event.target.value);
+    const handleLocationChange = (event, value) => {
+        setLocation(value);
     };
 
-    const handleProfessorChange = (event) => {
-        setProfessor(event.target.value);
+    const handleProfessorChange = (event, value) => {
+        setProfessor(value ? value.name : "");
+        setProfID(value ? value.id : "");
+    };
+
+    const handleCapacityChange = (event) => {
+        setCapacity(event.target.value);
     };
 
     const handleCreate = () => {
         // check if all fields are entered
-        if (!courseName.trim() || !courseCode.trim() || !section.trim() || !term || !block || !location.trim() || !professor.trim()) {
+        if (!courseTitle.trim() || !courseCode.trim() || !section.trim() || !term || !block || !location || !professor) {
             setErrorMessage("Please fill out all fields.");
             setIsError(true);
             return;
@@ -108,7 +150,9 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
             Bldg: bldg, 
             Room: room, 
             Instructor: professor,
-            Title: courseName,
+            ProfessorID: profID,
+            Title: courseTitle,
+            Cap: capacity,
         });
         onCreate(newCourse);
         handleClose();
@@ -126,12 +170,14 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
 
     const clearFields = () => {
         setTerm(null);
-        setCourseName("");
+        setCourseTitle("");
         setCourseCode("");
         setSection("");
         setBlock("");
         setLocation("");
         setProfessor("");
+        setProfID("");
+        setCapacity(null);
     };
 
 
@@ -169,9 +215,9 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
                     ))}
                 </ToggleButtonGroup>
                 <TextField 
-                    id="outlined-course-name" 
-                    label="Course Name" 
-                    onChange={(event) => handleCourseNameChange(event)}
+                    id="outlined-course-title" 
+                    label="Course Title" 
+                    onChange={(event) => handleCourseTitleChange(event)}
                     sx={{ flex: 0.5 }}
                     />
                 <Stack direction="row" spacing={2}>
@@ -201,15 +247,30 @@ const AddEventModal = ({ isOpen, onClose, onCreate }) => {
                     ))}
                     </Select>
                 </FormControl>
-                <TextField 
-                    id="outlined-location" 
-                    label="Location" 
-                    onChange={(event) => handleLocationChange(event)}
+                <Autocomplete
+                    disablePortal
+                    id="autocomplete-location"
+                    options={mockLocations}
+                    onChange={handleLocationChange}
+                    renderInput={(params) => <TextField {...params} label="Location" />}
+                />
+                <Autocomplete
+                    disablePortal
+                    id="autocomplete-instructor"
+                    options={instructors}
+                    getOptionLabel={(instructors) => instructors.name}
+                    onChange={handleProfessorChange}
+                    renderInput={(params) => <TextField {...params} label="Instructor" />}
                 />
                 <TextField 
-                    id="outlined-professor" 
-                    label="Professor" 
-                    onChange={(event) => handleProfessorChange(event)}
+                    id="outlined-capacity" 
+                    label="Capacity" 
+                    type="number"
+                    InputProps={{
+                        inputProps: { min: 0 }
+                    }}
+                    defaultValue={capacity}
+                    onChange={(event) => handleCapacityChange(event)}
                 />
                 <DialogActions>
                     <Button sx={{ px: '30px' }} color="error" onClick={handleClose}>Cancel</Button>

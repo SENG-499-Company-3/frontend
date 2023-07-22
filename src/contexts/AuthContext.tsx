@@ -1,6 +1,7 @@
 import React, { PropsWithChildren, createContext, useEffect } from 'react'
 import { AuthenticatedUserType, IAuthenticatedUser } from '../types/auth.d'
 import { useRouter } from 'next/router';
+import useApi from '../hooks/useApi';
 
 interface IAuthContext {
     /**
@@ -46,10 +47,10 @@ interface IAuthContext {
 
 export const AuthContext = createContext<IAuthContext>({
     currentUser: () => null,
-    setCurrentUser: () => {},
+    setCurrentUser: () => { },
     userToken: () => null,
-    setUserToken: () => {},
-    resetCurrentUser: () => {},
+    setUserToken: () => { },
+    resetCurrentUser: () => { },
     isAuthenticated: () => false,
     isAdmin: () => false,
     avatarInitials: () => ''
@@ -84,15 +85,26 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
         }
     }
 
+    /*
+    useEffect(() => {
+        if (!authContext.currentUser() && router.route !== '/register') {
+            if (localStorage.getItem('userToken')) {
+                setUserToken(localStorage.getItem('userToken'))
+            } else {
+                router.push('/login')
+            }
+        }
+    }, [currentUser]);
+    */
+
     useEffect(() => {
         authContext.setCurrentUser({
             name: 'Rich Little',
             email: 'richlittle@uvic.ca',
-            isMissingPreferenceSubmission: false,
             role:  AuthenticatedUserType.ADMIN,
-
-        })
-    }, [])
+            isMissingPreferenceSubmission: false
+        });
+    }, []);
 
     return (
         <AuthContext.Provider value={authContext}>

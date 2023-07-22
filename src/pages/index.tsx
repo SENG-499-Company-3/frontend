@@ -1,8 +1,9 @@
-import React from 'react'
+import React, { useState } from 'react'
 import ScheduleList from '../components/schedule/ScheduleList'
 import AppPage from '../components/layout/AppPage'
 import PageHeader from '../components/layout/PageHeader'
-import { Alert, AlertTitle, Box, Button, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material'
+import { Alert, AlertColor, AlertProps, AlertTitle, Box, Button, Collapse, Container, FormControl, InputLabel, MenuItem, Paper, Select, Typography } from '@mui/material'
+
 import PageHeaderActions from '../components/layout/PageHeaderActions'
 import PageContent from '../components/layout/PageContent'
 import { courseScheduleData } from '../components/common/sampleData/courseSchedule'
@@ -31,6 +32,15 @@ const termOptions = [
         value: [202305, 202309, 202401],
     }, 
 ]
+import { LoadingButton } from '@mui/lab'
+import PageContent from '../components/layout/PageContent'
+
+type ScheduleStatus =
+    | 'UNDEFINED'
+    | 'PENDING'
+    | 'VALID_UNPUBLISHED'
+    | 'VALID_PUBLISHED'
+    | 'INVALID'
 
 const HomePage = () => {
     const [term, setTerm] = React.useState(termOptions[3].title);
@@ -39,7 +49,44 @@ const HomePage = () => {
     const handleTermChange = (event) => {
         const selectedTerm = event.target.value;
         const selectedTermValue = termOptions.find((option) => option.title === selectedTerm).value;
-      
+          const [scheduleStatus, setScheduleStatus] = useState<ScheduleStatus>('UNDEFINED')
+    const [generating, setGenerating] = useState<boolean>(false);
+    const [validating, setValidating] = useState<boolean>(false);
+    const [publishing, setPulbishing] = useState<boolean>(false);
+
+    let scheduleStatusTitle = ''; 
+    let scheduleStatusText = 'Text'
+    let alertBackground = '#e8f4fd'
+    let alertSeverity: AlertColor = 'info'
+
+    switch (scheduleStatus) {
+        case 'UNDEFINED':
+            break;
+        case 'PENDING':
+            scheduleStatusTitle = 'You have unsubmitted changes';
+            scheduleStatusText = 'You must validate your schedule before it can be published.'
+            alertBackground = '#e8f4fd'
+            alertSeverity = 'info'
+            break;
+        case 'VALID_UNPUBLISHED':
+            scheduleStatusTitle = 'Your schedule is unpublished';
+            scheduleStatusText = 'Your schedule was successfully validated and can now be published.'
+            alertBackground = '#dff0d8'
+            alertSeverity = 'success'
+            break;
+        case 'VALID_PUBLISHED': 
+            scheduleStatusTitle = 'Your schedule published and validated';
+            scheduleStatusText = 'Your schedule was successfully validated and published!'
+            alertBackground = '#dff0d8'
+            alertSeverity = 'success'
+            break;
+        case 'INVALID': 
+            scheduleStatusTitle = 'Your schedule is invalid';
+            scheduleStatusText = 'Please address errors in your schedule before revalidating.'
+            alertBackground = '#f0d8d8'
+            alertSeverity = 'error'
+            break;
+
         setTerm(selectedTerm);
       
         if (selectedTermValue.length > 1) { // 'All' is selected
@@ -49,6 +96,46 @@ const HomePage = () => {
         }
       };
 
+
+    }
+
+    const handleGenerate = () => {
+        setGenerating(true);
+        setTimeout(() => {
+            setGenerating(false);
+            setScheduleStatus('VALID_PUBLISHED');
+        }, 2000)
+    }
+
+    const handleChangeSchedule = () => {
+        setScheduleStatus('PENDING');
+    }
+
+    const handleDiscard = () => {
+        if (confirm('Discard changes?')) {
+            setScheduleStatus('VALID_PUBLISHED');
+        }
+    }
+
+    const handleValidate = () => {
+        setValidating(true);
+        setTimeout(() => {
+            setValidating(false);
+            if (Math.random() > 0.5) {
+                setScheduleStatus('INVALID');
+            } else {
+                setScheduleStatus('VALID_UNPUBLISHED')
+            }
+        }, 4000)
+    }
+
+    const handlePublish = () => {
+        setPulbishing(true);
+        setTimeout(() => {
+            setPulbishing(false);
+            setScheduleStatus('VALID_PUBLISHED');
+        }, 2000)
+    }
 
     return (
         <AppPage>
@@ -84,22 +171,44 @@ const HomePage = () => {
                         <Button variant='outlined' startIcon={<CalendarMonthIcon />} endIcon={<ExpandMoreIcon />}>Schedule Options</Button>
                     </PageHeaderActions>
                 </Box>
-                <Alert
-                    severity='info'
-                    variant='outlined'
-                    sx={{ mt: 2 }}
-                    action={
-                        <Box sx={{ display: 'flex', gap: 1 }}>
-                            <Button variant='contained' disabled startIcon={<SaveIcon />}>Save Changes</Button>
-                            <Button variant='contained' disabled startIcon={<DeleteIcon />}>Discard Changes</Button>
-                        </Box>
-                    }
-                >
-                    <AlertTitle>You have unsaved changes</AlertTitle>
-                    <Typography component='span'>Hello world</Typography>
-                </Alert>
+                <Collapse in={scheduleStatus !== 'UNDEFINED'}>
+                    <Alert
+                        severity={alertSeverity}
+                        variant='outlined'
+                        sx={{
+                            mt: 2,
+                            backgroundColor: (theme) => theme.palette.mode === 'light' ? alertBackground : undefined
+                        }}
+                        action={
+                            <Box sx={{ display: 'flex', gap: 1 }}>
+                            </Box>
+                        }
+                    >
+                        <AlertTitle>{scheduleStatusTitle}</AlertTitle>
+                        <Typography component='span'>{scheduleStatusText}</Typography>
+                    </Alert>
+                </Collapse>
             </PageHeader>
-            <ScheduleList courses={courses}/>
+            {scheduleStatus === 'UNDEFINED' ? (
+                <PageContent>
+                    <Container maxWidth='md'>
+                        <Paper sx={{ p: 8, textAlign: 'center' }}>
+                            <Typography variant='h4' mb={2}>There is no existing schedule</Typography>
+                            <Typography variant='body1' mb={2}>Click to generate a schedule.</Typography>
+                            <LoadingButton
+                                variant='contained'
+                                startIcon={<PublicIcon />}
+                                loading={generating}
+                                onClick={() => handleGenerate()}
+                            >
+                                Generate Schedule
+                            </LoadingButton>
+                        </Paper>
+                    </Container>
+                </PageContent>
+            ) : (
+                <ScheduleList onChange={() => handleChangeSchedule()} />
+            )}
         </AppPage>
     )
 }

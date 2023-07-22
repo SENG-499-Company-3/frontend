@@ -35,6 +35,7 @@ const ProfessorPage = () => {
             })
     }, [userId])
 
+    // @TODO remove shortcircuit
     if (true || !loading && professor) {
         return (
             <ProfessorProfile

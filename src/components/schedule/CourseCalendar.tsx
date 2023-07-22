@@ -332,7 +332,7 @@ const CourseCalendar = ({
                 </MenuItem>
               ))}
             </Select>
-            {
+            {/* {
             canEdit && <Button
               variant="contained"
               onClick={onAddCourseModalOpen}
@@ -340,7 +340,7 @@ const CourseCalendar = ({
               >
                 <AddIcon/>
             </Button>  
-            }          
+            }           */}
 
             
           </Stack>
@@ -381,13 +381,13 @@ const CourseCalendar = ({
           />
         )
       }
-      {
+      {/* {
       canEdit && <AddEventModal
         isOpen={isAddCourseOpen}
         onClose={onAddCourseModalClose}
         onCreate={onAddCourse}
       />
-      }
+      } */}
     </Box>
   );
 };

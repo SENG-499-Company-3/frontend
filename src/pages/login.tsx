@@ -42,7 +42,7 @@ const LoginPage = () => {
     // This useEffect runs only once, when the component first mounts.
     useEffect(() => {
         if (authContext.userToken() != null && authContext.currentUser() == null) {
-            api.auth.self(email, password)
+            api.auth.self()
         }
         // Check if the user is already signed in. If they are, redirec them to the home page.
         if (authContext.isAuthenticated()) {
