@@ -3,17 +3,36 @@ import ScheduleList from '../components/schedule/ScheduleList'
 import AppPage from '../components/layout/AppPage'
 import PageHeader from '../components/layout/PageHeader'
 import { Alert, AlertColor, AlertProps, AlertTitle, Box, Button, Collapse, Container, FormControl, InputLabel, MenuItem, Paper, Select, Typography } from '@mui/material'
-
 import PageHeaderActions from '../components/layout/PageHeaderActions'
+import { courseScheduleData } from '../components/common/sampleData/courseSchedule'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SchoolIcon from '@mui/icons-material/School';
 import PublicIcon from '@mui/icons-material/Public';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import SaveIcon from '@mui/icons-material/Save';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { LoadingButton } from '@mui/lab'
 import PageContent from '../components/layout/PageContent'
+import SaveIcon from '@mui/icons-material/Save';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { Course } from '../types/course';
+
+const termOptions = [
+    {
+        title: 'Summer 2023',
+        value: [202305],
+    },
+    {
+        title: 'Fall 2023',
+        value: [202309],
+    },
+    {
+        title: 'Spring 2024',
+        value: [202401],
+    },
+    {
+        title: 'All',
+        value: [202305, 202309, 202401],
+    }, 
+]
 
 type ScheduleStatus =
     | 'UNDEFINED'
@@ -22,17 +41,33 @@ type ScheduleStatus =
     | 'VALID_PUBLISHED'
     | 'INVALID'
 
+
 const HomePage = () => {
-    const [scheduleStatus, setScheduleStatus] = useState<ScheduleStatus>('UNDEFINED')
+    const [term, setTerm] = React.useState(termOptions[3].title);
+    const [courses, setCourses] = React.useState(courseScheduleData);
     const [generating, setGenerating] = useState<boolean>(false);
     const [validating, setValidating] = useState<boolean>(false);
     const [publishing, setPulbishing] = useState<boolean>(false);
+    const [scheduleStatus, setScheduleStatus] = useState<ScheduleStatus>('UNDEFINED')
     const [schedule, setSchedule] = useState<Course[]>(null);
 
     let scheduleStatusTitle = ''; 
     let scheduleStatusText = 'Text'
     let alertBackground = '#e8f4fd'
     let alertSeverity: AlertColor = 'info'
+    
+    const handleTermChange = (event) => {
+        const selectedTerm = event.target.value;
+        const selectedTermValue = termOptions.find((option) => option.title === selectedTerm).value;
+        setTerm(selectedTerm);
+      
+        if (selectedTermValue.length > 1) { // 'All' is selected
+          setCourses(courseScheduleData);
+        } else {
+          setCourses(courseScheduleData.filter((item) => item.Term === selectedTermValue[0]));
+        }
+      };
+    
 
     switch (scheduleStatus) {
         case 'UNDEFINED':
@@ -61,8 +96,6 @@ const HomePage = () => {
             alertBackground = '#f0d8d8'
             alertSeverity = 'error'
             break;
-
-
     }
 
     const handleGenerate = () => {
@@ -114,44 +147,29 @@ const HomePage = () => {
                         <Typography>View and edit course schedules by term.</Typography>
                     </Box>
                     <PageHeaderActions>
-                        <FormControl>
-                            <InputLabel id='term-select-label'>Term</InputLabel>
-                            <Select
-                                label='Term'
-                                value='FALL2023'
-                                labelId='term-select-label'
-                                variant="outlined"
-                                size='small'
-                            >
-                                <MenuItem value='FALL2023'>Fall 2023</MenuItem>
-                            </Select>
-                        </FormControl>
-                        <LoadingButton
-                            variant='contained'
-                            disabled={['UNDEFINED', 'VALID_UNPUBLISHED', 'VALID_PUBLISHED', 'INVALID'].includes(scheduleStatus)}
-                            startIcon={<PublicIcon />}
-                            onClick={() => handleValidate()}
-                            loading={validating}
-                        >Validate Schedule</LoadingButton>
-
-                        {scheduleStatus === 'VALID_UNPUBLISHED' && (
-                            <LoadingButton
-                                variant='contained'
-                                color='success'
-                                startIcon={<PublicIcon />}
-                                onClick={() => handlePublish()}
-                                loading={publishing}
-                            >Publish Schedule</LoadingButton>
-                        )}
-
-                        {['UNSAVED', 'PENDING', 'VALID_UNPUBLISHED', 'INVALID'].includes(scheduleStatus) && (
-                            <Button
-                                variant='outlined'
-                                color='error'
-                                startIcon={<DeleteIcon />}
-                                onClick={() => handleDiscard()}
-                            >Discard Changes</Button>
-                        )}
+                        <Box>
+                            <FormControl>
+                                <InputLabel id='term-select-label'>Term</InputLabel>
+                                <Select
+                                    label='Term'
+                                    value={term}
+                                    labelId='term-select-label'
+                                    variant="outlined"
+                                    onChange={handleTermChange}
+                                    sx={{ minWidth: 150 }}
+                                    size='small'
+                                >
+                                    {termOptions.map((term, index) => (
+                                        <MenuItem value={term.title} key={index}>
+                                        {term.title}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Box>
+                        <Button variant='outlined' startIcon={<PublicIcon />}>Validate and Publish</Button>
+                        <Button disabled variant='outlined' startIcon={<SchoolIcon />} endIcon={<ExpandMoreIcon />}>Course Options</Button>
+                        <Button variant='outlined' startIcon={<CalendarMonthIcon />} endIcon={<ExpandMoreIcon />}>Schedule Options</Button>
                     </PageHeaderActions>
                 </Box>
                 <Collapse in={scheduleStatus !== 'UNDEFINED'}>
@@ -190,9 +208,7 @@ const HomePage = () => {
                     </Container>
                 </PageContent>
             ) : (
-                <ScheduleList 
-                    onChange={handleChangeSchedule}
-                />
+                <ScheduleList courses={courses} onChange={handleChangeSchedule} />
             )}
         </AppPage>
     )
