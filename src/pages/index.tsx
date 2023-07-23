@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import ScheduleList from '../components/schedule/ScheduleList'
 import AppPage from '../components/layout/AppPage'
 import PageHeader from '../components/layout/PageHeader'
@@ -14,6 +14,7 @@ import PageContent from '../components/layout/PageContent'
 import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Course } from '../types/course';
+import { ScheduleContext, ScheduleStatus } from '../contexts/ScheduleContext'
 
 const termOptions = [
     {
@@ -34,22 +35,15 @@ const termOptions = [
     }, 
 ]
 
-type ScheduleStatus =
-    | 'UNDEFINED'
-    | 'PENDING'
-    | 'VALID_UNPUBLISHED'
-    | 'VALID_PUBLISHED'
-    | 'INVALID'
-
-
 const HomePage = () => {
     const [term, setTerm] = React.useState(termOptions[3].title);
     const [courses, setCourses] = React.useState(courseScheduleData);
     const [generating, setGenerating] = useState<boolean>(false);
     const [validating, setValidating] = useState<boolean>(false);
     const [publishing, setPulbishing] = useState<boolean>(false);
-    const [scheduleStatus, setScheduleStatus] = useState<ScheduleStatus>('UNDEFINED')
     const [schedule, setSchedule] = useState<Course[]>(null);
+    const scheduleContext = useContext(ScheduleContext);
+    const scheduleStatus = scheduleContext.currentSchedule()?.status || 'UNDEFINED';
 
     let scheduleStatusTitle = ''; 
     let scheduleStatusText = 'Text'
@@ -98,23 +92,33 @@ const HomePage = () => {
             break;
     }
 
-    const handleGenerate = () => {
+    const handleSetScheduleStatus = (status: ScheduleStatus) => {
+        scheduleContext._setCurrentSchedule({ status })
+    }
+
+    const _handleGenerate = () => {
         setGenerating(true);
         setTimeout(() => {
             setGenerating(false);
-            setScheduleStatus('VALID_PUBLISHED');
+            handleSetScheduleStatus('VALID_PUBLISHED');
         }, 2000)
     }
 
+    const handleGenerate = () => {
+        setGenerating(true);
+        scheduleContext.generateSchedule().finally(() => setGenerating(false))
+    }
+
     const handleChangeSchedule = (courses: Course[]) => {
-        setScheduleStatus('PENDING');
+        handleSetScheduleStatus('PENDING');
+        //setScheduleStatus('PENDING');
         console.log(courses.length);
         setSchedule(courses);
     }
 
     const handleDiscard = () => {
         if (confirm('Discard changes?')) {
-            setScheduleStatus('VALID_PUBLISHED');
+            handleSetScheduleStatus('VALID_PUBLISHED');
         }
     }
 
@@ -123,9 +127,9 @@ const HomePage = () => {
         setTimeout(() => {
             setValidating(false);
             if (Math.random() > 0.5) {
-                setScheduleStatus('INVALID');
+                handleSetScheduleStatus('INVALID');
             } else {
-                setScheduleStatus('VALID_UNPUBLISHED')
+                handleSetScheduleStatus('VALID_UNPUBLISHED')
             }
         }, 4000)
     }
@@ -134,7 +138,7 @@ const HomePage = () => {
         setPulbishing(true);
         setTimeout(() => {
             setPulbishing(false);
-            setScheduleStatus('VALID_PUBLISHED');
+            handleSetScheduleStatus('VALID_PUBLISHED');
         }, 2000)
     }
 
@@ -200,7 +204,7 @@ const HomePage = () => {
                                 variant='contained'
                                 startIcon={<PublicIcon />}
                                 loading={generating}
-                                onClick={() => handleGenerate()}
+                                onClick={() => _handleGenerate()}
                             >
                                 Generate Schedule
                             </LoadingButton>
@@ -208,7 +212,10 @@ const HomePage = () => {
                     </Container>
                 </PageContent>
             ) : (
-                <ScheduleList courses={courses} onChange={handleChangeSchedule} />
+                <ScheduleList 
+                    courses={courses} 
+                    onChange={handleChangeSchedule} 
+                />
             )}
         </AppPage>
     )

@@ -4,6 +4,7 @@ import useAuthApi from './api/useAuthApi';
 import { AuthContext } from '../contexts/AuthContext';
 import useUserApi from './api/useUserApi';
 import useClassroomApi from './api/useClassroomApi';
+import useScheduleApi from './api/useScheduleApi';
 
 interface IApiHostContext {
 	REACT_API_HOST: string;
@@ -41,11 +42,13 @@ const useApi = () => {
 	const auth = useAuthApi(axiosInstance);
 	const user = useUserApi(axiosUserInstance);
 	const classroom = useClassroomApi(axiosInstance);
+	const schedule = useScheduleApi(axiosInstance);
 
 	return {
 		auth,
 		user,
-		classroom
+		classroom,
+		schedule
 	}
 }
 
