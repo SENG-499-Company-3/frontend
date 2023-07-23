@@ -97,8 +97,7 @@ const addRow = (course: Course, id: number) => {
 };
 
 interface IScheduleListProps {
-    onChange: () => void
-    onValidate: (courses: Course[]) => void
+    onChange: (courses: Course[]) => void
 }
 
 const ScheduleList = (props: IScheduleListProps) => {
@@ -111,12 +110,13 @@ const ScheduleList = (props: IScheduleListProps) => {
     const [currentRowID, setCurrentRowID] = useState<GridRowId>(null);
     const [currentCourse, setCurrentCourse] = useState<Course>(null);
 
-    const handleValidate = () => {
-        const [courseArray, setCourseArray] = useState<Course[]>(null);
+    const getRowsAsCourses = () => {
+        const [courseArray, setCourseArray] = useState(null);
         for (let i = 0; i < rows.length; i++) {
             setCourseArray((prevArray) => [...prevArray, parseRowToCourse(rows[i])]);
-        }
-        props.onValidate(courseArray);
+        };
+        console.log( courseArray.length );
+        return courseArray;
     };
 
     /* Add row functions */
@@ -132,7 +132,7 @@ const ScheduleList = (props: IScheduleListProps) => {
         setRows((prevRows) => [...prevRows, addRow(newCourse, numRows)]);
         setRowModesModel((oldModel) => ({ ...oldModel, [numRows]: { mode: GridRowModes.View }, }));
         setNumRows(numRows + 1);
-        props.onChange();
+        props.onChange(getRowsAsCourses());
     };
     
     /* Edit row functions */
@@ -147,6 +147,7 @@ const ScheduleList = (props: IScheduleListProps) => {
     const onEditModalSave = (updatedCourse: Course) => {
         const editedCourseRow = parseCourseToRow(updatedCourse);
         processRowUpdate(editedCourseRow);
+        props.onChange(getRowsAsCourses());
     };
 
     const onEditModalClose = () => {
@@ -175,6 +176,7 @@ const ScheduleList = (props: IScheduleListProps) => {
     const handleDeleteConfirmation = () => {
         setRows(rows.filter((row) => row.id !== currentRowID));
         onDeleteModalClose();
+        props.onChange(getRowsAsCourses());
     };
 
     /* Cancel click functions */

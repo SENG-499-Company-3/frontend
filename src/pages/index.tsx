@@ -13,6 +13,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { LoadingButton } from '@mui/lab'
 import PageContent from '../components/layout/PageContent'
+import { Course } from '../types/course';
 
 type ScheduleStatus =
     | 'UNDEFINED'
@@ -26,6 +27,7 @@ const HomePage = () => {
     const [generating, setGenerating] = useState<boolean>(false);
     const [validating, setValidating] = useState<boolean>(false);
     const [publishing, setPulbishing] = useState<boolean>(false);
+    const [schedule, setSchedule] = useState<Course[]>(null);
 
     let scheduleStatusTitle = ''; 
     let scheduleStatusText = 'Text'
@@ -71,8 +73,10 @@ const HomePage = () => {
         }, 2000)
     }
 
-    const handleChangeSchedule = () => {
+    const handleChangeSchedule = (courses: Course[]) => {
         setScheduleStatus('PENDING');
+        console.log(courses.length);
+        setSchedule(courses);
     }
 
     const handleDiscard = () => {
@@ -92,10 +96,6 @@ const HomePage = () => {
             }
         }, 4000)
     }
-
-    const getCourses = (courses: Course[]) => {
-        return courses;
-    };
 
     const handlePublish = () => {
         setPulbishing(true);
@@ -191,8 +191,7 @@ const HomePage = () => {
                 </PageContent>
             ) : (
                 <ScheduleList 
-                    onChange={() => handleChangeSchedule()}
-                    onValidate={() => getCourses(null)}
+                    onChange={handleChangeSchedule}
                 />
             )}
         </AppPage>
