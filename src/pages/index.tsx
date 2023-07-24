@@ -100,7 +100,7 @@ const HomePage = () => {
         setGenerating(true);
         setTimeout(() => {
             setGenerating(false);
-            handleSetScheduleStatus('VALID_PUBLISHED');
+            handleSetScheduleStatus('VALID_UNPUBLISHED');
         }, 2000)
     }
 
@@ -109,11 +109,32 @@ const HomePage = () => {
         scheduleContext.generateSchedule().finally(() => setGenerating(false))
     }
 
-    const handleChangeSchedule = (changedCourses: Course[]) => {
-        handleSetScheduleStatus('PENDING');
+    const handleChangeSchedule = (changedCourses: Course[], changed: boolean) => {
+        if (changed) {
+            handleSetScheduleStatus('PENDING');
+        }
+        //TODO: DELETE ME
         console.log(changedCourses.length);
-        setSchedule(changedCourses);
-        //TODO: store in ScheduleContext instead
+
+        //Handle the case when the courses are filtered
+        if (term !== termOptions[3].title) {
+            const currentTermValue = termOptions.find((option) => option.title === term).value;
+            /*
+            //Read ScheduleContext for current data
+            //Filter out untouched sections(terms) - set aside? 
+            const unchangedSchedule = scheduleContext.currentSchedule.filter((item) => item.Term !== currentTermValue[0]);
+
+            //Replace changed sections with changedCourses OR just
+            //Mash both back into the ScheduleContext
+            setSchedule(unchangedSchedule);
+            setSchedule((unchanged) => [...unchanged, changedCourses]);
+
+            //OR remove the current term from ScheduleContext and insert changedCourses?
+            */
+        } else {
+            setSchedule(changedCourses);
+            //TODO: store in ScheduleContext instead
+        };
     }
 
     const handleDiscard = () => {

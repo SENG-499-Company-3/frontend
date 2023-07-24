@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { DataGrid, GridRowsProp, GridColDef, GridToolbar, GridRowModel, GridEventListener, GridRowEditStopReasons, GridRowId, GridRowModes, GridActionsCellItem, GridRowModesModel, GridValueGetterParams, GridValueSetterParams } from '@mui/x-data-grid';
-import { courseScheduleData } from '../common/sampleData/courseSchedule'
 import WeekdayTable  from './WeekdayTable'
 import { Course } from '../../types/course'
 import { convertToTime, convertTimeToNumber } from '../../utils/helper';
@@ -79,7 +78,7 @@ const addRow = (course: Course, id: number) => {
 };
 
 interface IScheduleListProps {
-    onChange: (updatedCourses: Course[]) => void,
+    onChange: (updatedCourses: Course[], status: boolean) => void,
     courses: Course[]
 }
 
@@ -110,10 +109,17 @@ const ScheduleList = (props: IScheduleListProps) => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [currentRowID, setCurrentRowID] = useState<GridRowId>(null);
     const [currentCourse, setCurrentCourse] = useState<Course>(null);
+    const [isChanged, setIsChanged] = useState<boolean>(null);
 
+    //When courses prop changes, update
+    useEffect(() => {
+        setRows(getRows(props.courses));
+    }, [props.courses]);
+
+    //When rows change, send back
     useEffect(() => {
         if (rows) {
-            props.onChange(getRowsAsCourses());
+            props.onChange(getRowsAsCourses(), isChanged);
         }
     }, [rows]);
 
@@ -138,6 +144,7 @@ const ScheduleList = (props: IScheduleListProps) => {
         setRows((prevRows) => [...prevRows, addRow(newCourse, numRows)]);
         setRowModesModel((oldModel) => ({ ...oldModel, [numRows]: { mode: GridRowModes.View }, }));
         setNumRows(numRows + 1);
+        setIsChanged(true);
     };
     
     /* Edit row functions */
@@ -152,6 +159,7 @@ const ScheduleList = (props: IScheduleListProps) => {
     const onEditModalSave = (updatedCourse: Course) => {
         const editedCourseRow = parseCourseToRow(updatedCourse);
         processRowUpdate(editedCourseRow);
+        setIsChanged(true);
     };
 
     const onEditModalClose = () => {
@@ -179,6 +187,7 @@ const ScheduleList = (props: IScheduleListProps) => {
 
     const handleDeleteConfirmation = () => {
         setRows(rows.filter((row) => row.id !== currentRowID));
+        setIsChanged(true);
         onDeleteModalClose();
     };
 
