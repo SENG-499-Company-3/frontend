@@ -129,6 +129,10 @@ const ScheduleList = (props: IScheduleListProps) => {
     const [currentRowID, setCurrentRowID] = useState<GridRowId>(null);
     const [currentCourse, setCurrentCourse] = useState<Course>(null);
 
+    useEffect(() => {
+        setRows(getRows(props.courses));
+    }, [props.courses]);
+
     /* Add row functions */
     const handleAddCourse = () => {
         setIsAddCourseOpen(true);
