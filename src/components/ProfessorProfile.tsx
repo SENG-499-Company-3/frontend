@@ -26,7 +26,7 @@ const ProfessorProfile = (props: IProfessorProfileProps) => {
     const [isEditingPreferences, setIsEditingPreferences] = useState<boolean>(false);
     const api = useApi();
 
-    const profCourses = courseScheduleData.filter(course => course.Instructor === props.professor.name);
+    const profCourses = courseScheduleData.filter(course => course.ProfessorID === props.professor?.id);
 
     useEffect(() => {
         api.preferences.getPreferencesByUserId(props.professor.id).then((preferences) => {

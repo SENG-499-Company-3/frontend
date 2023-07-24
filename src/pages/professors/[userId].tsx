@@ -28,12 +28,14 @@ const ProfessorPage = () => {
             })
             .catch(() => {
                 console.error("Failed to get professor")
+                setProfessor({ id: userId } as unknown as IUser);
             })
             .finally(() => {
                 setLoading(false);
             })
     }, [userId])
 
+    // @TODO remove shortcircuit
     if (true || !loading && professor) {
         return (
             <ProfessorProfile
@@ -50,4 +52,4 @@ const ProfessorPage = () => {
     )
 }
 
-export default ProfessorPage;
+export default ProfessorPage

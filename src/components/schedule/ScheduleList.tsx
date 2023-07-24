@@ -1,15 +1,19 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { DataGrid, GridRowsProp, GridColDef, GridToolbar, GridRowModel, GridEventListener, GridRowEditStopReasons, GridRowId, GridRowModes, GridActionsCellItem, GridRowModesModel, GridValueGetterParams, GridValueSetterParams } from '@mui/x-data-grid';
 import { courseScheduleData } from '../common/sampleData/courseSchedule'
 import WeekdayTable  from './WeekdayTable'
 import { Course } from '../../types/course'
-import { convertToTime } from '../../utils/helper';
+import { convertToTime, convertTimeToNumber } from '../../utils/helper';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 import { Button, Paper } from '@mui/material';
+import AddEventModal from "./AddEventModal";
+import EditEventModal from "./EditEventModal";
+import DeleteConfirmModal from './DeleteConfirmModal';
+import Link from 'next/link';
 
 const initialRows: GridRowsProp = courseScheduleData.map((course: Course, index: number ) => ({
   id: index,
@@ -18,89 +22,176 @@ const initialRows: GridRowsProp = courseScheduleData.map((course: Course, index:
   section: course.Section,
   title: course.Title,
   scheduleType: course.SchedType,
-  instructor: course.Instructor,
+  instructor: course.Instructor, 
+  profID: course.ProfessorID,
   location: course.Bldg + ' ' + course.Room,
   start: convertToTime(course.Begin),
   end: convertToTime(course.End),
+  startDate: course.StartDate,
+  endDate: course.EndDate,
   days: course.Days,
   capacity: course.Cap,
 }));
 
-const createRow = (id: number) => {
-    return { id, days: '', isNew: true }; //Update with defaults if desired. Days must be empty string
+const parseCourseToRow = (course: Course): GridRowModel => {
+    return {
+        id: course.id,
+        term: course.Term,
+        course: course.Subj + ' ' + course.Num,
+        section: course.Section,
+        title: course.Title,
+        scheduleType: course.SchedType,
+        instructor: course.Instructor,
+        profID: course.ProfessorID,
+        location: course.Bldg + ' ' + course.Room,
+        start: convertToTime(course.Begin),
+        end: convertToTime(course.End),
+        startDate: course.StartDate,
+        endDate: course.EndDate,
+        days: course.Days,
+        capacity: course.Cap,
+    };
 };
 
-/* Map incoming schedule's terms and professors into array for dropdowns. CONFIRM this functions with incoming data */
-const termList = courseScheduleData.map((course: Course) => course.Term).filter((value, index, self) => self.indexOf(value) === index);
-const professorList = courseScheduleData.map((course: Course) => course.Instructor).filter((value, index, self) => self.indexOf(value) === index);
-
-const daysTimeSlots = [
-    'MR 08:30 09:50', //A
-    'MR 10:00 11:20', //B
-    'MR 11:30 12:50', //C
-    'MR 13:00 14:20', //D
-    'MWR 14:30 15:20', //E
-    'MWR 15:30 16:20', //F
-    'MW 16:30 17:50', //G
-    'TWF 08:30 09:20', //H
-    'TWF 09:30 10:20', //I
-    'TWF 10:30 11:20', //J
-    'TWF 11:30 12:20', //K
-    'TWF 12:30 13:20', //L
-    'TWF 13:30 14:20', //M
-    'TF 14:30 16:30', //N
-    'TR 16:30 17:50', //O
-];
-
-/* Getter and Setter for column Block, to use the singular column to update the days, start, and end
-   Note that days/times currently cannot be manually entered. This could be updated by adding blocks VWXYZ (MTWRF) and enable edit on start/end
-   Column block can be overwritten by string */
-function getDaysTime(params: GridValueGetterParams) {
-    const inString = `${params.row.days || ''} ${params.row.start || ''} ${params.row.end || ''}`;
-    for (let i = 0; i < 15; i++) {
-        if (inString === daysTimeSlots[i]) {
-            return daysTimeSlots[i];
-        }
+const parseRowToCourse = (row: GridRowModel): Course => {
+    return {
+        id: row.id,
+        Term: row.term,
+        Subj: row.course.split(' ')[0],
+        Num: row.course.split(' ')[1],
+        Section: row.section,
+        Title: row.title,
+        SchedType: row.SchedType,
+        Instructor: row.instructor,
+        ProfessorID: row.profID,
+        Bldg: row.location.split(' ')[0],
+        Room: row.location.split(' ')[1],
+        Begin: convertTimeToNumber(row.start),
+        End: convertTimeToNumber(row.end),
+        Days: row.days,
+        StartDate: row.startDate,
+        EndDate: row.endDate,
+        Cap: row.capacity,
     }
-    return inString;
-}
-function setDaysTime(params: GridValueSetterParams) {
-    const [days, start, end] = params.value!.toString().split(' ');
-    return { ...params.row, days, start, end };
+};
+
+const addRow = (course: Course, id: number) => {
+    return {
+        id,
+        term: course.Term,
+        course: course.Subj + ' ' + course.Num,
+        section: course.Section,
+        title: course.Title,
+        scheduleType: course.SchedType,
+        instructor: course.Instructor,
+        profID: course.ProfessorID,
+        location: course.Bldg + ' ' + course.Room,
+        start: convertToTime(course.Begin),
+        end: convertToTime(course.End),
+        startDate: course.StartDate,
+        endDate: course.EndDate,
+        days: course.Days,
+        capacity: course.Cap,
+        isNew: true,
+    };
+};
+
+interface IScheduleListProps {
+    onChange: () => void,
+    courses: Course[]
 }
 
-/* Parser for course, section, and location to force caps entry */
-function parseToCaps(value: any) {
-    return String(value).toUpperCase();
+function getRows(courses: Course[]) {
+    const initialRows: GridRowsProp = courses.map((course: Course, index: number ) => ({
+        id: index,
+        term: course.Term,
+        course: course.Subj + ' ' + course.Num,
+        section: course.Section,
+        title: course.Title,
+        scheduleType: course.SchedType,
+        instructor: course.Instructor,
+        location: course.Bldg + ' ' + course.Room,
+        start: convertToTime(course.Begin),
+        end: convertToTime(course.End),
+        days: course.Days,
+        capacity: course.Cap,
+      }));
+    return initialRows;
 }
 
-const ScheduleList = () => {
-    const [rows, setRows] = useState(initialRows);
+const ScheduleList = (props: IScheduleListProps) => {
+    const [rows, setRows] = useState(getRows(props.courses));
     const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
-    const numRows = rows.length;
+    const [numRows, setNumRows] = useState<number>(initialRows.length);
+    const [isAddCourseOpen, setIsAddCourseOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [currentRowID, setCurrentRowID] = useState<GridRowId>(null);
+    const [currentCourse, setCurrentCourse] = useState<Course>(null);
 
-    /* Add rows function for use with the added button */
-    const handleAddRow = (newIndex: number) => {
-        setRows((prevRows) => [...prevRows, createRow(newIndex)]);
-        setRowModesModel((oldModel) => ({
-            ...oldModel,
-            [newIndex]: { mode: GridRowModes.Edit, fieldToFocus: 'term' },
-        }));
+    useEffect(() => {
+        setRows(getRows(props.courses));
+    }, [props.courses]);
+
+    /* Add row functions */
+    const handleAddCourse = () => {
+        setIsAddCourseOpen(true);
     };
 
-    /* Functions from the CRUD table in the documentation */
+    const onAddCourseModalClose = () => {
+        setIsAddCourseOpen(false);
+    };
+
+    const onAddCourse = (newCourse: Course) => {
+        setRows((prevRows) => [...prevRows, addRow(newCourse, numRows)]);
+        setRowModesModel((oldModel) => ({ ...oldModel, [numRows]: { mode: GridRowModes.View }, }));
+        setNumRows(numRows + 1);
+        props.onChange();
+    };
+    
+    /* Edit row functions */
     const handleEditClick = (id: GridRowId) => () => {
+        setIsEditModalOpen(true);
+        setCurrentRowID(id);
+        const editingRow = rows.find((row) => row.id === id);
+        setCurrentCourse(parseRowToCourse(editingRow));
         setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
     };
 
+    const onEditModalSave = (updatedCourse: Course) => {
+        const editedCourseRow = parseCourseToRow(updatedCourse);
+        processRowUpdate(editedCourseRow);
+    };
+
+    const onEditModalClose = () => {
+        setRowModesModel({ ...rowModesModel, [currentRowID]: { mode: GridRowModes.View } });
+        setIsEditModalOpen(false);
+        setCurrentRowID(null);
+        setCurrentCourse(null);
+    };
+
+    /* Save row functions */
     const handleSaveClick = (id: GridRowId) => () => {
         setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
     };
 
+    /* Delete row functions */
     const handleDeleteClick = (id: GridRowId) => () => {
-        setRows(rows.filter((row) => row.id !== id));
+        setIsDeleteModalOpen(true);
+        setCurrentRowID(id);
     };
 
+    const onDeleteModalClose = () => {
+        setIsDeleteModalOpen(false);
+        setCurrentRowID(null);
+    };
+
+    const handleDeleteConfirmation = () => {
+        setRows(rows.filter((row) => row.id !== currentRowID));
+        onDeleteModalClose();
+    };
+
+    /* Cancel click functions */
     const handleCancelClick = (id: GridRowId) => () => {
         setRowModesModel({
             ...rowModesModel,
@@ -131,12 +222,18 @@ const ScheduleList = () => {
 
     /* Columns moved to be internal due to Actions requiring the above functions */
     const columns: GridColDef[] = [
-        { field: 'term', headerName: 'Term', flex: 2, editable: true, type:'singleSelect', valueOptions:termList },
-        { field: 'course', headerName: 'Course', flex: 3, editable: true, valueParser: parseToCaps },
-        { field: 'section', headerName: 'Section', flex: 2, editable: true, valueParser: parseToCaps },
-        { field: 'instructor', headerName: 'Instructor', flex: 3, editable: true, type: 'singleSelect', valueOptions:professorList },
-        { field: 'capacity', headerName: 'Capacity', type: 'number', flex: 1, editable: true },
-        { field: 'location', headerName: 'Location', flex: 3, editable: true, valueParser: parseToCaps },
+        { field: 'term', headerName: 'Term', flex: 2 },
+        { field: 'course', headerName: 'Course', flex: 3 },
+        { field: 'section', headerName: 'Section', flex: 2 },
+        {
+            field: 'instructor', headerName: 'Instructor', flex:3,  renderCell: (params) => {
+                return (
+                    <Link href={`/professors/${params.row.profID}`}>{params.value}</Link>
+                )
+            }
+        },
+        { field: 'capacity', headerName: 'Capacity', type: 'number', flex: 2 },
+        { field: 'location', headerName: 'Location', flex: 3 },
         {
             field: 'days',
             headerName: 'Days',
@@ -145,13 +242,6 @@ const ScheduleList = () => {
         },
         { field: 'start', headerName: 'Start', flex: 2 },
         { field: 'end', headerName: 'End', flex: 2 },
-        {
-            field: 'daysTime', headerName: 'Block', flex: 2, editable: true,
-            type: 'singleSelect',
-            valueOptions: daysTimeSlots,
-            valueGetter: getDaysTime,
-            valueSetter: setDaysTime,
-        },
         {
             field: 'actions',
             type: 'actions',
@@ -202,11 +292,9 @@ const ScheduleList = () => {
 
     return (
         <Paper sx={{ p: 2 }} square elevation={0}>
-            
-                <Button size="small" startIcon={<AddIcon />} onClick={() => handleAddRow(numRows)}>
-                    Add Course
-                </Button>
-            
+            <Button size="small" startIcon={<AddIcon />} onClick={() => handleAddCourse()}>
+                Add Course
+            </Button>
             <DataGrid
                 rows={rows} 
                 columns={columns}
@@ -228,8 +316,25 @@ const ScheduleList = () => {
                     },
                 }}
             />
+            <AddEventModal
+                isOpen={isAddCourseOpen}
+                onClose={onAddCourseModalClose}
+                onCreate={onAddCourse}
+            />
+            <DeleteConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={onDeleteModalClose}
+                onConfirm={handleDeleteConfirmation}
+            />
+            {(currentCourse != null) && <EditEventModal
+                isOpen={isEditModalOpen}
+                onClose={onEditModalClose}
+                onSave={onEditModalSave}
+                course={currentCourse}
+                courseBgColor={"#DCDCDC"}
+            />}
         </Paper>
     )
 }
 
-export default ScheduleList
+export default ScheduleList;

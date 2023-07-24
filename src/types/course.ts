@@ -7,6 +7,7 @@ export type Course = {
     Title: string;
     SchedType?: string;
     Instructor: string;
+    ProfessorID: string;
     Bldg: string;
     Room: string;
     Begin: number;
