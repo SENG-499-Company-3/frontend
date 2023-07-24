@@ -109,11 +109,11 @@ const HomePage = () => {
         scheduleContext.generateSchedule().finally(() => setGenerating(false))
     }
 
-    const handleChangeSchedule = (courses: Course[]) => {
+    const handleChangeSchedule = (changedCourses: Course[]) => {
         handleSetScheduleStatus('PENDING');
-        //setScheduleStatus('PENDING');
-        console.log(courses.length);
-        setSchedule(courses);
+        console.log(changedCourses.length);
+        setSchedule(changedCourses);
+        //TODO: store in ScheduleContext instead
     }
 
     const handleDiscard = () => {

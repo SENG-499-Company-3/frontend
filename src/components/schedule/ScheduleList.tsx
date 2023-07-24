@@ -15,24 +15,6 @@ import EditEventModal from "./EditEventModal";
 import DeleteConfirmModal from './DeleteConfirmModal';
 import Link from 'next/link';
 
-const initialRows: GridRowsProp = courseScheduleData.map((course: Course, index: number ) => ({
-  id: index,
-  term: course.Term,
-  course: course.Subj + ' ' + course.Num,
-  section: course.Section,
-  title: course.Title,
-  scheduleType: course.SchedType,
-  instructor: course.Instructor, 
-  profID: course.ProfessorID,
-  location: course.Bldg + ' ' + course.Room,
-  start: convertToTime(course.Begin),
-  end: convertToTime(course.End),
-  startDate: course.StartDate,
-  endDate: course.EndDate,
-  days: course.Days,
-  capacity: course.Cap,
-}));
-
 const parseCourseToRow = (course: Course): GridRowModel => {
     return {
         id: course.id,
@@ -97,7 +79,7 @@ const addRow = (course: Course, id: number) => {
 };
 
 interface IScheduleListProps {
-    onChange: (courses: Course[]) => void,
+    onChange: (updatedCourses: Course[]) => void,
     courses: Course[]
 }
 
@@ -122,20 +104,25 @@ function getRows(courses: Course[]) {
 const ScheduleList = (props: IScheduleListProps) => {
     const [rows, setRows] = useState(getRows(props.courses));
     const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
-    const [numRows, setNumRows] = useState<number>(initialRows.length);
+    const [numRows, setNumRows] = useState<number>(props.courses.length);
     const [isAddCourseOpen, setIsAddCourseOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [currentRowID, setCurrentRowID] = useState<GridRowId>(null);
     const [currentCourse, setCurrentCourse] = useState<Course>(null);
 
+    useEffect(() => {
+        if (rows) {
+            props.onChange(getRowsAsCourses());
+        }
+    }, [rows]);
+
     const getRowsAsCourses = () => {
-        const [courseArray, setCourseArray] = useState(null);
+        const tempArray = [];
         for (let i = 0; i < rows.length; i++) {
-            setCourseArray((prevArray) => [...prevArray, parseRowToCourse(rows[i])]);
+            tempArray.push(parseRowToCourse(rows[i]));
         };
-        console.log( courseArray.length );
-        return courseArray;
+        return tempArray;
     };
 
     /* Add row functions */
@@ -151,7 +138,6 @@ const ScheduleList = (props: IScheduleListProps) => {
         setRows((prevRows) => [...prevRows, addRow(newCourse, numRows)]);
         setRowModesModel((oldModel) => ({ ...oldModel, [numRows]: { mode: GridRowModes.View }, }));
         setNumRows(numRows + 1);
-        props.onChange(getRowsAsCourses());
     };
     
     /* Edit row functions */
@@ -166,7 +152,6 @@ const ScheduleList = (props: IScheduleListProps) => {
     const onEditModalSave = (updatedCourse: Course) => {
         const editedCourseRow = parseCourseToRow(updatedCourse);
         processRowUpdate(editedCourseRow);
-        props.onChange(getRowsAsCourses());
     };
 
     const onEditModalClose = () => {
@@ -195,7 +180,6 @@ const ScheduleList = (props: IScheduleListProps) => {
     const handleDeleteConfirmation = () => {
         setRows(rows.filter((row) => row.id !== currentRowID));
         onDeleteModalClose();
-        props.onChange(getRowsAsCourses());
     };
 
     /* Cancel click functions */
