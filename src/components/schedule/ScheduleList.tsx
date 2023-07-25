@@ -131,6 +131,10 @@ const ScheduleList = (props: IScheduleListProps) => {
         return tempArray;
     };
 
+    useEffect(() => {
+        setRows(getRows(props.courses));
+    }, [props.courses]);
+
     /* Add row functions */
     const handleAddCourse = () => {
         setIsAddCourseOpen(true);

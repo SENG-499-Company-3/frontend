@@ -1,7 +1,7 @@
 import { Box, MenuItem, List, ListItemText, ListItemIcon } from "@mui/material";
 import HomeIcon from '@mui/icons-material/Home';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
-import Link from "next/link";
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import { useRouter } from "next/router";
 
 export const SideNavigation = ({ onClose }) => {
@@ -24,6 +24,12 @@ export const SideNavigation = ({ onClose }) => {
                 <ListItemIcon><AccountBoxIcon /></ListItemIcon>
                 <ListItemText>
                     Professors
+                </ListItemText>
+            </MenuItem>
+            <MenuItem onClick={() => handleClickLink('/courses')}>
+                <ListItemIcon><FolderOpenIcon /></ListItemIcon>
+                <ListItemText>
+                    Courses
                 </ListItemText>
             </MenuItem>
         </List>

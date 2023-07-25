@@ -1,5 +1,3 @@
-import { PropsWithChildren, createContext, useState, useEffect } from 'react';
-import { Course } from '../types/course';
 import useApi from '../hooks/useApi'
 
 export type ScheduleStatus =
@@ -48,6 +46,10 @@ export const ScheduleContextProvider = (props: PropsWithChildren) => {
             .then((schedule: Schedule) => {
                 setCurrentSchedule(schedule);
             }),
+        /*generateSchedule: () => api.schedule.generateSchedule(null)
+            .then(() => {
+                //
+            }),*/
         _setCurrentSchedule: setCurrentSchedule,
         _setWorkingSchedule: setWorkingSchedule,
         _setDisplaySchedule: setDisplaySchedule
@@ -57,7 +59,7 @@ export const ScheduleContextProvider = (props: PropsWithChildren) => {
     useEffect(() => {
         if (localStorage.getItem(USER_TOKEN)) {
             setUserToken(localStorage.getItem(USER_TOKEN))
-        }
+    }
     }, []);
 
 

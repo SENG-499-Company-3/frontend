@@ -11,6 +11,7 @@ import PublicIcon from '@mui/icons-material/Public';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { LoadingButton } from '@mui/lab'
 import PageContent from '../components/layout/PageContent'
+import { ScheduleContext, ScheduleStatus } from '../contexts/ScheduleContext'
 import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Course } from '../types/course';
@@ -36,14 +37,14 @@ const termOptions = [
 ]
 
 const HomePage = () => {
-    const [term, setTerm] = React.useState(termOptions[3].title);
-    const [courses, setCourses] = React.useState(courseScheduleData);
     const [generating, setGenerating] = useState<boolean>(false);
     const [validating, setValidating] = useState<boolean>(false);
     const [publishing, setPulbishing] = useState<boolean>(false);
-    const [schedule, setSchedule] = useState<Course[]>(courses);
     const scheduleContext = useContext(ScheduleContext);
+
     const scheduleStatus = scheduleContext.currentSchedule()?.status || 'UNDEFINED';
+    const [term, setTerm] = React.useState(termOptions[3].title);
+    const [courses, setCourses] = React.useState(courseScheduleData);
 
     let scheduleStatusTitle = ''; 
     let scheduleStatusText = 'Text'

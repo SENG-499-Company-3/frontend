@@ -1,15 +1,27 @@
 import { AxiosInstance, AxiosResponse } from 'axios'
 import { Schedule } from '../../contexts/ScheduleContext';
 
+interface IGenerateScheduleRequest {
+    scheduledCourseIds: number[];
+    termId: number;
+}
+
 const useScheduleApi = (axios: AxiosInstance) => {
-    const generate = async (): Promise<Schedule> => {
-        const { data } = await axios.get(`/schedule/generate`);
+    const generateSchedule = async (request: IGenerateScheduleRequest): Promise<void> => {
+        const { data } = await axios.post(`/schedule/create`, request);
+
+        return data;
+    }
+
+    const getSchedule = async (): Promise<Schedule> => {
+        const { data } = await axios.get(`/schedule`);
 
         return data;
     }
 
     return {
-        generate
+        getSchedule,
+        generateSchedule
     }
 }
 

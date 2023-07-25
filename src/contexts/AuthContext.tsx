@@ -1,7 +1,8 @@
-import React, { PropsWithChildren, createContext, useEffect } from 'react'
+import React, { PropsWithChildren, createContext, useEffect, useCallback } from 'react'
 import { AuthenticatedUserType, IAuthenticatedUser } from '../types/auth.d'
 import { useRouter } from 'next/router';
 import useApi from '../hooks/useApi';
+import { USER_TOKEN } from '../hooks/api/useAuthApi';
 
 interface IAuthContext {
     /**
@@ -60,11 +61,12 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
     const [currentUser, setCurrentUser] = React.useState<IAuthenticatedUser | null>(null);
     const [userToken, setUserToken] = React.useState<string | null>(null);
     const router = useRouter();
+    const api = useApi();
 
     const authContext: IAuthContext = {
         currentUser: () => currentUser,
         setCurrentUser,
-        userToken: () => userToken,
+        userToken: useCallback(() => userToken, [userToken]),
         setUserToken,
         resetCurrentUser: () => setCurrentUser(null),
         isAuthenticated: () => Boolean(currentUser),
@@ -85,25 +87,10 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
         }
     }
 
-    /*
     useEffect(() => {
-        if (!authContext.currentUser() && router.route !== '/register') {
-            if (localStorage.getItem('userToken')) {
-                setUserToken(localStorage.getItem('userToken'))
-            } else {
-                router.push('/login')
-            }
+        if (localStorage.getItem(USER_TOKEN)) {
+            setUserToken(localStorage.getItem(USER_TOKEN))
         }
-    }, [currentUser]);
-    */
-
-    useEffect(() => {
-        authContext.setCurrentUser({
-            name: 'Rich Little',
-            email: 'richlittle@uvic.ca',
-            role:  AuthenticatedUserType.ADMIN,
-            isMissingPreferenceSubmission: false
-        });
     }, []);
 
     return (
