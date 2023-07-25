@@ -32,7 +32,7 @@ const useApi = () => {
 			},
 			baseURL
 		});
-	}, [authContext, baseURL]);
+	}, [authContext.userToken, baseURL]);
 
 	const axiosUserInstance = useMemo(() => {
 		return axios.create({
@@ -46,10 +46,10 @@ const useApi = () => {
 	const courses = useCoursesApi(axiosInstance);
 	const schedule = useScheduleApi(axiosInstance);
 
-
-	// TODO
 	useEffect(() => {
-		auth.self();
+		if (!authContext.currentUser()) {
+			auth.self();
+		}
 	}, [axiosInstance])
 	
 	return {
