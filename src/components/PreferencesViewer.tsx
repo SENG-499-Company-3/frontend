@@ -375,7 +375,7 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
                                                         name={`load-${termYear}`}
                                                         size='small'
                                                         type='number'
-                                                        InputProps={{ inputProps: { min: 0, max: 6 }}}
+                                                        // InputProps={{ inputProps: { min: 0, max: 6 }}}
                                                         value={maxCourses}
                                                         onChange={(event) => handleChangeLoad(event, termYear)}
                                                         label='Course Load'
