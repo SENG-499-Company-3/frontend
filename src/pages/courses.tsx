@@ -201,8 +201,10 @@ const CoursesPage = () => {
         //
     }
 
-    const handleDeleteCourse = () => {
-        //
+    const handleDeleteCourse = (course: ICourse) => {
+        api.courses.deleteCourse(course.courseId).then(() => {
+            // courseContext.deleteCourse(course);
+        })
     }
 
     const handleCancelCreateCourse = () => {
@@ -252,7 +254,7 @@ const CoursesPage = () => {
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button color='error' onClick={() => handleDeleteCourse()}>Delete</Button>
+                    <Button color='error' onClick={() => handleDeleteCourse(deletingCourse)}>Delete</Button>
                     <Button onClick={() => setdeletingCourse(null)}>Cancel</Button>
                 </DialogActions>
             </Dialog>

@@ -46,10 +46,12 @@ const useApi = () => {
 	const courses = useCoursesApi(axiosInstance);
 	const schedule = useScheduleApi(axiosInstance);
 
+
+	// TODO
 	useEffect(() => {
 		auth.self();
 	}, [axiosInstance])
-
+	
 	return {
 		_axiosInstance: axiosInstance,
 		auth,

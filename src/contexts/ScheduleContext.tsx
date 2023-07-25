@@ -30,7 +30,7 @@ export const ScheduleContextProvider = (props: PropsWithChildren) => {
 
     const scheduleContext: IScheduleContext = {
         currentSchedule: () => currentSchedule,
-        generateSchedule: () => api.schedule.generate()
+        generateSchedule: () => api.schedule.generateSchedule(null)
             .then(() => {
                 //
             }),
