@@ -41,7 +41,7 @@ const HomePage = () => {
     const [generating, setGenerating] = useState<boolean>(false);
     const [validating, setValidating] = useState<boolean>(false);
     const [publishing, setPulbishing] = useState<boolean>(false);
-    const [schedule, setSchedule] = useState<Course[]>(null);
+    const [schedule, setSchedule] = useState<Course[]>(courses);
     const scheduleContext = useContext(ScheduleContext);
     const scheduleStatus = scheduleContext.currentSchedule()?.status || 'UNDEFINED';
 
@@ -234,7 +234,7 @@ const HomePage = () => {
                 </PageContent>
             ) : (
                 <ScheduleList 
-                    courses={courses} 
+                    courses={schedule} 
                     onChange={handleChangeSchedule} 
                 />
             )}

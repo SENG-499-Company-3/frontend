@@ -78,7 +78,7 @@ const addRow = (course: Course, id: number) => {
 };
 
 interface IScheduleListProps {
-    onChange: (updatedCourses: Course[], status: boolean) => void,
+    onChange: (updatedCourses: Course[], changed: boolean) => void,
     courses: Course[]
 }
 
