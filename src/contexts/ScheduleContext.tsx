@@ -1,3 +1,5 @@
+import React, { PropsWithChildren, createContext, useEffect, useState } from 'react';
+import { WORKING_SCHEDULE } from '../hooks/api/useScheduleApi';
 import useApi from '../hooks/useApi'
 
 export type ScheduleStatus =
@@ -5,20 +7,32 @@ export type ScheduleStatus =
     | 'PENDING'
     | 'VALID_UNPUBLISHED'
     | 'VALID_PUBLISHED'
-    | 'INVALID'
+    | 'INVALID';
 
-export type Schedule = null | (Record<string, any> & {
+export type Schedule = null | {
+    scheduledCourses: Course[],
     status: ScheduleStatus
-})
+};
 
 interface IScheduleContext {
+    //The latest validated and saved schedule
     currentSchedule: () => Schedule
     _setCurrentSchedule: (schedule: Schedule) => void
+
+    //The schedule with any changes made by the logged in user
     workingSchedule: () => Schedule
     _setWorkingSchedule: (schedule: Schedule) => void
+
+    //The currently visible schedule - ie, the filtered schedule WITH any edits
     displaySchedule: () => Course[]
     _setDisplaySchedule: (schedule: Schedule) => void
+
+    //Schedule functions
     generateSchedule: () => Promise<void>
+    /* TBD if these are necessary here
+    validateSchedule: () => Promise<void>
+    saveSchedule: () => Promise<void>
+    publishSchedule: () => Promise<void> */
 }
 
 export const ScheduleContext = createContext<IScheduleContext>({
@@ -38,11 +52,14 @@ export const ScheduleContextProvider = (props: PropsWithChildren) => {
     const api = useApi();
 
     const scheduleContext: IScheduleContext = {
-        currentSchedule: () => currentSchedule,
+        currentSchedule: () => api.schedule.getSchedule()
+            .then((schedule: Schedule) => {
+                setCurrentSchedule(schedule);
+            }),
         workingSchedule: () => workingSchedule,
         displaySchedule: () => displaySchedule,
 
-        generateSchedule: () => api.schedule.generate()
+        generateSchedule: () => api.schedule.generateSchedule(null)
             .then((schedule: Schedule) => {
                 setCurrentSchedule(schedule);
             }),
@@ -57,12 +74,16 @@ export const ScheduleContextProvider = (props: PropsWithChildren) => {
 
 
     useEffect(() => {
-        if (localStorage.getItem(USER_TOKEN)) {
-            setUserToken(localStorage.getItem(USER_TOKEN))
-    }
+        if (localStorage.getItem(WORKING_SCHEDULE)) {
+            setWorkingSchedule(localStorage.getItem(WORKING_SCHEDULE))
+        }
     }, []);
 
-
+    useEffect(() => {
+        if (workingSchedule) {
+            localStorage.setItem(WORKING_SCHEDULE, workingSchedule)
+        }
+    }, [workingSchedule]);
 
 
     return (

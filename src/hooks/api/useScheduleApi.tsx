@@ -1,6 +1,8 @@
 import { AxiosInstance, AxiosResponse } from 'axios'
 import { Schedule } from '../../contexts/ScheduleContext';
 
+export const WORKING_SCHEDULE =  [], { 'UNDEFINED'};
+
 interface IGenerateScheduleRequest {
     scheduledCourseIds: number[];
     termId: number;

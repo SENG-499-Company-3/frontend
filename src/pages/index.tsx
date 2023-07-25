@@ -11,11 +11,10 @@ import PublicIcon from '@mui/icons-material/Public';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { LoadingButton } from '@mui/lab'
 import PageContent from '../components/layout/PageContent'
-import { ScheduleContext, ScheduleStatus } from '../contexts/ScheduleContext'
+import { ScheduleContext, ScheduleStatus } from '../contexts/ScheduleContext';
 import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Course } from '../types/course';
-import { ScheduleContext, ScheduleStatus } from '../contexts/ScheduleContext'
 
 const termOptions = [
     {
@@ -41,8 +40,7 @@ const HomePage = () => {
     const [validating, setValidating] = useState<boolean>(false);
     const [publishing, setPulbishing] = useState<boolean>(false);
     const scheduleContext = useContext(ScheduleContext);
-
-    const scheduleStatus = scheduleContext.currentSchedule()?.status || 'UNDEFINED';
+    const scheduleStatus = ScheduleContext.currentSchedule()?.status || 'UNDEFINED';
     const [term, setTerm] = React.useState(termOptions[3].title);
     const [courses, setCourses] = React.useState(courseScheduleData);
 
@@ -57,9 +55,9 @@ const HomePage = () => {
         setTerm(selectedTerm);
       
         if (selectedTermValue.length > 1) { // 'All' is selected
-          setCourses(courseScheduleData);
+          scheduleContext.setDisplaySchedule(ScheduleContext.workingSchedule.scheduledCourses);
         } else {
-          setCourses(courseScheduleData.filter((item) => item.Term === selectedTermValue[0]));
+          ScheduleContext.setDisplaySchedule(ScheduleContext.workingSchedule.scheduledCourses.filter((item) => item.Term === selectedTermValue[0]));
         }
       };
     
@@ -94,7 +92,7 @@ const HomePage = () => {
     }
 
     const handleSetScheduleStatus = (status: ScheduleStatus) => {
-        scheduleContext._setCurrentSchedule({ status })
+        ScheduleContext._setCurrentSchedule({ status })
     }
 
     const _handleGenerate = () => {
@@ -107,7 +105,7 @@ const HomePage = () => {
 
     const handleGenerate = () => {
         setGenerating(true);
-        scheduleContext.generateSchedule().finally(() => setGenerating(false))
+        ScheduleContext.generateSchedule().finally(() => setGenerating(false))
     }
 
     const handleChangeSchedule = (changedCourses: Course[], changed: boolean) => {
@@ -133,7 +131,7 @@ const HomePage = () => {
             //OR remove the current term from ScheduleContext and insert changedCourses?
             */
         } else {
-            setSchedule(changedCourses);
+            ScheduleContext.setWorkingSchedule(changedCourses);
             //TODO: store in ScheduleContext instead
         };
     }
@@ -235,7 +233,7 @@ const HomePage = () => {
                 </PageContent>
             ) : (
                 <ScheduleList 
-                    courses={schedule} 
+                    courses={ScheduleContext.displaySchedule} 
                     onChange={handleChangeSchedule} 
                 />
             )}
