@@ -12,6 +12,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import LoadingSpinner from '../components/layout/LoadingSpinner';
 import { ICourse } from '../hooks/api/useCoursesApi';
+import { makeCourseName } from '../utils/helper';
 
 interface ICoursesTableProps {
     courses: ICourse[]
@@ -21,49 +22,49 @@ interface ICoursesTableProps {
 const defaultCourses: ICourse[] = [
     {
         courseId: 1,
-        courseCode: 'CSC ',
+        courseCode: 'CSC',
         courseNumber: '111',
         courseName: 'Course name',
     },
     {
         courseId: 2,
-        courseCode: 'CSC ',
+        courseCode: 'CSC',
         courseNumber: '115',
         courseName: 'Course name',
     },
     {
         courseId: 3,
-        courseCode: 'CSC ',
+        courseCode: 'CSC',
         courseNumber: '226',
         courseName: 'Course name',
     },
     {
         courseId: 4,
-        courseCode: 'CSC ',
+        courseCode: 'CSC',
         courseNumber: '225',
         courseName: 'Course name',
     },
     {
         courseId: 5,
-        courseCode: 'CSC ',
+        courseCode: 'CSC',
         courseNumber: '230',
         courseName: 'Course name',
     },
     {
         courseId: 6,
-        courseCode: 'CSC ',
+        courseCode: 'CSC',
         courseNumber: '320',
         courseName: 'Course name',
     },
     {
         courseId: 7,
-        courseCode: 'CSC ',
+        courseCode: 'CSC',
         courseNumber: '370',
         courseName: 'Course name',
     },
     {
         courseId: 8,
-        courseCode: 'CSC ',
+        courseCode: 'CSC',
         courseNumber: '360',
         courseName: 'Course name',
     },
@@ -145,7 +146,7 @@ const CoursesTable = (props: ICoursesTableProps) => {
     const courses = props.courses.map((course: ICourse) => ({
         id: course.courseId,
         courseName: course.courseName,
-        courseCodeWithNumber: `${course.courseCode} ${course.courseNumber}`
+        courseCodeWithNumber: makeCourseName(course)
     }));
 
     return (
@@ -165,6 +166,7 @@ const CoursesTable = (props: ICoursesTableProps) => {
                     },
                 }}
                 sx={{ border: 0 }}
+                disableRowSelectionOnClick
             />
         </Paper>
     )

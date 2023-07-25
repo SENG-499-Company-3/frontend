@@ -315,6 +315,7 @@ const ScheduleList = (props: IScheduleListProps) => {
                     quickFilterProps: { debounceMs: 500 },
                     },
                 }}
+                disableRowSelectionOnClick
             />
             <AddEventModal
                 isOpen={isAddCourseOpen}

@@ -1,56 +1,165 @@
-import { Box, Button, Dialog, DialogContent, DialogTitle, Divider, Grid, Paper, MenuItem, Select, TextField, Typography, FormControl, InputLabel } from "@mui/material"
+import {
+    Box,
+    Divider,
+    Grid,
+    Paper,
+    MenuItem,
+    Select,
+    TextField,
+    Typography,
+    FormControl,
+    InputLabel,
+    RadioGroup,
+    Radio,
+    FormControlLabel
+} from "@mui/material"
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import { SelectChangeEvent } from '@mui/material/Select';
 import { DataGrid, GridColDef } from "@mui/x-data-grid"
-import { useState } from 'react';
+import { useState, useContext, Fragment } from 'react';
 
 import AppPage from './layout/AppPage'
 import PageHeader from "./layout/PageHeader"
 import PageContent from "./layout/PageContent"
 import Breadcrumbs from "./layout/Breadcrumbs"
 import PageHeaderActions from "./layout/PageHeaderActions"
+import { ICourse } from "../hooks/api/useCoursesApi";
+import { getMonthStringFromNumber, makeCourseName, pluralize } from "../utils/helper";
+import { ICoursePreference, IPreferences } from "../hooks/api/usePreferencesApi";
+import { ITerm } from "../hooks/api/useTermsApi";
+import useApi from "../hooks/useApi";
+import { TermsContext, defaultTerms } from "../contexts/TermsContext";
 
-interface ICoursePreference {
-    courseName: string;
-    willingness: 'WILLING' | 'UNWILLING'
-    ability: 'ABLE' | 'WITH_DIFFICULTY' | 'UNABLE'
-}
+const DEFAULT_MAX_COURSES = 6;
 
-export interface IPreferences {
-    coursePreferences: ICoursePreference[]
-    additionalDetails: string
-}
+const defaultCourses: ICourse[] = [
+    {
+        courseId: 1,
+        courseCode: 'CSC',
+        courseNumber: '111',
+        courseName: 'Course name',
+    },
+    {
+        courseId: 2,
+        courseCode: 'CSC',
+        courseNumber: '115',
+        courseName: 'Course name',
+    },
+    {
+        courseId: 3,
+        courseCode: 'CSC',
+        courseNumber: '226',
+        courseName: 'Course name',
+    },
+    {
+        courseId: 4,
+        courseCode: 'CSC',
+        courseNumber: '225',
+        courseName: 'Course name',
+    },
+    {
+        courseId: 5,
+        courseCode: 'CSC',
+        courseNumber: '230',
+        courseName: 'Course name',
+    },
+    {
+        courseId: 6,
+        courseCode: 'CSC',
+        courseNumber: '320',
+        courseName: 'Course name',
+    },
+    {
+        courseId: 7,
+        courseCode: 'CSC',
+        courseNumber: '370',
+        courseName: 'Course name',
+    },
+    {
+        courseId: 8,
+        courseCode: 'CSC',
+        courseNumber: '360',
+        courseName: 'Course name',
+    },
+    {
+        courseId: 9,
+        courseCode: 'MATH',
+        courseNumber: '101',
+        courseName: 'Course name',
+    },
+    {
+        courseId: 10,
+        courseCode: 'MATH',
+        courseNumber: '110',
+        courseName: 'Course name',
+    },
+    {
+        courseId: 11,
+        courseCode: 'MATH',
+        courseNumber: '122',
+        courseName: 'Course name',
+    },
+    {
+        courseId: 12,
+        courseCode: 'SENG',
+        courseNumber: '265',
+        courseName: 'Course name',
+    },
+    {
+        courseId: 13,
+        courseCode: 'SENG',
+        courseNumber: '310',
+        courseName: 'Course name',
+    },
+    {
+        courseId: 14,
+        courseCode: 'SENG',
+        courseNumber: '275',
+        courseName: 'Course name',
+    },
+    {
+        courseId: 15,
+        courseCode: 'SENG',
+        courseNumber: '350',
+        courseName: 'Course name',
+    },
+    {
+        courseId: 16,
+        courseCode: 'SENG',
+        courseNumber: '360',
+        courseName: 'Course name',
+    },
+    {
+        courseId: 17,
+        courseCode: 'ENGR',
+        courseNumber: '110',
+        courseName: 'Course name',
+    }
+]
 
-const COURSES = [
-    'CSC 111',
-    'CSC 115',
-    'CSC 226',
-    'CSC 225',
-    'CSC 230',
-    'CSC 320',
-    'CSC 370',
-    'CSC 360',
-    'MATH 101',
-    'MATH 110',
-    'MATH 122',
-    'SENG 265',
-    'SENG 310',
-    'SENG 275',
-    'SENG 350',
-    'SENG 360',
-    'ENGR 110',
-];
-
-export const defaultCoursePreferences: ICoursePreference[] = COURSES.map((course) => ({
-    courseName: course,
+export const defaultCoursePreferences: ICoursePreference[] = defaultCourses.map((course: ICourse) => ({
+    courseId: course.courseId,
+    courseName: makeCourseName(course),
     willingness: 'WILLING',
     ability: 'ABLE'
 }));
 
 export const defaultPreferences: IPreferences = {
     coursePreferences: defaultCoursePreferences,
-    additionalDetails: ''
+    additionalDetails: '',
+    availability: defaultTerms.map((term) => ({
+        termId: term.id,
+        isAvailable: true
+    })),
+    load: defaultTerms
+        .reduce((years, term) => {
+            if (!years.includes(term.year)) {
+                years.push(term.year);
+            }
+            return years;
+        }, [])
+        .map((year) => ({ year, maxCourses: DEFAULT_MAX_COURSES }))
 }
 
 
@@ -61,6 +170,17 @@ interface IPreferencesViewerProps {
 }
 
 const PreferencesViewer = (props: IPreferencesViewerProps) => {
+    console.log({ props })
+    const termsContext = useContext(TermsContext);
+    const termYears = termsContext.terms()
+        .reduce((years, term) => {
+            if (!years.includes(term.year)) {
+                years.push(term.year);
+            }
+
+            return years;
+        }, []);
+
     const coursePreferenceColumns: GridColDef<ICoursePreference>[] = [
         {
             field: 'courseName',
@@ -74,7 +194,8 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
             valueFormatter: !props.editing && ((params) => {
                 return {
                     'WILLING': 'Willing',
-                    'UNWILLING': 'Unwilling'
+                    'UNWILLING': 'Unwilling',
+                    'VERY_WILLING': 'Very willing'
                 }[params.value]
             }),
             renderCell: props.editing && ((params) => {
@@ -94,6 +215,7 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
                     >
                         <MenuItem value='WILLING'>Willing</MenuItem>
                         <MenuItem value='UNWILLING'>Unilling</MenuItem>
+                        <MenuItem value='VERY_WILLING'>Very willing</MenuItem>
                     </Select>
                 )
             })
@@ -106,7 +228,6 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
                 return {
                     'ABLE': 'Able',
                     'WITH_DIFFICULTY': 'With Difficulty',
-                    'UNABLE': 'Unable'
                 }[params.value]
             }),
             renderCell: props.editing && ((params) => {
@@ -126,7 +247,6 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
                     >
                         <MenuItem value='ABLE'>Able</MenuItem>
                         <MenuItem value='WITH_DIFFICULTY'>With Difficulty</MenuItem>
-                        <MenuItem value='UNABLE'>Unable</MenuItem>
                     </Select>
                 )
             })
@@ -149,7 +269,133 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
                             sx={{ p: 0, height: 500 }}
                             columns={coursePreferenceColumns}
                             rows={props.preferences.coursePreferences}
+                            disableRowSelectionOnClick
                         />
+                    </Grid>
+                </Grid>
+
+                <Divider sx={{ my: 6 }} />
+
+                <Grid container spacing={3}>
+                    <Grid item xs={12} lg={4}>
+                        <Typography variant="h5">Term Availability and Course Load</Typography>
+                        <Box pt={1} pb={2} maxWidth="55ch">
+                            <Typography variant="body1" color="textSecondary">Indicate your availability and course load for the upcoming teaching terms.</Typography>
+                        </Box>
+                    </Grid>
+                    <Grid item xs={12} lg={8}>
+                        <Box>
+                            {termYears.map((termYear: number, index: number) => {
+                                const handleChangeLoad = (event, year) => {
+                                    const maxCourses = event.target.value;
+                                    const newLoad = [...props.preferences.load];
+                                    const yearIndex = newLoad.findIndex((load) => load.year === year)
+                                    newLoad[yearIndex] = { year, maxCourses };
+
+                                    props.onChange({
+                                        ...props.preferences,
+                                        load: newLoad
+                                    });
+                                }
+
+                                const maxCourses = props.preferences.load.find((load) => load.year === termYear)?.maxCourses;
+
+                                return (
+                                    <Fragment key={`year-${termYear}`}>
+                                        {termsContext
+                                            .terms()
+                                            .filter((term) => term.year === termYear)
+                                            .map((term) => {
+                                                const termName = `${getMonthStringFromNumber(term.month)} ${termYear}`;
+
+                                                const handleChangeAvailability = (event, updatedTerm: ITerm) => {
+                                                    const isAvailable: boolean = event.target.value !== 'false';
+                                                    const newAvailability = [...props.preferences.availability];
+                                                    const termIndex = newAvailability.findIndex((availability) => availability.termId === updatedTerm.id)
+                                                    newAvailability[termIndex] = {
+                                                        termId: updatedTerm.id,
+                                                        isAvailable
+                                                    };
+                
+                                                    props.onChange({
+                                                        ...props.preferences,
+                                                        availability: newAvailability
+                                                    });
+                                                }
+
+                                                const isAvailable = props.preferences.availability.find((availability) => availability.termId === term.id)?.isAvailable
+
+                                                return (                                
+                                                    <Box key={`term-${term.id}`} mb={2}>
+                                                        <Typography variant="h6">
+                                                            {termName}
+                                                        </Typography>
+                                                        <Typography color="textSecondary">
+                                                            {`Are you available to instruct for the ${termName} term?`}
+                                                        </Typography>
+                                                        <Box mt={1}>
+                                                            {props.editing ? (
+                                                                <RadioGroup
+                                                                    name={`term-${term.id}`}
+                                                                    onChange={(event) => handleChangeAvailability(event, term)}
+                                                                    value={isAvailable ? 'true' : 'false'}
+                                                                    sx={{ flexFlow: 'row wrap', pl: 1 }}>
+                                                                    <FormControlLabel
+                                                                        value="false"
+                                                                        control={<Radio required={true} color="primary" size="small" />}
+                                                                        label="No"
+                                                                    />
+                                                                    <FormControlLabel
+                                                                        value="true"
+                                                                        control={<Radio required={true} color="primary" size="small" />}
+                                                                        label="Yes"
+                                                                    />
+                                                                </RadioGroup>
+                                                            ) : (
+                                                                <Typography>
+                                                                    <strong>{isAvailable ? 'Yes' : 'No'}</strong>
+                                                                </Typography>
+                                                            )}
+                                                        </Box>
+                                                    </Box>
+                                                )
+                                            })
+                                        }
+                                       
+                                       <Box mt={2}>
+                                            <Typography variant="h6">
+                                                Course Load for {termYear}
+                                            </Typography>
+                                            <Typography color="textSecondary">
+                                                Enter your maximum course load for the {termYear} teaching year
+                                            </Typography>
+                                            <Box mt={2}>
+                                                {props.editing ? (
+                                                    <TextField
+                                                        name={`load-${termYear}`}
+                                                        size='small'
+                                                        type='number'
+                                                        // InputProps={{ inputProps: { min: 0, max: 6 }}}
+                                                        value={maxCourses}
+                                                        onChange={(event) => handleChangeLoad(event, termYear)}
+                                                        label='Course Load'
+                                                        required
+                                                    />
+                                                ) : (
+                                                    <Typography>
+                                                        <strong>{pluralize(maxCourses, `${maxCourses} course`)}</strong>
+                                                    </Typography>
+                                                )}
+                                            </Box>
+                                        </Box>
+                                        
+                                        {index < termYears.length - 1 && (
+                                            <Divider sx={{ my: 3 }} />
+                                        )}
+                                    </Fragment>
+                                )
+                            })}
+                        </Box>
                     </Grid>
                 </Grid>
 
