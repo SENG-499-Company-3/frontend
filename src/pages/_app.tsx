@@ -8,6 +8,7 @@ import '../assets/styles/main.scss'
 import { AuthContextProvider } from '../contexts/AuthContext';
 import Layout from '../components/layout/AppLayout';
 import { ScheduleContextProvider } from '../contexts/ScheduleContext';
+import { TermsContextProvider } from '../contexts/TermsContext';
 
 
 const darkTheme = createTheme({
@@ -40,13 +41,15 @@ export default function MyApp({ Component, pageProps }: AppProps) {
 
 	return (
 		<AuthContextProvider>
-			<ScheduleContextProvider>
-				<ThemeProvider theme={theme}>
-					<Layout onToggleThemeMode={switchTheme}>
-						<Component {...pageProps} />
-					</Layout>
-				</ThemeProvider>
-			</ScheduleContextProvider>
+			<TermsContextProvider>
+				<ScheduleContextProvider>
+					<ThemeProvider theme={theme}>
+						<Layout onToggleThemeMode={switchTheme}>
+							<Component {...pageProps} />
+						</Layout>
+					</ThemeProvider>
+				</ScheduleContextProvider>
+			</TermsContextProvider>
 		</AuthContextProvider>
 	);
 }

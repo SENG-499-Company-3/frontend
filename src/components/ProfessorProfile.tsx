@@ -5,10 +5,11 @@ import PageHeader from "./layout/PageHeader"
 import dynamic from "next/dynamic";
 import { courseScheduleData } from "./common/sampleData/courseSchedule";
 import PageContent from "./layout/PageContent";
-import PreferencesViewer, { IPreferences, defaultPreferences } from "./PreferencesViewer";
+import PreferencesViewer, { defaultPreferences } from "./PreferencesViewer";
 import PageHeaderActions from "./layout/PageHeaderActions";
 import { IUser } from "../hooks/api/useUserApi";
 import useApi from "../hooks/useApi";
+import { IPreferences } from "../hooks/api/usePreferencesApi";
 
 interface IProfessorProfileProps {
     professor: IUser;
@@ -29,15 +30,10 @@ const ProfessorProfile = (props: IProfessorProfileProps) => {
     const profCourses = courseScheduleData.filter(course => course.ProfessorID === props.professor?.id);
 
     useEffect(() => {
-        api.preferences.getPreferencesByUserId(props.professor.id).then((preferences) => {
-            let parsedPreferences = { ...defaultPreferences };
-            try {
-                parsedPreferences = JSON.parse(preferences);
-                setPreferences(parsedPreferences);
-            } catch {
-                return;
-            }
-        })
+        api.preferences.getPreferencesByUserId(props.professor.id)
+            .then((preferences) => {
+                setPreferences(preferences);
+            })
     }, [props.professor.id]);
 
     return (

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { format, parse } from "date-fns";
+import { ICourse } from "../hooks/api/useCoursesApi";
 
 export const useSmallScreen = () => {
   const [isSmallScreen, setIsSmallScreen] = useState(false);
@@ -153,3 +154,29 @@ export const courseBlocks = [
     'TF 14:30 16:30', //N
     'TR 16:30 17:50', //O
 ];
+
+/**
+ * Creates a human-readible string comprising the course code and course number
+ * for the given coruse
+ * @param course The course the get the name of
+ */
+export const makeCourseName = (course: ICourse): string => {
+  return `${course.courseCode} ${course.courseNumber}`;
+}
+
+export const getMonthStringFromNumber = (month: number): string => {
+  return {
+    1: 'Spring',
+    2: 'February',
+    3: 'March',
+    4: 'April',
+    5: 'Summer',
+    6: 'June',
+    7: 'July',
+    8: 'August',
+    9: 'Fall',
+    10: 'October',
+    11: 'November',
+    12: 'December'
+  }[month] || ''
+}
