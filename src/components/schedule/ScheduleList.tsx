@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { DataGrid, GridRowsProp, GridColDef, GridToolbar, GridRowModel, GridEventListener, GridRowEditStopReasons, GridRowId, GridRowModes, GridActionsCellItem, GridRowModesModel, GridValueGetterParams, GridValueSetterParams } from '@mui/x-data-grid';
 import { courseScheduleData } from '../common/sampleData/courseSchedule'
 import WeekdayTable  from './WeekdayTable'
@@ -97,11 +97,30 @@ const addRow = (course: Course, id: number) => {
 };
 
 interface IScheduleListProps {
-    onChange: () => void
+    onChange: () => void,
+    courses: Course[]
+}
+
+function getRows(courses: Course[]) {
+    const initialRows: GridRowsProp = courses.map((course: Course, index: number ) => ({
+        id: index,
+        term: course.Term,
+        course: course.Subj + ' ' + course.Num,
+        section: course.Section,
+        title: course.Title,
+        scheduleType: course.SchedType,
+        instructor: course.Instructor,
+        location: course.Bldg + ' ' + course.Room,
+        start: convertToTime(course.Begin),
+        end: convertToTime(course.End),
+        days: course.Days,
+        capacity: course.Cap,
+      }));
+    return initialRows;
 }
 
 const ScheduleList = (props: IScheduleListProps) => {
-    const [rows, setRows] = useState(initialRows);
+    const [rows, setRows] = useState(getRows(props.courses));
     const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
     const [numRows, setNumRows] = useState<number>(initialRows.length);
     const [isAddCourseOpen, setIsAddCourseOpen] = useState(false);
@@ -109,6 +128,10 @@ const ScheduleList = (props: IScheduleListProps) => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [currentRowID, setCurrentRowID] = useState<GridRowId>(null);
     const [currentCourse, setCurrentCourse] = useState<Course>(null);
+
+    useEffect(() => {
+        setRows(getRows(props.courses));
+    }, [props.courses]);
 
     /* Add row functions */
     const handleAddCourse = () => {
@@ -314,4 +337,4 @@ const ScheduleList = (props: IScheduleListProps) => {
     )
 }
 
-export default ScheduleList
+export default ScheduleList;
