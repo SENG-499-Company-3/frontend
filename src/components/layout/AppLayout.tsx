@@ -13,14 +13,6 @@ const AppLayout = (props: PropsWithChildren<ILayoutProps>) => {
     const authApi = useApi().auth;
     const [isSideNavigationShown, setIsSideNavigationShown] = useState(false);
 
-    useEffect(() => {
-        authApi.self().then((user) => {
-            console.log("Set user: ", user)
-        }).catch((error) => {
-            console.log(error)
-        })
-    }, [authContext.userToken()])
-
     return (
         <Box sx={{ minHeight: '100vh', backgroundColor: (theme) => theme.palette.mode === 'light' ? '#EEE' : '#444' }}>
             <TopNavigation onToggleThemeMode={props.onToggleThemeMode} />

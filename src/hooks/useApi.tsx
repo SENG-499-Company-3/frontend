@@ -44,7 +44,12 @@ const useApi = () => {
 	const classroom = useClassroomApi(axiosInstance);
 	const schedule = useScheduleApi(axiosInstance);
 
+	useEffect(() => {
+		auth.self();
+	}, [axiosInstance])
+
 	return {
+		_axiosInstance: axiosInstance,
 		auth,
 		user,
 		classroom,

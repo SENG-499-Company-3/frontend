@@ -19,8 +19,6 @@ const ProfessorPage = () => {
             return;
         }
 
-        console.log({ userId })
-
         setLoading(true);
         api.user.getUserById(userId)
             .then((user: IUser) => {

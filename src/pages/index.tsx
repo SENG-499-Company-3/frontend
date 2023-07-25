@@ -181,7 +181,7 @@ const HomePage = () => {
                                 variant='contained'
                                 startIcon={<PublicIcon />}
                                 loading={generating}
-                                onClick={() => _handleGenerate()}
+                                onClick={() => handleGenerate()}
                             >
                                 Generate Schedule
                             </LoadingButton>

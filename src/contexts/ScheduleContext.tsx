@@ -31,8 +31,8 @@ export const ScheduleContextProvider = (props: PropsWithChildren) => {
     const scheduleContext: IScheduleContext = {
         currentSchedule: () => currentSchedule,
         generateSchedule: () => api.schedule.generate()
-            .then((schedule: Schedule) => {
-                setCurrentSchedule(schedule);
+            .then(() => {
+                //
             }),
         _setCurrentSchedule: setCurrentSchedule,
     }
