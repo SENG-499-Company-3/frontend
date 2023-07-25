@@ -10,7 +10,7 @@ export const TermsContext = createContext<ITermsContext>({
     terms: () => []
 });
 
-const defaultTerms: ITerm[] = [
+export const defaultTerms: ITerm[] = [
     {
         id: 1,
         month: 5,

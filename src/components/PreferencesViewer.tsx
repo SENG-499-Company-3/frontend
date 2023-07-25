@@ -17,7 +17,7 @@ import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import { SelectChangeEvent } from '@mui/material/Select';
 import { DataGrid, GridColDef } from "@mui/x-data-grid"
-import { useState, useContext } from 'react';
+import { useState, useContext, Fragment } from 'react';
 
 import AppPage from './layout/AppPage'
 import PageHeader from "./layout/PageHeader"
@@ -25,11 +25,13 @@ import PageContent from "./layout/PageContent"
 import Breadcrumbs from "./layout/Breadcrumbs"
 import PageHeaderActions from "./layout/PageHeaderActions"
 import { ICourse } from "../hooks/api/useCoursesApi";
-import { getMonthStringFromNumber, makeCourseName } from "../utils/helper";
+import { getMonthStringFromNumber, makeCourseName, pluralize } from "../utils/helper";
 import { ICoursePreference, IPreferences } from "../hooks/api/usePreferencesApi";
 import { ITerm } from "../hooks/api/useTermsApi";
 import useApi from "../hooks/useApi";
-import { TermsContext } from "../contexts/TermsContext";
+import { TermsContext, defaultTerms } from "../contexts/TermsContext";
+
+const DEFAULT_MAX_COURSES = 6;
 
 const defaultCourses: ICourse[] = [
     {
@@ -146,30 +148,18 @@ export const defaultCoursePreferences: ICoursePreference[] = defaultCourses.map(
 export const defaultPreferences: IPreferences = {
     coursePreferences: defaultCoursePreferences,
     additionalDetails: '',
-    availability: [
-        {
-            termId: 1,
-            isAvailable: false
-        },
-        {
-            termId: 2,
-            isAvailable: true
-        },
-        {
-            termId: 3,
-            isAvailable: true
-        }
-    ],
-    load: [
-        {
-            year: 2023,
-            maxCourses: 4
-        },
-        {
-            year: 2024,
-            maxCourses: 4
-        }
-    ]
+    availability: defaultTerms.map((term) => ({
+        termId: term.id,
+        isAvailable: true
+    })),
+    load: defaultTerms
+        .reduce((years, term) => {
+            if (!years.includes(term.year)) {
+                years.push(term.year);
+            }
+            return years;
+        }, [])
+        .map((year) => ({ year, maxCourses: DEFAULT_MAX_COURSES }))
 }
 
 
@@ -180,9 +170,16 @@ interface IPreferencesViewerProps {
 }
 
 const PreferencesViewer = (props: IPreferencesViewerProps) => {
-    const terms = useContext(TermsContext).terms();
+    console.log({ props })
+    const termsContext = useContext(TermsContext);
+    const termYears = termsContext.terms()
+        .reduce((years, term) => {
+            if (!years.includes(term.year)) {
+                years.push(term.year);
+            }
 
-    console.log({ terms })
+            return years;
+        }, []);
 
     const coursePreferenceColumns: GridColDef<ICoursePreference>[] = [
         {
@@ -281,57 +278,121 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
 
                 <Grid container spacing={3}>
                     <Grid item xs={12} lg={4}>
-                        <Typography variant="h5">Term Availability</Typography>
+                        <Typography variant="h5">Term Availability and Course Load</Typography>
                         <Box pt={1} pb={2} maxWidth="55ch">
-                            <Typography variant="body1" color="textSecondary">Indicate your availability for the upcoming teaching terms.</Typography>
+                            <Typography variant="body1" color="textSecondary">Indicate your availability and course load for the upcoming teaching terms.</Typography>
                         </Box>
                     </Grid>
                     <Grid item xs={12} lg={8}>
                         <Box>
-                            {terms.map((term) => {
-                                const termName = `${getMonthStringFromNumber(term.month)} ${term.year}`;
-
-                                const handleChange = (event, term: ITerm) => {
-                                    const isAvailable: boolean = event.target.value !== false;
-                                    const newAvailability = [...props.preferences.availability];
-                                    const termIndex = newAvailability.findIndex((availability) => availability.termId === term.id)
-                                    newAvailability[termIndex] = {
-                                        termId: term.id,
-                                        isAvailable
-                                    };
+                            {termYears.map((termYear: number, index: number) => {
+                                const handleChangeLoad = (event, year) => {
+                                    const maxCourses = event.target.value;
+                                    const newLoad = [...props.preferences.load];
+                                    const yearIndex = newLoad.findIndex((load) => load.year === year)
+                                    newLoad[yearIndex] = { year, maxCourses };
 
                                     props.onChange({
                                         ...props.preferences,
-                                        availability: newAvailability
+                                        load: newLoad
                                     });
                                 }
 
-                                return (                                
-                                    <Box key={term.id} mb={2}>
-                                        <Typography component="legend" variant="h6">
-                                            {termName}
-                                        </Typography>
-                                        <Typography color="textSecondary">
-                                            {`Are you available to instruct for the ${termName} term?`}
-                                        </Typography>
-                                        <Box mt={1} pl={1}>
-                                            <RadioGroup
-                                                name={`term-${term.id}`}
-                                                onChange={(event) => handleChange(event, term)}
-                                                sx={{ flexFlow: 'row wrap' }}>
-                                                <FormControlLabel
-                                                    value="false"
-                                                    control={<Radio required={true} color="primary" size="small" />}
-                                                    label="No"
-                                                />
-                                                <FormControlLabel
-                                                    value="true"
-                                                    control={<Radio required={true} color="primary" size="small" />}
-                                                    label="Yes"
-                                                />
-                                            </RadioGroup>
+                                const maxCourses = props.preferences.load.find((load) => load.year === termYear)?.maxCourses;
+
+                                return (
+                                    <Fragment key={`year-${termYear}`}>
+                                        {termsContext
+                                            .terms()
+                                            .filter((term) => term.year === termYear)
+                                            .map((term) => {
+                                                const termName = `${getMonthStringFromNumber(term.month)} ${termYear}`;
+
+                                                const handleChangeAvailability = (event, updatedTerm: ITerm) => {
+                                                    const isAvailable: boolean = event.target.value !== 'false';
+                                                    const newAvailability = [...props.preferences.availability];
+                                                    const termIndex = newAvailability.findIndex((availability) => availability.termId === updatedTerm.id)
+                                                    newAvailability[termIndex] = {
+                                                        termId: updatedTerm.id,
+                                                        isAvailable
+                                                    };
+                
+                                                    props.onChange({
+                                                        ...props.preferences,
+                                                        availability: newAvailability
+                                                    });
+                                                }
+
+                                                const isAvailable = props.preferences.availability.find((availability) => availability.termId === term.id)?.isAvailable
+
+                                                return (                                
+                                                    <Box key={`term-${term.id}`} mb={2}>
+                                                        <Typography variant="h6">
+                                                            {termName}
+                                                        </Typography>
+                                                        <Typography color="textSecondary">
+                                                            {`Are you available to instruct for the ${termName} term?`}
+                                                        </Typography>
+                                                        <Box mt={1}>
+                                                            {props.editing ? (
+                                                                <RadioGroup
+                                                                    name={`term-${term.id}`}
+                                                                    onChange={(event) => handleChangeAvailability(event, term)}
+                                                                    value={isAvailable ? 'true' : 'false'}
+                                                                    sx={{ flexFlow: 'row wrap', pl: 1 }}>
+                                                                    <FormControlLabel
+                                                                        value="false"
+                                                                        control={<Radio required={true} color="primary" size="small" />}
+                                                                        label="No"
+                                                                    />
+                                                                    <FormControlLabel
+                                                                        value="true"
+                                                                        control={<Radio required={true} color="primary" size="small" />}
+                                                                        label="Yes"
+                                                                    />
+                                                                </RadioGroup>
+                                                            ) : (
+                                                                <Typography>
+                                                                    <strong>{isAvailable ? 'Yes' : 'No'}</strong>
+                                                                </Typography>
+                                                            )}
+                                                        </Box>
+                                                    </Box>
+                                                )
+                                            })
+                                        }
+                                       
+                                       <Box mt={2}>
+                                            <Typography variant="h6">
+                                                Course Load for {termYear}
+                                            </Typography>
+                                            <Typography color="textSecondary">
+                                                Enter your maximum course load for the {termYear} teaching year
+                                            </Typography>
+                                            <Box mt={2}>
+                                                {props.editing ? (
+                                                    <TextField
+                                                        name={`load-${termYear}`}
+                                                        size='small'
+                                                        type='number'
+                                                        InputProps={{ inputProps: { min: 0, max: 6 }}}
+                                                        value={maxCourses}
+                                                        onChange={(event) => handleChangeLoad(event, termYear)}
+                                                        label='Course Load'
+                                                        required
+                                                    />
+                                                ) : (
+                                                    <Typography>
+                                                        <strong>{pluralize(maxCourses, `${maxCourses} course`)}</strong>
+                                                    </Typography>
+                                                )}
+                                            </Box>
                                         </Box>
-                                    </Box>
+                                        
+                                        {index < termYears.length - 1 && (
+                                            <Divider sx={{ my: 3 }} />
+                                        )}
+                                    </Fragment>
                                 )
                             })}
                         </Box>
