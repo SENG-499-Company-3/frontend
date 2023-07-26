@@ -19,13 +19,13 @@ interface IScheduleContext {
     currentSchedule: () => Schedule
     _setCurrentSchedule: (schedule: Schedule) => void
 
-    //The schedule with any changes made by the logged in user
+    //The schedule with any changes made by the logged in user. This should pull/save in local storage: see below for useEffects
     workingSchedule: () => Schedule
     _setWorkingSchedule: (schedule: Schedule) => void
 
     //The currently visible schedule - ie, the filtered schedule WITH any edits
     displaySchedule: () => Course[]
-    _setDisplaySchedule: (currentAssignment: Course[]) => void
+    _setDisplaySchedule: (display: Course[]) => void
 
     //Schedule functions
     fetchSchedule: () => Promise<void>
@@ -33,7 +33,8 @@ interface IScheduleContext {
     validateSchedule: () => Promise<void>
     //TBD
     //saveSchedule: () => Promise<void>
-    //publishSchedule: () => Promise<void> 
+    //publishSchedule: () => Promise<void>
+    //clearWorking: () => void
 }
 
 export const ScheduleContext = createContext<IScheduleContext>({
@@ -53,8 +54,8 @@ export const ScheduleContext = createContext<IScheduleContext>({
 
 export const ScheduleContextProvider = (props: PropsWithChildren) => {
     const [currentSchedule, setCurrentSchedule] = useState<Schedule>(null);
-    const [workingSchedule, setWorkingSchedule] = useState(currentSchedule);
-    const [displaySchedule, setDisplaySchedule] = useState(workingSchedule.scheduledCourses);
+    const [workingSchedule, setWorkingSchedule] = useState<Schedule>(null);
+    const [displaySchedule, setDisplaySchedule] = useState<Course[]>([]);
     const api = useApi();
 
     const scheduleContext: IScheduleContext = {
@@ -102,9 +103,18 @@ export const ScheduleContextProvider = (props: PropsWithChildren) => {
         }
     }, []);
 
+    //The currentSchedule should only change when fetch or save are performed - at which point, the working schedule should be overwritten (unless local found)
+    useEffect(() => {
+        if (currentSchedule) {
+            setWorkingSchedule(currentSchedule);
+            setDisplaySchedule(workingSchedule.scheduledCourses);
+        }
+    }, [currentSchedule]);
+
+    //When the workingSchedule is updated, save to local storage
     useEffect(() => {
         if (workingSchedule) {
-            localStorage.setItem(WORKING_SCHEDULE, workingSchedule)
+            localStorage.setItem(WORKING_SCHEDULE, workingSchedule.toString())
         }
     }, [workingSchedule]);
 

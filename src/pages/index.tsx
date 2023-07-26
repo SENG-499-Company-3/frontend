@@ -121,7 +121,7 @@ const HomePage = () => {
             /*
             //Read ScheduleContext for current data
             //Filter out untouched sections(terms) - set aside? 
-            const unchangedSchedule = scheduleContext.currentSchedule.filter((item) => item.Term !== currentTermValue[0]);
+            const unchangedSchedule = scheduleContext.workingSchedule().scheduledCourses.filter((item) => item.Term !== currentTermValue[0]);
 
             //Replace changed sections with changedCourses OR just
             //Mash both back into the ScheduleContext
@@ -132,6 +132,7 @@ const HomePage = () => {
             */
         } else {
             ScheduleContext.setWorkingSchedule(changedCourses);
+            scheduleContext.setDisplaySchedule(changedCourses);
             //TODO: store in ScheduleContext instead
         };
     }
