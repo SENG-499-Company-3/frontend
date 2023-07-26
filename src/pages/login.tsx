@@ -9,7 +9,7 @@ import Paper from '@mui/material/Paper'
 import CircularProgress from '@mui/material/CircularProgress';
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography/Typography';
+import Typography from '@mui/material/Typography';
 import { IExistingUserDetails } from '../types/auth.d'
 import { AuthContext } from '../contexts/AuthContext'
 import { useRouter } from 'next/router'

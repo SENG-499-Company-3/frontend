@@ -1,8 +1,8 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import ScheduleList from '../components/schedule/ScheduleList'
 import AppPage from '../components/layout/AppPage'
 import PageHeader from '../components/layout/PageHeader'
-import { Alert, AlertColor, AlertProps, AlertTitle, Box, Button, Collapse, Container, FormControl, InputLabel, MenuItem, Paper, Select, Typography } from '@mui/material'
+import { Alert, AlertColor, Divider, AlertTitle, Box, Button, Collapse, Container, FormControl, InputLabel, MenuItem, Paper, Select, Typography } from '@mui/material'
 import PageHeaderActions from '../components/layout/PageHeaderActions'
 import { courseScheduleData } from '../components/common/sampleData/courseSchedule'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -17,11 +17,14 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { TermsContext } from '../contexts/TermsContext'
 import { getMonthStringFromNumber } from '../utils/helper'
 import { ITerm } from '../hooks/api/useTermsApi'
+import { DataGrid } from '@mui/x-data-grid'
+import CoursesTable from '../components/CoursesTable'
 
 const HomePage = () => {
     const [generating, setGenerating] = useState<boolean>(false);
     const [validating, setValidating] = useState<boolean>(false);
     const [publishing, setPulbishing] = useState<boolean>(false);
+    const [showNewCourseDialog, setShowNewCourseDialog] = useState<boolean>(false);
     const scheduleContext = useContext(ScheduleContext);
     const termsContext = useContext(TermsContext);
     const terms = termsContext.terms();
@@ -48,8 +51,11 @@ const HomePage = () => {
             setCourses(courseScheduleData.filter((item) => item.Term === selectedTermValue[0]));
         }
         */
-      };
+    };
     
+    useEffect(() => {
+        setCurrentTerm(terms[0])
+    }, [terms]) 
 
     switch (scheduleStatus) {
         case 'UNDEFINED':
@@ -156,9 +162,32 @@ const HomePage = () => {
                                 </Select>
                             </FormControl>
                         </Box>
-                        <Button variant='outlined' startIcon={<PublicIcon />}>Validate and Publish</Button>
-                        <Button disabled variant='outlined' startIcon={<SchoolIcon />} endIcon={<ExpandMoreIcon />}>Course Options</Button>
-                        <Button variant='outlined' startIcon={<CalendarMonthIcon />} endIcon={<ExpandMoreIcon />}>Schedule Options</Button>
+                        <LoadingButton
+                            variant='contained'
+                            disabled={['UNDEFINED', 'VALID_UNPUBLISHED', 'VALID_PUBLISHED', 'INVALID'].includes(scheduleStatus)}
+                            startIcon={<PublicIcon />}
+                            onClick={() => handleValidate()}
+                            loading={validating}
+                        >Validate Schedule</LoadingButton>
+
+                        {scheduleStatus === 'VALID_UNPUBLISHED' && (
+                            <LoadingButton
+                                variant='contained'
+                                color='success'
+                                startIcon={<PublicIcon />}
+                                onClick={() => handlePublish()}
+                                loading={publishing}
+                            >Publish Schedule</LoadingButton>
+                        )}
+
+                        {['UNSAVED', 'PENDING', 'VALID_UNPUBLISHED', 'INVALID'].includes(scheduleStatus) && (
+                            <Button
+                                variant='outlined'
+                                color='error'
+                                startIcon={<DeleteIcon />}
+                                onClick={() => handleDiscard()}
+                            >Discard Changes</Button>
+                        )}
                     </PageHeaderActions>
                 </Box>
                 <Collapse in={scheduleStatus !== 'UNDEFINED'}>
@@ -193,6 +222,18 @@ const HomePage = () => {
                             >
                                 Generate Schedule
                             </LoadingButton>
+                            <Divider sx={{ py: 2 }} />
+                            <CoursesTable
+                                showNewCourseDialog={showNewCourseDialog}
+                                onCloseNewCourseDialog={() => setShowNewCourseDialog(false)}
+                                DataGridProps={{
+                                    checkboxSelection: true,
+                                    sx: {
+                                        height: 500,
+                                        border: 0
+                                    }
+                                }}
+                            />
                         </Paper>
                     </Container>
                 </PageContent>
