@@ -14,34 +14,20 @@ import PageContent from '../components/layout/PageContent'
 import { ScheduleContext, ScheduleStatus } from '../contexts/ScheduleContext'
 import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
-
-const termOptions = [
-    {
-        title: 'Summer 2023',
-        value: [202305],
-    },
-    {
-        title: 'Fall 2023',
-        value: [202309],
-    },
-    {
-        title: 'Spring 2024',
-        value: [202401],
-    },
-    {
-        title: 'All',
-        value: [202305, 202309, 202401],
-    }, 
-]
+import { TermsContext } from '../contexts/TermsContext'
+import { getMonthStringFromNumber } from '../utils/helper'
+import { ITerm } from '../hooks/api/useTermsApi'
 
 const HomePage = () => {
     const [generating, setGenerating] = useState<boolean>(false);
     const [validating, setValidating] = useState<boolean>(false);
     const [publishing, setPulbishing] = useState<boolean>(false);
     const scheduleContext = useContext(ScheduleContext);
+    const termsContext = useContext(TermsContext);
+    const terms = termsContext.terms();
 
     const scheduleStatus = scheduleContext.currentSchedule()?.status || 'UNDEFINED';
-    const [term, setTerm] = React.useState(termOptions[3].title);
+    const [currentTerm, setCurrentTerm] = React.useState<ITerm | null>(terms[0] || null);
     const [courses, setCourses] = React.useState(courseScheduleData);
 
     let scheduleStatusTitle = ''; 
@@ -50,15 +36,18 @@ const HomePage = () => {
     let alertSeverity: AlertColor = 'info'
     
     const handleTermChange = (event) => {
-        const selectedTerm = event.target.value;
-        const selectedTermValue = termOptions.find((option) => option.title === selectedTerm).value;
-        setTerm(selectedTerm);
+        const selectedTermId = event.target.value;
+        const selectedTerm = terms.find((term) => term.id === selectedTermId)
+        setCurrentTerm(selectedTerm);
       
+        /**
+         * @TODO
         if (selectedTermValue.length > 1) { // 'All' is selected
-          setCourses(courseScheduleData);
+            setCourses(courseScheduleData);
         } else {
-          setCourses(courseScheduleData.filter((item) => item.Term === selectedTermValue[0]));
+            setCourses(courseScheduleData.filter((item) => item.Term === selectedTermValue[0]));
         }
+        */
       };
     
 
@@ -152,16 +141,16 @@ const HomePage = () => {
                                 <InputLabel id='term-select-label'>Term</InputLabel>
                                 <Select
                                     label='Term'
-                                    value={term}
+                                    value={currentTerm?.id}
                                     labelId='term-select-label'
                                     variant="outlined"
                                     onChange={handleTermChange}
                                     sx={{ minWidth: 150 }}
                                     size='small'
                                 >
-                                    {termOptions.map((term, index) => (
-                                        <MenuItem value={term.title} key={index}>
-                                        {term.title}
+                                    {terms.map((term) => (
+                                        <MenuItem value={term.id} key={term.id}>
+                                            {getMonthStringFromNumber(term.month)} {term.year}
                                         </MenuItem>
                                     ))}
                                 </Select>
