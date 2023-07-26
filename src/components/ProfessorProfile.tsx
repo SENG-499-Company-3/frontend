@@ -1,5 +1,5 @@
 import { Avatar, Box, Button, Paper, Tab, Tabs, Typography } from "@mui/material"
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import AppPage from "./layout/AppPage"
 import PageHeader from "./layout/PageHeader"
 import dynamic from "next/dynamic";
@@ -12,7 +12,7 @@ import useApi from "../hooks/useApi";
 import { IPreferences } from "../hooks/api/usePreferencesApi";
 
 interface IProfessorProfileProps {
-    professor: IUser;
+    professor: IUser | null;
     canEditPreferences: boolean;
     canEditCalendar: boolean;
 }
@@ -29,12 +29,13 @@ const ProfessorProfile = (props: IProfessorProfileProps) => {
 
     const profCourses = courseScheduleData.filter(course => course.ProfessorID === props.professor?.id);
 
+    const professorId = useMemo(() => props.professor?.id, [props.professor]);
     useEffect(() => {
-        api.preferences.getPreferencesByUserId(props.professor.id)
+        api.preferences.getPreferencesByUserId(professorId)
             .then((preferences) => {
                 setPreferences(preferences);
             })
-    }, [props.professor.id]);
+    }, [professorId]);
 
     return (
         <AppPage>
