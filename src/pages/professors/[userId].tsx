@@ -51,3 +51,11 @@ const ProfessorPage = () => {
 }
 
 export default ProfessorPage
+
+export async function generateStaticParams() {
+    const users = [];
+
+    return users.map((user) => ({
+        userId: user.id
+    }))
+}
