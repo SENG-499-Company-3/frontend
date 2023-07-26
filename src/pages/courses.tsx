@@ -70,7 +70,6 @@ const CoursesPage = () => {
     const api = useApi();
     const courseContext = useContext(CourseContext);
 
-    const [courses, setCourses] = useState<ICourse[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [newCourseName, setNewCourseName] = useState<string>('');
     const [newCourseCode, setNewCourseCode] = useState<string>('');
@@ -82,20 +81,24 @@ const CoursesPage = () => {
 
     useEffect(() => {
         // setLoading(true);
-        api.courses.listCourses()
-            .then((courses: ICourse[]) => {
-                setCourses(courses);
-            })
-            .catch(() => {
-                console.error("Failed to fetch courses.")
-            })
-            .finally(() => {
-                setLoading(false);
-            })
+        courseContext.fetchCourses();
+
     }, []);
 
     const handleCreateCourse = () => {
-        //
+        const newCourse: Omit<ICourse, 'courseId'> = {
+            courseCode: newCourseCode,
+            courseNumber: newCourseNumber,
+            courseName: newCourseName,
+        }
+
+        api.courses.createCourse(newCourse).then((newCourse) => {
+            courseContext.addCourse(newCourse);
+            setShowCreateDialog(false);
+            setNewCourseCode('');
+            setNewCourseName('');
+            setNewCourseNumber('');
+        })
     }
 
     const handleDeleteCourse = (course: ICourse) => {
@@ -177,7 +180,7 @@ const CoursesPage = () => {
                     {loading ? (
                         <LoadingSpinner />
                     ) : (
-                        <CoursesTable courses={defaultCourses} handleDeleteCourse={(courseId) => setdeletingCourse(courseId)}/>
+                        <CoursesTable courses={courseContext.courses()} handleDeleteCourse={(courseId) => setdeletingCourse(courseId)}/>
                     )}
                 </PageContent>
             </AppPage>

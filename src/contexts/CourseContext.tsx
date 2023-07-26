@@ -111,7 +111,7 @@ interface ICourseContext {
     courses: () => ICourse[]
     addCourse: (newCourse: ICourse) => void
     deleteCourse: (course: ICourse) => void
-    fetchCourses: () => Promise<ICourse[]>
+    fetchCourses: () => Promise<void>
 }
 
 export const CourseContext = createContext<ICourseContext>({
@@ -134,7 +134,17 @@ export const CourseContextProvider = (props: PropsWithChildren) => {
         deleteCourse: (deletedCourse: ICourse) => {
             setCourses(courses.filter((course) => course.courseId !== deletedCourse.courseId))
         },
-        fetchCourses: () => Promise.resolve(defaultCourses)
+        fetchCourses: () => api.courses.listCourses()
+            .then((courses) => {
+                setCourses(courses)
+            })
+            .catch(() => {
+                console.error("Failed to fetch courses.")
+                setCourses(defaultCourses)
+            })
+            .finally(() => {
+                //
+            })
     }
 
     return (
