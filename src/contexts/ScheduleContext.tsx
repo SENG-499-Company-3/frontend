@@ -1,6 +1,6 @@
 import React, { PropsWithChildren, createContext, useEffect, useState } from 'react';
 import { WORKING_SCHEDULE } from '../hooks/api/useScheduleApi';
-import useApi from '../hooks/useApi'
+import useApi from '../hooks/useApi';
 
 export type ScheduleStatus =
     | 'UNDEFINED'
@@ -25,14 +25,15 @@ interface IScheduleContext {
 
     //The currently visible schedule - ie, the filtered schedule WITH any edits
     displaySchedule: () => Course[]
-    _setDisplaySchedule: (schedule: Schedule) => void
+    _setDisplaySchedule: (currentAssignment: Course[]) => void
 
     //Schedule functions
+    fetchSchedule: () => Promise<void>
     generateSchedule: () => Promise<void>
-    /* TBD if these are necessary here
     validateSchedule: () => Promise<void>
-    saveSchedule: () => Promise<void>
-    publishSchedule: () => Promise<void> */
+    //TBD
+    //saveSchedule: () => Promise<void>
+    //publishSchedule: () => Promise<void> 
 }
 
 export const ScheduleContext = createContext<IScheduleContext>({
@@ -42,34 +43,56 @@ export const ScheduleContext = createContext<IScheduleContext>({
     _setWorkingSchedule: () => { },
     displaySchedule: () => null,
     _setDisplaySchedule: () => { },
-    generateSchedule: () => Promise.reject()
+
+    fetchSchedule: () => Promise.reject(),
+    generateSchedule: () => Promise.reject(),
+    validateSchedule: () => Promise.reject(),
+    //saveSchedule: () => Promise.reject(),
+    //publishSchedule: () => Promise.reject()
 });
 
 export const ScheduleContextProvider = (props: PropsWithChildren) => {
     const [currentSchedule, setCurrentSchedule] = useState<Schedule>(null);
     const [workingSchedule, setWorkingSchedule] = useState(currentSchedule);
-    const [displaySchedule, setDisplaySchedule] = useState<Exclude<Schedule,'status'>>(workingSchedule);
+    const [displaySchedule, setDisplaySchedule] = useState(workingSchedule.scheduledCourses);
     const api = useApi();
 
     const scheduleContext: IScheduleContext = {
-        currentSchedule: () => api.schedule.getSchedule()
-            .then((schedule: Schedule) => {
-                setCurrentSchedule(schedule);
-            }),
+        currentSchedule: () => currentSchedule,
         workingSchedule: () => workingSchedule,
         displaySchedule: () => displaySchedule,
+
+        _setCurrentSchedule: setCurrentSchedule,
+        _setWorkingSchedule: setWorkingSchedule,
+        _setDisplaySchedule: setDisplaySchedule,
+
+        fetchSchedule: () => api.schedule.getSchedule()
+            .then((schedule: Schedule) => {
+                setCurrentSchedule(schedule);
+            })
+            .catch(() => {
+                console.error("Failed to fetch schedule.");
+                setCurrentSchedule(null);
+            })
+            .finally(() => {
+                //
+            }),
 
         generateSchedule: () => api.schedule.generateSchedule(null)
             .then((schedule: Schedule) => {
                 setCurrentSchedule(schedule);
+            })
+            .catch(() => {
+                console.error("Failed to generate schedule.");
+            })
+            .finally(() => {
+                //
             }),
-        /*generateSchedule: () => api.schedule.generateSchedule(null)
+
+        validateSchedule: () => api.schedule.validateSchedule(workingSchedule)
             .then(() => {
                 //
-            }),*/
-        _setCurrentSchedule: setCurrentSchedule,
-        _setWorkingSchedule: setWorkingSchedule,
-        _setDisplaySchedule: setDisplaySchedule
+            }),
     }
 
 

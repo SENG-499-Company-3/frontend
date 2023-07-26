@@ -9,8 +9,8 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SchoolIcon from '@mui/icons-material/School';
 import PublicIcon from '@mui/icons-material/Public';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import { LoadingButton } from '@mui/lab'
-import PageContent from '../components/layout/PageContent'
+import { LoadingButton } from '@mui/lab';
+import PageContent from '../components/layout/PageContent';
 import { ScheduleContext, ScheduleStatus } from '../contexts/ScheduleContext';
 import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
