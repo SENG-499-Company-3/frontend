@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import ScheduleList from '../components/schedule/ScheduleList'
 import AppPage from '../components/layout/AppPage'
 import PageHeader from '../components/layout/PageHeader'
@@ -40,9 +40,13 @@ const HomePage = () => {
     const [validating, setValidating] = useState<boolean>(false);
     const [publishing, setPulbishing] = useState<boolean>(false);
     const scheduleContext = useContext(ScheduleContext);
-    const scheduleStatus = ScheduleContext.currentSchedule()?.status || 'UNDEFINED';
+    const scheduleStatus = scheduleContext.workingSchedule()?.status || 'UNDEFINED';
     const [term, setTerm] = React.useState(termOptions[3].title);
     const [courses, setCourses] = React.useState(courseScheduleData);
+
+    useEffect(() => {
+        scheduleContext.fetchSchedule();
+    }, []);
 
     let scheduleStatusTitle = ''; 
     let scheduleStatusText = 'Text'
@@ -55,9 +59,9 @@ const HomePage = () => {
         setTerm(selectedTerm);
       
         if (selectedTermValue.length > 1) { // 'All' is selected
-          scheduleContext.setDisplaySchedule(ScheduleContext.workingSchedule.scheduledCourses);
+          scheduleContext._setDisplaySchedule(scheduleContext.workingSchedule().scheduledCourses);
         } else {
-          ScheduleContext.setDisplaySchedule(ScheduleContext.workingSchedule.scheduledCourses.filter((item) => item.Term === selectedTermValue[0]));
+          scheduleContext._setDisplaySchedule(scheduleContext.workingSchedule().scheduledCourses.filter((item) => item.Term === selectedTermValue[0]));
         }
       };
     
@@ -91,8 +95,9 @@ const HomePage = () => {
             break;
     }
 
-    const handleSetScheduleStatus = (status: ScheduleStatus) => {
-        ScheduleContext._setCurrentSchedule({ status })
+    const handleSetScheduleStatus = (newStatus: ScheduleStatus) => {
+        const updatedSchedule = { ...scheduleContext.workingSchedule(), status: newStatus };
+        scheduleContext._setWorkingSchedule(updatedSchedule);
     }
 
     const _handleGenerate = () => {
@@ -105,36 +110,37 @@ const HomePage = () => {
 
     const handleGenerate = () => {
         setGenerating(true);
-        ScheduleContext.generateSchedule().finally(() => setGenerating(false))
+        scheduleContext.generateSchedule().finally(() => setGenerating(false))
     }
 
     const handleChangeSchedule = (changedCourses: Course[], changed: boolean) => {
+        //Update working schedule
         if (changed) {
             handleSetScheduleStatus('PENDING');
+
+            //TODO: DELETE ME
+            console.log(changedCourses.length);
+
+            //Update displaySchedule
+            scheduleContext._setDisplaySchedule(changedCourses);
+
+            const updateWorking = { ...scheduleContext.workingSchedule(), scheduledCourses: changedCourses };
+
+            //Handle the case when the courses are filtered
+            if (term !== termOptions[3].title) {
+                const currentTermValue = termOptions.find((option) => option.title === term).value;
+            
+                //Read workingSchedule for current data. Filter out untouched sections(terms) - set aside
+                const unchangedSchedule = scheduleContext.workingSchedule().scheduledCourses.filter((item) => item.Term !== currentTermValue[0]);
+            
+                //Mash both back into the ScheduleContext
+                const final = { ...scheduleContext.workingSchedule(), scheduledCourses: [...unchangedSchedule, ...changedCourses] };
+                scheduleContext._setWorkingSchedule(final);
+            
+            } else {
+                scheduleContext._setWorkingSchedule(updateWorking);
+            };
         }
-        //TODO: DELETE ME
-        console.log(changedCourses.length);
-
-        //Handle the case when the courses are filtered
-        if (term !== termOptions[3].title) {
-            const currentTermValue = termOptions.find((option) => option.title === term).value;
-            /*
-            //Read ScheduleContext for current data
-            //Filter out untouched sections(terms) - set aside? 
-            const unchangedSchedule = scheduleContext.workingSchedule().scheduledCourses.filter((item) => item.Term !== currentTermValue[0]);
-
-            //Replace changed sections with changedCourses OR just
-            //Mash both back into the ScheduleContext
-            setSchedule(unchangedSchedule);
-            setSchedule((unchanged) => [...unchanged, changedCourses]);
-
-            //OR remove the current term from ScheduleContext and insert changedCourses?
-            */
-        } else {
-            ScheduleContext.setWorkingSchedule(changedCourses);
-            scheduleContext.setDisplaySchedule(changedCourses);
-            //TODO: store in ScheduleContext instead
-        };
     }
 
     const handleDiscard = () => {
@@ -234,8 +240,8 @@ const HomePage = () => {
                 </PageContent>
             ) : (
                 <ScheduleList 
-                    courses={ScheduleContext.displaySchedule} 
-                    onChange={handleChangeSchedule} 
+                    courses={scheduleContext.displaySchedule()} 
+                    onChange={handleChangeSchedule}
                 />
             )}
         </AppPage>

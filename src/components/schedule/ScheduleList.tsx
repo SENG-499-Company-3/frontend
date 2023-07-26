@@ -109,7 +109,7 @@ const ScheduleList = (props: IScheduleListProps) => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [currentRowID, setCurrentRowID] = useState<GridRowId>(null);
     const [currentCourse, setCurrentCourse] = useState<Course>(null);
-    const [isChanged, setIsChanged] = useState<boolean>(null);
+    const [isChanged, setIsChanged] = useState<boolean>(false);
 
     //When courses prop changes, update
     useEffect(() => {
@@ -118,9 +118,10 @@ const ScheduleList = (props: IScheduleListProps) => {
 
     //When rows change, send back
     useEffect(() => {
-        if (rows) {
+        if (isChanged) {
             props.onChange(getRowsAsCourses(), isChanged);
         }
+        setIsChanged(false);
     }, [rows]);
 
     const getRowsAsCourses = () => {

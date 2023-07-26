@@ -1,6 +1,9 @@
 import React, { PropsWithChildren, createContext, useEffect, useState } from 'react';
 import { WORKING_SCHEDULE } from '../hooks/api/useScheduleApi';
 import useApi from '../hooks/useApi';
+import { Course } from '../types/course';
+
+import { courseScheduleData } from '../components/common/sampleData/courseSchedule'
 
 export type ScheduleStatus =
     | 'UNDEFINED'
@@ -73,7 +76,9 @@ export const ScheduleContextProvider = (props: PropsWithChildren) => {
             })
             .catch(() => {
                 console.error("Failed to fetch schedule.");
-                setCurrentSchedule(null);
+
+                const defaultSchedule = { ...scheduleContext.currentSchedule(), scheduledCourses: courseScheduleData/*, status: 'UNDEFINED'*/ };
+                setCurrentSchedule(defaultSchedule);
             })
             .finally(() => {
                 //
@@ -99,7 +104,7 @@ export const ScheduleContextProvider = (props: PropsWithChildren) => {
 
     useEffect(() => {
         if (localStorage.getItem(WORKING_SCHEDULE)) {
-            setWorkingSchedule(localStorage.getItem(WORKING_SCHEDULE))
+            setWorkingSchedule(JSON.parse(localStorage.getItem(WORKING_SCHEDULE)));
         }
     }, []);
 
@@ -114,7 +119,7 @@ export const ScheduleContextProvider = (props: PropsWithChildren) => {
     //When the workingSchedule is updated, save to local storage
     useEffect(() => {
         if (workingSchedule) {
-            localStorage.setItem(WORKING_SCHEDULE, workingSchedule.toString())
+            localStorage.setItem(WORKING_SCHEDULE, JSON.stringify(workingSchedule))
         }
     }, [workingSchedule]);
 
