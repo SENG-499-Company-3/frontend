@@ -13,6 +13,7 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import LoadingSpinner from '../components/layout/LoadingSpinner';
 import { ICourse } from '../hooks/api/useCoursesApi';
 import { CourseContext } from '../contexts/CourseContext';
+import { makeCourseName } from '../utils/helper';
 
 interface ICoursesTableProps {
     courses: ICourse[]
@@ -41,7 +42,7 @@ const CoursesTable = (props: ICoursesTableProps) => {
     const courses = props.courses.map((course: ICourse) => ({
         id: course.courseId,
         courseName: course.courseName,
-        courseCodeWithNumber: `${course.courseCode} ${course.courseNumber}`
+        courseCodeWithNumber: makeCourseName(course)
     }));
 
     return (
@@ -61,6 +62,7 @@ const CoursesTable = (props: ICoursesTableProps) => {
                     },
                 }}
                 sx={{ border: 0 }}
+                disableRowSelectionOnClick
             />
         </Paper>
     )

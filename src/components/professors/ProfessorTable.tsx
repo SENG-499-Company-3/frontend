@@ -44,6 +44,7 @@ const ProfessorTable = (props: IProfessorTableProps) => {
                     },
                 }}
                 sx={{ border: 0 }}
+                disableRowSelectionOnClick
             />
         </Paper>
     )

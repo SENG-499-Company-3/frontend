@@ -1,11 +1,13 @@
 import axios from 'axios';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import useAuthApi from './api/useAuthApi';
+import useAuthApi, { USER_TOKEN } from './api/useAuthApi';
 import { AuthContext } from '../contexts/AuthContext';
 import useUserApi from './api/useUserApi';
+import usePreferencesApi from './api/usePreferencesApi';
 import useClassroomApi from './api/useClassroomApi';
 import useScheduleApi from './api/useScheduleApi';
 import useCoursesApi from './api/useCoursesApi';
+import useTermsApi from './api/useTermsApi';
 
 interface IApiHostContext {
 	REACT_API_HOST: string;
@@ -29,6 +31,7 @@ const useApi = () => {
 		return axios.create({
 			headers: {
 				Authorization: `Bearer ${authContext.userToken()}`
+				// Authorization: `Bearer ${localStorage ? localStorage.getItem(USER_TOKEN) : authContext.userToken()}`
 			},
 			baseURL
 		});
@@ -42,9 +45,11 @@ const useApi = () => {
 
 	const auth = useAuthApi(axiosInstance);
 	const user = useUserApi(axiosUserInstance);
+	const preferences = usePreferencesApi(axiosInstance);
 	const classroom = useClassroomApi(axiosInstance);
 	const courses = useCoursesApi(axiosInstance);
 	const schedule = useScheduleApi(axiosInstance);
+	const terms = useTermsApi(axiosInstance);
 
 	useEffect(() => {
 		if (!authContext.currentUser()) {
@@ -53,12 +58,14 @@ const useApi = () => {
 	}, [axiosInstance])
 	
 	return {
-		_axiosInstance: axiosInstance,
+		// _axiosInstance: axiosInstance,
 		auth,
 		user,
 		classroom,
+		preferences,
 		courses,
-		schedule
+		schedule,
+		terms
 	}
 }
 
