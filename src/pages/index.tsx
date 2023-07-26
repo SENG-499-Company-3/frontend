@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from 'react'
 import ScheduleList from '../components/schedule/ScheduleList'
 import AppPage from '../components/layout/AppPage'
 import PageHeader from '../components/layout/PageHeader'
-import { Alert, AlertColor, Divider, AlertTitle, Box, Button, Collapse, Container, FormControl, InputLabel, MenuItem, Paper, Select, Typography } from '@mui/material'
+import { Alert, AlertColor, Divider, AlertTitle, Box, Button, Collapse, Container, FormControl, InputLabel, MenuItem, Paper, Select, Typography, Menu } from '@mui/material'
 import PageHeaderActions from '../components/layout/PageHeaderActions'
 import { courseScheduleData } from '../components/common/sampleData/courseSchedule'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -15,7 +15,7 @@ import { ScheduleContext, ScheduleStatus } from '../contexts/ScheduleContext'
 import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { TermsContext } from '../contexts/TermsContext'
-import { getMonthStringFromNumber } from '../utils/helper'
+import { getMonthStringFromNumber, pluralize } from '../utils/helper'
 import { ITerm } from '../hooks/api/useTermsApi'
 import { DataGrid } from '@mui/x-data-grid'
 import CoursesTable from '../components/CoursesTable'
@@ -25,6 +25,8 @@ const HomePage = () => {
     const [validating, setValidating] = useState<boolean>(false);
     const [publishing, setPulbishing] = useState<boolean>(false);
     const [showNewCourseDialog, setShowNewCourseDialog] = useState<boolean>(false);
+    const [courseMenuAnchorEl, setCourseMenuAnchorEl] = useState(null);
+    const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>([]);
     const scheduleContext = useContext(ScheduleContext);
     const termsContext = useContext(TermsContext);
     const terms = termsContext.terms();
@@ -55,7 +57,13 @@ const HomePage = () => {
     
     useEffect(() => {
         setCurrentTerm(terms[0])
-    }, [terms]) 
+    }, [terms])
+
+    /*
+    useEffect(() => {
+
+    }, [courseRows])
+    */
 
     switch (scheduleStatus) {
         case 'UNDEFINED':
@@ -211,29 +219,52 @@ const HomePage = () => {
             {scheduleStatus === 'UNDEFINED' ? (
                 <PageContent>
                     <Container maxWidth='md'>
-                        <Paper sx={{ p: 8, textAlign: 'center' }}>
+                        <Paper sx={{ px: 8, pt: 6, pb: 1, textAlign: 'center' }}>
                             <Typography variant='h4' mb={2}>There is no existing schedule</Typography>
                             <Typography variant='body1' mb={2}>Click to generate a schedule.</Typography>
-                            <LoadingButton
-                                variant='contained'
-                                startIcon={<PublicIcon />}
-                                loading={generating}
-                                onClick={() => _handleGenerate()}
-                            >
-                                Generate Schedule
-                            </LoadingButton>
-                            <Divider sx={{ py: 2 }} />
-                            <CoursesTable
-                                showNewCourseDialog={showNewCourseDialog}
-                                onCloseNewCourseDialog={() => setShowNewCourseDialog(false)}
-                                DataGridProps={{
-                                    checkboxSelection: true,
-                                    sx: {
-                                        height: 500,
-                                        border: 0
-                                    }
-                                }}
-                            />
+                            <Menu anchorEl={courseMenuAnchorEl} open={Boolean(courseMenuAnchorEl)} onClose={() => setCourseMenuAnchorEl(null)}>
+                                <MenuItem
+                                    onClick={() => {
+                                        setShowNewCourseDialog(true);
+                                        setCourseMenuAnchorEl(null)
+                                    }}
+                                >Create Course</MenuItem>
+                            </Menu>
+                            <Box display='flex' gap={1} justifyContent='center'>
+                                <Button variant='outlined' startIcon={<SchoolIcon />} endIcon={<ExpandMoreIcon />} onClick={(event) => setCourseMenuAnchorEl(event.currentTarget)}>
+                                    Course Options
+                                </Button>
+                                <LoadingButton
+                                    variant='contained'
+                                    startIcon={<PublicIcon />}
+                                    loading={generating}
+                                    onClick={() => _handleGenerate()}
+                                    disabled={rowSelectionModel.length <= 0}
+                                >
+                                    Generate Schedule
+                                </LoadingButton>
+                            </Box>
+                            <Box sx={{ textAlign: 'left', my: 3 }}>
+                                <Typography>
+                                    <strong>
+                                        {`Scheduling ${rowSelectionModel.length} ${pluralize(rowSelectionModel.length, 'courses')}`}
+                                    </strong>
+                                </Typography>
+                                <Divider sx={{ pt: 1 }} />
+                                <CoursesTable
+                                    showNewCourseDialog={showNewCourseDialog}
+                                    onCloseNewCourseDialog={() => setShowNewCourseDialog(false)}
+                                    DataGridProps={{
+                                        checkboxSelection: true,
+                                        sx: {
+                                            height: 500,
+                                            border: 0
+                                        },
+                                        rowSelectionModel,
+                                        onRowSelectionModelChange: setRowSelectionModel
+                                    }}
+                                />
+                            </Box>
                         </Paper>
                     </Container>
                 </PageContent>

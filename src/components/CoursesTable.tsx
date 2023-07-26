@@ -214,8 +214,8 @@ const CoursesTable = (props: ICoursesTableProps) => {
                     
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => handleCreateCourse()}>Create</Button>
                     <Button onClick={() => handleCancelCreateCourse()}>Cancel</Button>
+                    <Button onClick={() => handleCreateCourse()}>Create</Button>
                 </DialogActions>
             </Dialog>
         )
