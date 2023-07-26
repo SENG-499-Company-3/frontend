@@ -14,7 +14,7 @@ const useCoursesApi = (axios: AxiosInstance) => {
         return data;
     }
 
-    const createCourse = async (course: Exclude<ICourse, 'courseId'>): Promise<ICourse> => {
+    const createCourse = async (course: Omit<ICourse, 'courseId'>): Promise<ICourse> => {
         const { data } = await axios.post('/courses', course);
 
         return data;

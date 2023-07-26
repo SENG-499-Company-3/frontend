@@ -8,6 +8,7 @@ import '../assets/styles/main.scss'
 import { AuthContextProvider } from '../contexts/AuthContext';
 import Layout from '../components/layout/AppLayout';
 import { ScheduleContextProvider } from '../contexts/ScheduleContext';
+import { CourseContextProvider } from '../contexts/CourseContext';
 import { TermsContextProvider } from '../contexts/TermsContext';
 
 
@@ -43,11 +44,13 @@ export default function MyApp({ Component, pageProps }: AppProps) {
 		<AuthContextProvider>
 			<TermsContextProvider>
 				<ScheduleContextProvider>
-					<ThemeProvider theme={theme}>
-						<Layout onToggleThemeMode={switchTheme}>
-							<Component {...pageProps} />
-						</Layout>
-					</ThemeProvider>
+					<CourseContextProvider>
+						<ThemeProvider theme={theme}>
+							<Layout onToggleThemeMode={switchTheme}>
+								<Component {...pageProps} />
+							</Layout>
+						</ThemeProvider>
+					</CourseContextProvider>
 				</ScheduleContextProvider>
 			</TermsContextProvider>
 		</AuthContextProvider>

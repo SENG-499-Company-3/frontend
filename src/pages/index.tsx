@@ -8,16 +8,14 @@ import { courseScheduleData } from '../components/common/sampleData/courseSchedu
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SchoolIcon from '@mui/icons-material/School';
 import PublicIcon from '@mui/icons-material/Public';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { LoadingButton } from '@mui/lab'
 import PageContent from '../components/layout/PageContent'
 import { ScheduleContext, ScheduleStatus } from '../contexts/ScheduleContext'
-import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { TermsContext } from '../contexts/TermsContext'
 import { getMonthStringFromNumber, pluralize } from '../utils/helper'
 import { ITerm } from '../hooks/api/useTermsApi'
-import { DataGrid } from '@mui/x-data-grid'
+import { GridRowSelectionModel } from '@mui/x-data-grid'
 import CoursesTable from '../components/CoursesTable'
 
 const HomePage = () => {
