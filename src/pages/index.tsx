@@ -11,7 +11,7 @@ import PublicIcon from '@mui/icons-material/Public';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { LoadingButton } from '@mui/lab';
 import PageContent from '../components/layout/PageContent';
-import { ScheduleContext, ScheduleStatus } from '../contexts/ScheduleContext';
+import { Schedule, ScheduleContext, ScheduleStatus } from '../contexts/ScheduleContext';
 import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Course } from '../types/course';
@@ -116,7 +116,8 @@ const HomePage = () => {
     const handleChangeSchedule = (changedCourses: Course[], changed: boolean) => {
         //Update working schedule
         if (changed) {
-            handleSetScheduleStatus('PENDING');
+            /* Desynced and does not work. Set manually
+            handleSetScheduleStatus('PENDING'); */
 
             //TODO: DELETE ME
             console.log(changedCourses.length);
@@ -124,7 +125,7 @@ const HomePage = () => {
             //Update displaySchedule
             scheduleContext._setDisplaySchedule(changedCourses);
 
-            const updateWorking = { ...scheduleContext.workingSchedule(), scheduledCourses: changedCourses };
+            const updateWorking: Schedule = { ...scheduleContext.workingSchedule(), scheduledCourses: changedCourses, status: 'PENDING' };
 
             //Handle the case when the courses are filtered
             if (term !== termOptions[3].title) {

@@ -77,8 +77,17 @@ export const ScheduleContextProvider = (props: PropsWithChildren) => {
             .catch(() => {
                 console.error("Failed to fetch schedule.");
 
-                const defaultSchedule = { ...scheduleContext.currentSchedule(), scheduledCourses: courseScheduleData/*, status: 'UNDEFINED'*/ };
+                const defaultSchedule :Schedule = { scheduledCourses: courseScheduleData, status: 'UNDEFINED' };
                 setCurrentSchedule(defaultSchedule);
+                //Check local storage first and set if found
+                if (localStorage.getItem(WORKING_SCHEDULE)) {
+                    setWorkingSchedule(JSON.parse(localStorage.getItem(WORKING_SCHEDULE)));
+                    setDisplaySchedule(JSON.parse(localStorage.getItem(WORKING_SCHEDULE)).scheduledCourses);
+                } else {
+                    setWorkingSchedule(defaultSchedule);
+                    setDisplaySchedule(defaultSchedule.scheduledCourses);
+                }
+                
             })
             .finally(() => {
                 //
@@ -109,17 +118,22 @@ export const ScheduleContextProvider = (props: PropsWithChildren) => {
     }, []);
 
     //The currentSchedule should only change when fetch or save are performed - at which point, the working schedule should be overwritten (unless local found)
-    useEffect(() => {
-        if (currentSchedule) {
+    /*useEffect(() => {
+        if (currentSchedule !== null) {
             setWorkingSchedule(currentSchedule);
-            setDisplaySchedule(workingSchedule.scheduledCourses);
+            if (workingSchedule.scheduledCourses !== null) {
+                setDisplaySchedule(workingSchedule.scheduledCourses);
+            } else {
+                setDisplaySchedule([]);
+            }
         }
-    }, [currentSchedule]);
+    }, [currentSchedule]); */
 
     //When the workingSchedule is updated, save to local storage
     useEffect(() => {
         if (workingSchedule) {
-            localStorage.setItem(WORKING_SCHEDULE, JSON.stringify(workingSchedule))
+            localStorage.setItem(WORKING_SCHEDULE, JSON.stringify(workingSchedule));
+            setDisplaySchedule(workingSchedule.scheduledCourses);
         }
     }, [workingSchedule]);
 
