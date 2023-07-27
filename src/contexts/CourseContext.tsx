@@ -1,5 +1,5 @@
 import { PropsWithChildren, createContext, useState } from "react"
-import { ICourse } from "../hooks/api/useCoursesApi"
+import { ICourse, INewCourse } from "../hooks/api/useCoursesApi"
 import useApi from "../hooks/useApi"
 
 const defaultCourses: ICourse[] = [
@@ -109,15 +109,15 @@ const defaultCourses: ICourse[] = [
 
 interface ICourseContext {
     courses: () => ICourse[]
-    addCourse: (newCourse: ICourse) => void
-    deleteCourse: (course: ICourse) => void
+    addCourse: (newCourse: INewCourse) => Promise<void>
+    deleteCourse: (course: ICourse) => Promise<void>
     fetchCourses: () => Promise<void>
 }
 
 export const CourseContext = createContext<ICourseContext>({
     courses: () => null,
-    addCourse: () => { },
-    deleteCourse: () => { },
+    addCourse: () => Promise.reject(),
+    deleteCourse: () => Promise.reject(),
     fetchCourses: () => Promise.reject()
 });
 
@@ -125,26 +125,33 @@ export const CourseContextProvider = (props: PropsWithChildren) => {
     const [courses, setCourses] = useState<ICourse[]>([]);
     const api = useApi();
 
-
     const courseContext: ICourseContext = {
         courses: () => courses,
-        addCourse: (newCourse: ICourse) => {
-            setCourses([...courses, newCourse])
+        addCourse: (newCourse: INewCourse) => {
+            return api.courses.createCourse(newCourse)
+                .then((course: ICourse) => {
+                    setCourses([...courses, course])
+                });
         },
         deleteCourse: (deletedCourse: ICourse) => {
-            setCourses(courses.filter((course) => course.courseId !== deletedCourse.courseId))
+            return api.courses.deleteCourse(deletedCourse.courseId)
+                .then(() => {
+                    setCourses(courses.filter((course) => course.courseId !== deletedCourse.courseId))
+                })
         },
-        fetchCourses: () => api.courses.listCourses()
-            .then((courses) => {
-                setCourses(courses)
-            })
-            .catch(() => {
-                console.error("Failed to fetch courses.")
-                setCourses(defaultCourses)
-            })
-            .finally(() => {
-                //
-            })
+        fetchCourses: () => {
+            return api.courses.listCourses()
+                .then((courses) => {
+                    setCourses(courses)
+                })
+                .catch(() => {
+                    console.error("Failed to fetch courses.")
+                    setCourses(defaultCourses)
+                })
+                .finally(() => {
+                    //
+                })
+        }   
     }
 
     return (

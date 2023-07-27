@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import AddIcon from '@mui/icons-material/Add';
 import ProfessorTable from '../components/professors/ProfessorTable'
 import AppPage from '../components/layout/AppPage'
@@ -13,6 +13,8 @@ import { DataGrid, DataGridProps, GridColDef } from '@mui/x-data-grid';
 import LoadingSpinner from '../components/layout/LoadingSpinner';
 import { ICourse } from '../hooks/api/useCoursesApi';
 import { makeCourseName } from '../utils/helper';
+import { CourseContext } from '../contexts/CourseContext';
+import { LoadingButton } from '@mui/lab';
 
 interface ICoursesTableProps {
     showNewCourseDialog: boolean;
@@ -20,6 +22,7 @@ interface ICoursesTableProps {
     DataGridProps?: Partial<DataGridProps>
 }
 
+/*
 export const defaultCourses: ICourse[] = [
     {
         courseId: 1,
@@ -124,13 +127,125 @@ export const defaultCourses: ICourse[] = [
         courseName: 'Course name',
     }
 ]
+*/
+
+interface INewCourseDialogProps {
+    open: boolean;
+    onClose: () => void
+}
+
+const NewCourseDialog = (props: INewCourseDialogProps) => {
+    const [creating, setCreating] = useState<boolean>(false);
+    const [courseName, setCourseName] = useState<string>('');
+    const [courseCode, setCourseCode] = useState<string>('');
+    const [courseNumber, setCourseNumber] = useState<string>('');
+    const courseContext = useContext(CourseContext);
+
+    const handleCreateCourse = () => {
+        setCreating(true)
+        courseContext.addCourse({ courseCode, courseName, courseNumber })
+            .then(() => {
+                props.onClose()
+            })
+            .finally(() => {
+                setCreating(false)
+            })
+    }
+
+    const handleClose = () => {
+        props.onClose();
+    }
+
+    const handleFetchCourses = (): Promise<void> => {
+        return courseContext.fetchCourses()
+    }
+
+    useEffect(() => {
+        handleFetchCourses();
+    }, [])
+
+    return (
+        <Dialog open={props.open}>
+            <DialogTitle>Create a Course</DialogTitle>
+            <DialogContent>
+                <DialogContentText>Enter the course name, code and number</DialogContentText>
+                <Box mt={2}>
+                    <TextField
+                        label="Course Title" 
+                        fullWidth
+                        onChange={(event) => setCourseName(event.target.value)}
+                        value={courseName}
+
+                    />
+                    <Box display='flex' gap={1} mt={2}>
+                        <TextField 
+                            label="Course Code" 
+                            onChange={(event) => setCourseCode(event.target.value)}
+                            value={courseCode}
+                        />
+                        <TextField 
+                            label="Course Number"
+                            onChange={(event) => setCourseNumber(event.target.value)}
+                            value={courseNumber}
+                        />
+                    </Box>
+                </Box>
+                
+                
+            </DialogContent>
+            <DialogActions>
+                <LoadingButton loading={creating} onClick={() => handleClose()}>Cancel</LoadingButton>
+                <LoadingButton loading={creating} onClick={() => handleCreateCourse()}>Create</LoadingButton>
+            </DialogActions>
+        </Dialog>
+    )
+}
+
+
+interface IDeleteCourseDialogProps {
+    deletingCourse: ICourse;
+    open: boolean;
+    onClose: () => void
+}
+
+const DeleteCourseDialog = (props: IDeleteCourseDialogProps) => {
+    const [deleting, setDeleting] = useState<boolean>(false);
+    const courseContext = useContext(CourseContext);
+
+    const handleDeleteCourse = () => {
+        setDeleting(true);
+        courseContext.deleteCourse(props.deletingCourse)
+            .then(() => {
+                props.onClose();
+            })
+            .finally(() => {
+                setDeleting(false);
+            })
+    }
+    return (
+        <Dialog open={props.open}>
+            <DialogTitle>Delete Course</DialogTitle>
+            <DialogContent>
+                {props.deletingCourse && (
+                    <DialogContentText>Are you sure you want to delete <strong>{props.deletingCourse.courseName}</strong>?</DialogContentText>
+                )}
+            </DialogContent>
+            <DialogActions>
+                <LoadingButton loading={deleting} color='error' onClick={() => handleDeleteCourse()}>Delete</LoadingButton>
+                <LoadingButton loading={deleting} onClick={() => props.onClose()}>Cancel</LoadingButton>
+            </DialogActions>
+        </Dialog>
+    )
+}
+
 
 const CoursesTable = (props: ICoursesTableProps) => {
-    const handleDeleteCourse = (course: ICourse) => {
-        api.courses.deleteCourse(course.courseId).then(() => {
-            // courseContext.deleteCourse(course);
-        })
-    }
+    const api = useApi();
+    const [loading, setLoading] = useState<boolean>(false);
+    const [deletingCourse, setdeletingCourse] = useState<ICourse | null>(null);
+
+    const courseContext = useContext(CourseContext);
+    const courses = courseContext.courses();
 
     const columns: GridColDef[] = [
         { field: 'courseCodeWithNumber', headerName: 'Course Code', flex: 1  },
@@ -141,7 +256,7 @@ const CoursesTable = (props: ICoursesTableProps) => {
             flex: 0,
             renderCell: (params) => {
                 return (
-                    <IconButton onClick={() => handleDeleteCourse(params.row)}>
+                    <IconButton onClick={() => setdeletingCourse(params.row)}>
                         <DeleteIcon />
                     </IconButton>
                 )
@@ -150,101 +265,26 @@ const CoursesTable = (props: ICoursesTableProps) => {
         }
     ];
 
-    const api = useApi();
-    const [courses, setCourses] = useState<ICourse[]>(defaultCourses);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [newCourseName, setNewCourseName] = useState<string>('');
-    const [newCourseCode, setNewCourseCode] = useState<string>('');
-    const [newCourseNumber, setNewCourseNumber] = useState<string>('');
-    const [deletingCourse, setdeletingCourse] = useState<ICourse | null>(null);
-
-    const confirmingDelete = Boolean(deletingCourse);
-
     const courseRows = courses.map((course: ICourse) => ({
         id: course.courseId,
         courseName: course.courseName,
         courseCodeWithNumber: makeCourseName(course)
     }));
 
-    useEffect(() => {
-        // setLoading(true);
-        api.courses.listCourses()
-            .then((courses: ICourse[]) => {
-                setCourses(courses);
-            })
-            .catch(() => {
-                console.error("Failed to fetch courses.")
-            })
-            .finally(() => {
-                setLoading(false);
-            })
-    }, []);
-
-    const handleCreateCourse = () => {
-        //
-    }
-
-    const handleCancelCreateCourse = () => {
-        props.onCloseNewCourseDialog()
-        setNewCourseCode('');
-        setNewCourseName('');
-        setNewCourseNumber('');
-    }
-
-    const NewCourseDialog = () => {
-        return (
-            <Dialog open={props.showNewCourseDialog}>
-                <DialogTitle>Create a Course</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        label="Course Title" 
-
-                    />
-                    
-                    <TextField 
-                        label="Course Code" 
-                        // onChange={(event) => handleCourseCodeChange(event)}
-                    
-                        />
-                        <TextField 
-                        label="Course Number"
-                        // onChange={(event) => handleSectionChange(event)}
-                    
-                        />
-                    
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => handleCancelCreateCourse()}>Cancel</Button>
-                    <Button onClick={() => handleCreateCourse()}>Create</Button>
-                </DialogActions>
-            </Dialog>
-        )
-    }
-
-    const DeleteCourseDialog = () => {
-        return (
-            <Dialog open={confirmingDelete}>
-                <DialogTitle>Delete Course</DialogTitle>
-                <DialogContent>
-                    {deletingCourse && (
-                        <DialogContentText>Are you sure you want to delete <strong>{deletingCourse.courseName}</strong>?</DialogContentText>
-                    )}
-                </DialogContent>
-                <DialogActions>
-                    <Button color='error' onClick={() => handleDeleteCourse(deletingCourse)}>Delete</Button>
-                    <Button onClick={() => setdeletingCourse(null)}>Cancel</Button>
-                </DialogActions>
-            </Dialog>
-        )
-    }
-
     return (
         loading ? (
             <LoadingSpinner />
         ) : (        
             <>
-                <NewCourseDialog />
-                <DeleteCourseDialog />
+                <NewCourseDialog
+                    open={props.showNewCourseDialog}
+                    onClose={props.onCloseNewCourseDialog}
+                />
+                <DeleteCourseDialog
+                    open={Boolean(deletingCourse)}
+                    deletingCourse={deletingCourse}
+                    onClose={() => setdeletingCourse(null)}
+                />
                 <DataGrid
                     rows={courseRows}
                     columns={columns}

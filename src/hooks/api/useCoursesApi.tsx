@@ -7,6 +7,8 @@ export interface ICourse {
     courseName: string;
 }
 
+export type INewCourse = Omit<ICourse, 'courseId'>
+
 const useCoursesApi = (axios: AxiosInstance) => {
     const listCourses = async (): Promise<ICourse[]> => {
         const { data } = await axios.get('/courses/list');
@@ -14,7 +16,7 @@ const useCoursesApi = (axios: AxiosInstance) => {
         return data;
     }
 
-    const createCourse = async (course: Omit<ICourse, 'courseId'>): Promise<ICourse> => {
+    const createCourse = async (course: INewCourse): Promise<ICourse> => {
         const { data } = await axios.post('/courses', course);
 
         return data;
