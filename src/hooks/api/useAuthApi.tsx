@@ -2,6 +2,7 @@ import { AxiosInstance, AxiosResponse } from 'axios'
 import { IAuthenticatedUser } from '../../types/auth.d';
 import { AuthContext } from '../../contexts/AuthContext';
 import React, { useContext, useEffect, useMemo } from 'react';
+import { IUser } from './useUserApi';
 
 export const USER_TOKEN = 'USER_TOKEN';
 
@@ -18,7 +19,7 @@ const useAuthApi = (axios: AxiosInstance) => {
     /**
      * Fetches the currently authenticated user
      */
-    const self = async (): Promise<IAuthenticatedUser> => {
+    const self = async (): Promise<IUser> => {
         const { data } = await axios.post('/auth/self')
 
         return data;

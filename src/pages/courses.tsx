@@ -6,6 +6,7 @@ import { Box, Button, Typography, Paper, Container } from '@mui/material'
 import PageHeaderActions from '../components/layout/PageHeaderActions'
 import PageContent from '../components/layout/PageContent'
 import CoursesTable from '../components/CoursesTable';
+import { withAuthGuard } from '../contexts/AuthContext';
 
 const CoursesPage = () => {
     const [showNewCourseDialog, setShowNewCourseDialog] = useState<boolean>(false);
@@ -46,4 +47,4 @@ const CoursesPage = () => {
     )
 }
 
-export default CoursesPage
+export default withAuthGuard(CoursesPage)

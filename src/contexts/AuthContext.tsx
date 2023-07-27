@@ -3,12 +3,13 @@ import { AuthenticatedUserType, IAuthenticatedUser } from '../types/auth.d'
 import { useRouter } from 'next/router';
 import { USER_TOKEN } from '../hooks/api/useAuthApi';
 import { useApi } from './ApiContext';
+import { IUser } from '../hooks/api/useUserApi';
 
 interface IAuthContext {
     /**
      * The currently signed-in user.
      */
-    currentUser: () => IAuthenticatedUser | null;
+    currentUser: () => IUser | null;
 
     /**
      * Fetches the currently signed in user and updates the context.
@@ -77,7 +78,7 @@ export const withAuthGuard = (WrappedComponent) => {
   };
 
 export const AuthContextProvider = (props: PropsWithChildren) => {
-    const [currentUser, setCurrentUser] = React.useState<IAuthenticatedUser | null>(null);
+    const [currentUser, setCurrentUser] = React.useState<IUser | null>(null);
     const router = useRouter();
     const api = useApi();
 
@@ -97,7 +98,7 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
             router.push('/login');
         },
         isAuthenticated: () => Boolean(currentUser) && Boolean(api.userToken),
-        isAdmin: () => currentUser.role === AuthenticatedUserType.ADMIN,
+        isAdmin: () => currentUser.userrole === AuthenticatedUserType.ADMIN,
         avatarInitials: () => {
             if (!currentUser?.name) {
                 return '';
