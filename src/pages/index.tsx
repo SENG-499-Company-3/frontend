@@ -10,7 +10,7 @@ import SchoolIcon from '@mui/icons-material/School';
 import PublicIcon from '@mui/icons-material/Public';
 import { LoadingButton } from '@mui/lab'
 import PageContent from '../components/layout/PageContent'
-import { ScheduleContext, ScheduleStatus } from '../contexts/ScheduleContext'
+import { Schedule, ScheduleContext, ScheduleStatus } from '../contexts/ScheduleContext'
 import DeleteIcon from '@mui/icons-material/Delete';
 import { TermsContext } from '../contexts/TermsContext'
 import { getMonthStringFromNumber, pluralize } from '../utils/helper'
@@ -32,6 +32,10 @@ const HomePage = () => {
     const scheduleStatus = scheduleContext.currentSchedule()?.status || 'UNDEFINED';
     const [currentTerm, setCurrentTerm] = React.useState<ITerm | null>(terms[0] || null);
     const [courses, setCourses] = React.useState(courseScheduleData);
+
+    useEffect(() => {
+        scheduleContext.fetchSchedule();
+    }, []);
 
     let scheduleStatusTitle = ''; 
     let scheduleStatusText = 'Text'
@@ -92,15 +96,16 @@ const HomePage = () => {
             break;
     }
 
-    const handleSetScheduleStatus = (status: ScheduleStatus) => {
-        scheduleContext._setCurrentSchedule({ status })
+    const handleSetScheduleStatus = (newStatus: ScheduleStatus) => {
+        const updatedSchedule = { ...scheduleContext.workingSchedule(), status: newStatus };
+        scheduleContext._setWorkingSchedule(updatedSchedule);
     }
 
     const _handleGenerate = () => {
         setGenerating(true);
         setTimeout(() => {
             setGenerating(false);
-            handleSetScheduleStatus('VALID_PUBLISHED');
+            handleSetScheduleStatus('VALID_UNPUBLISHED');
         }, 2000)
     }
 
@@ -109,9 +114,39 @@ const HomePage = () => {
         scheduleContext.generateSchedule().finally(() => setGenerating(false))
     }
 
-    const handleChangeSchedule = () => {
-        handleSetScheduleStatus('PENDING');
+    /*
+     * @TODO uncomment
+    const handleChangeSchedule = (changedCourses: Course[], changed: boolean) => {
+        //Update working schedule
+        if (changed) {
+            // Desynced and does not work. Set manually
+            // handleSetScheduleStatus('PENDING');
+
+            //TODO: DELETE ME
+            console.log(changedCourses.length);
+
+            //Update displaySchedule
+            scheduleContext._setDisplaySchedule(changedCourses);
+
+            const updateWorking: Schedule = { ...scheduleContext.workingSchedule(), scheduledCourses: changedCourses, status: 'PENDING' };
+
+            //Handle the case when the courses are filtered
+            if (term !== termOptions[3].title) {
+                const currentTermValue = termOptions.find((option) => option.title === term).value;
+            
+                //Read workingSchedule for current data. Filter out untouched sections(terms) - set aside
+                const unchangedSchedule = scheduleContext.workingSchedule().scheduledCourses.filter((item) => item.Term !== currentTermValue[0]);
+            
+                //Mash both back into the ScheduleContext
+                const final = { ...scheduleContext.workingSchedule(), scheduledCourses: [...unchangedSchedule, ...changedCourses] };
+                scheduleContext._setWorkingSchedule(final);
+            
+            } else {
+                scheduleContext._setWorkingSchedule(updateWorking);
+            };
+        }
     }
+    */
 
     const handleDiscard = () => {
         if (confirm('Discard changes?')) {
@@ -267,7 +302,10 @@ const HomePage = () => {
                     </Container>
                 </PageContent>
             ) : (
-                <ScheduleList courses={courses} onChange={() => handleChangeSchedule()} />
+                <ScheduleList 
+                    courses={scheduleContext.displaySchedule()} 
+                    onChange={() => {}} // handleChangeSchedule}
+                />
             )}
         </AppPage>
     )
