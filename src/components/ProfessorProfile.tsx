@@ -8,8 +8,8 @@ import PageContent from "./layout/PageContent";
 import PreferencesViewer, { defaultPreferences } from "./PreferencesViewer";
 import PageHeaderActions from "./layout/PageHeaderActions";
 import { IUser } from "../hooks/api/useUserApi";
-import useApi from "../hooks/useApi";
 import { IPreferences } from "../hooks/api/usePreferencesApi";
+import { useApi } from "../contexts/ApiContext";
 
 interface IProfessorProfileProps {
     professor: IUser | null;

@@ -28,7 +28,6 @@ import { ICourse } from "../hooks/api/useCoursesApi";
 import { getMonthStringFromNumber, makeCourseName, pluralize } from "../utils/helper";
 import { ICoursePreference, IPreferences } from "../hooks/api/usePreferencesApi";
 import { ITerm } from "../hooks/api/useTermsApi";
-import useApi from "../hooks/useApi";
 import { TermsContext, defaultTerms } from "../contexts/TermsContext";
 
 const DEFAULT_MAX_COURSES = 6;

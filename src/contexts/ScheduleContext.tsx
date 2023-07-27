@@ -1,5 +1,5 @@
 import { PropsWithChildren, createContext, useState } from 'react'
-import useApi from '../hooks/useApi'
+import { useApi } from './ApiContext'
 
 export type ScheduleStatus =
     | 'UNDEFINED'

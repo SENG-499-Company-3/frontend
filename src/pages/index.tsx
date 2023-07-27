@@ -153,13 +153,19 @@ const HomePage = () => {
                                 <InputLabel id='term-select-label'>Term</InputLabel>
                                 <Select
                                     label='Term'
-                                    value={currentTerm?.id}
                                     labelId='term-select-label'
                                     variant="outlined"
+                                    value={currentTerm?.id || -1}
                                     onChange={handleTermChange}
                                     sx={{ minWidth: 150 }}
                                     size='small'
+                                    disabled={terms.length === 0}
                                 >
+                                    {terms.length === 0 && (
+                                        <MenuItem value={-1}>
+                                        
+                                        </MenuItem>
+                                    )}
                                     {terms.map((term) => (
                                         <MenuItem value={term.id} key={term.id}>
                                             {getMonthStringFromNumber(term.month)} {term.year}

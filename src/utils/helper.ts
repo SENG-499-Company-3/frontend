@@ -161,7 +161,7 @@ export const courseBlocks = [
  * @param course The course the get the name of
  */
 export const makeCourseName = (course: ICourse): string => {
-  return `${course.courseCode} ${course.courseNumber}`;
+  return `${course.Subj} ${course.Num}`.toUpperCase();
 }
 
 export const getMonthStringFromNumber = (month: number): string => {

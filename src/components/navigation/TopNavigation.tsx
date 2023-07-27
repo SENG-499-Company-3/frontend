@@ -1,11 +1,11 @@
 import { useContext, useState } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
-import useApi from '../../hooks/useApi';
 import { AppBar, Avatar, Box, Button, Drawer, IconButton, Toolbar, Typography } from "@mui/material";
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import MenuIcon from '@mui/icons-material/Menu';
 import Link from "next/link";
 import { SideNavigation } from "./SideNavigation";
+import { useApi } from "../../contexts/ApiContext";
 
 interface ITopNavigationProps {
     onToggleThemeMode: () => void
@@ -17,7 +17,8 @@ export const TopNavigation = (props: ITopNavigationProps) => {
     const [showSideNav, setShowSideNav] = useState<boolean>(false);
 
     const signOut = async () => {
-        await api.auth.logout();
+        // await api.auth.logout();
+        alert('TODO')
     }
 
     return (
