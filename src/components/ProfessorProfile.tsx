@@ -1,16 +1,18 @@
 import { Avatar, Box, Button, Paper, Tab, Tabs, Typography } from "@mui/material"
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import AppPage from "./layout/AppPage"
 import PageHeader from "./layout/PageHeader"
 import dynamic from "next/dynamic";
 import { courseScheduleData } from "./common/sampleData/courseSchedule";
 import PageContent from "./layout/PageContent";
-import PreferencesViewer, { IPreferences, defaultPreferences } from "./PreferencesViewer";
+import PreferencesViewer, { defaultPreferences } from "./PreferencesViewer";
 import PageHeaderActions from "./layout/PageHeaderActions";
 import { IUser } from "../hooks/api/useUserApi";
+import useApi from "../hooks/useApi";
+import { IPreferences } from "../hooks/api/usePreferencesApi";
 
 interface IProfessorProfileProps {
-    professor: IUser;
+    professor: IUser | null;
     canEditPreferences: boolean;
     canEditCalendar: boolean;
 }
@@ -20,10 +22,20 @@ const NoSsrCalendar = dynamic(() => import("./schedule/CourseCalendar"), {
 });
 
 const ProfessorProfile = (props: IProfessorProfileProps) => {
-    const profCourses = courseScheduleData.filter(course => course.ProfessorID === props.professor?.id);
     const [tab, setTab] = useState<number>(0);
     const [preferences, setPreferences] = useState<IPreferences>(defaultPreferences)
     const [isEditingPreferences, setIsEditingPreferences] = useState<boolean>(false);
+    const api = useApi();
+
+    const profCourses = courseScheduleData.filter(course => course.ProfessorID === props.professor?.id);
+
+    const professorId = useMemo(() => props.professor?.id, [props.professor]);
+    useEffect(() => {
+        api.preferences.getPreferencesByUserId(professorId)
+            .then((preferences) => {
+                setPreferences(preferences);
+            })
+    }, [professorId]);
 
     return (
         <AppPage>

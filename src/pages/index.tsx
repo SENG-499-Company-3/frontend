@@ -2,46 +2,35 @@ import React, { useContext, useState, useEffect } from 'react'
 import ScheduleList from '../components/schedule/ScheduleList'
 import AppPage from '../components/layout/AppPage'
 import PageHeader from '../components/layout/PageHeader'
-import { Alert, AlertColor, AlertProps, AlertTitle, Box, Button, Collapse, Container, FormControl, InputLabel, MenuItem, Paper, Select, Typography } from '@mui/material'
+import { Alert, AlertColor, Divider, AlertTitle, Box, Button, Collapse, Container, FormControl, InputLabel, MenuItem, Paper, Select, Typography, Menu } from '@mui/material'
 import PageHeaderActions from '../components/layout/PageHeaderActions'
 import { courseScheduleData } from '../components/common/sampleData/courseSchedule'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SchoolIcon from '@mui/icons-material/School';
 import PublicIcon from '@mui/icons-material/Public';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import { LoadingButton } from '@mui/lab';
-import PageContent from '../components/layout/PageContent';
-import { Schedule, ScheduleContext, ScheduleStatus } from '../contexts/ScheduleContext';
-import SaveIcon from '@mui/icons-material/Save';
+import { LoadingButton } from '@mui/lab'
+import PageContent from '../components/layout/PageContent'
+import { Schedule, ScheduleContext, ScheduleStatus } from '../contexts/ScheduleContext'
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Course } from '../types/course';
-
-const termOptions = [
-    {
-        title: 'Summer 2023',
-        value: [202305],
-    },
-    {
-        title: 'Fall 2023',
-        value: [202309],
-    },
-    {
-        title: 'Spring 2024',
-        value: [202401],
-    },
-    {
-        title: 'All',
-        value: [202305, 202309, 202401],
-    }, 
-]
+import { TermsContext } from '../contexts/TermsContext'
+import { getMonthStringFromNumber, pluralize } from '../utils/helper'
+import { ITerm } from '../hooks/api/useTermsApi'
+import { GridRowSelectionModel } from '@mui/x-data-grid'
+import CoursesTable from '../components/CoursesTable'
 
 const HomePage = () => {
     const [generating, setGenerating] = useState<boolean>(false);
     const [validating, setValidating] = useState<boolean>(false);
     const [publishing, setPulbishing] = useState<boolean>(false);
+    const [showNewCourseDialog, setShowNewCourseDialog] = useState<boolean>(false);
+    const [courseMenuAnchorEl, setCourseMenuAnchorEl] = useState(null);
+    const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>([]);
     const scheduleContext = useContext(ScheduleContext);
-    const scheduleStatus = scheduleContext.workingSchedule()?.status || 'UNDEFINED';
-    const [term, setTerm] = React.useState(termOptions[3].title);
+    const termsContext = useContext(TermsContext);
+    const terms = termsContext.terms();
+
+    const scheduleStatus = scheduleContext.currentSchedule()?.status || 'UNDEFINED';
+    const [currentTerm, setCurrentTerm] = React.useState<ITerm | null>(terms[0] || null);
     const [courses, setCourses] = React.useState(courseScheduleData);
 
     useEffect(() => {
@@ -54,17 +43,29 @@ const HomePage = () => {
     let alertSeverity: AlertColor = 'info'
     
     const handleTermChange = (event) => {
-        const selectedTerm = event.target.value;
-        const selectedTermValue = termOptions.find((option) => option.title === selectedTerm).value;
-        setTerm(selectedTerm);
+        const selectedTermId = event.target.value;
+        const selectedTerm = terms.find((term) => term.id === selectedTermId)
+        setCurrentTerm(selectedTerm);
       
+        /**
+         * @TODO
         if (selectedTermValue.length > 1) { // 'All' is selected
-          scheduleContext._setDisplaySchedule(scheduleContext.workingSchedule().scheduledCourses);
+            setCourses(courseScheduleData);
         } else {
-          scheduleContext._setDisplaySchedule(scheduleContext.workingSchedule().scheduledCourses.filter((item) => item.Term === selectedTermValue[0]));
+            setCourses(courseScheduleData.filter((item) => item.Term === selectedTermValue[0]));
         }
-      };
+        */
+    };
     
+    useEffect(() => {
+        setCurrentTerm(terms[0])
+    }, [terms])
+
+    /*
+    useEffect(() => {
+
+    }, [courseRows])
+    */
 
     switch (scheduleStatus) {
         case 'UNDEFINED':
@@ -113,11 +114,13 @@ const HomePage = () => {
         scheduleContext.generateSchedule().finally(() => setGenerating(false))
     }
 
+    /*
+     * @TODO uncomment
     const handleChangeSchedule = (changedCourses: Course[], changed: boolean) => {
         //Update working schedule
         if (changed) {
-            /* Desynced and does not work. Set manually
-            handleSetScheduleStatus('PENDING'); */
+            // Desynced and does not work. Set manually
+            // handleSetScheduleStatus('PENDING');
 
             //TODO: DELETE ME
             console.log(changedCourses.length);
@@ -143,6 +146,7 @@ const HomePage = () => {
             };
         }
     }
+    */
 
     const handleDiscard = () => {
         if (confirm('Discard changes?')) {
@@ -184,24 +188,47 @@ const HomePage = () => {
                                 <InputLabel id='term-select-label'>Term</InputLabel>
                                 <Select
                                     label='Term'
-                                    value={term}
+                                    value={currentTerm?.id}
                                     labelId='term-select-label'
                                     variant="outlined"
                                     onChange={handleTermChange}
                                     sx={{ minWidth: 150 }}
                                     size='small'
                                 >
-                                    {termOptions.map((term, index) => (
-                                        <MenuItem value={term.title} key={index}>
-                                        {term.title}
+                                    {terms.map((term) => (
+                                        <MenuItem value={term.id} key={term.id}>
+                                            {getMonthStringFromNumber(term.month)} {term.year}
                                         </MenuItem>
                                     ))}
                                 </Select>
                             </FormControl>
                         </Box>
-                        <Button variant='outlined' startIcon={<PublicIcon />}>Validate and Publish</Button>
-                        <Button disabled variant='outlined' startIcon={<SchoolIcon />} endIcon={<ExpandMoreIcon />}>Course Options</Button>
-                        <Button variant='outlined' startIcon={<CalendarMonthIcon />} endIcon={<ExpandMoreIcon />}>Schedule Options</Button>
+                        <LoadingButton
+                            variant='contained'
+                            disabled={['UNDEFINED', 'VALID_UNPUBLISHED', 'VALID_PUBLISHED', 'INVALID'].includes(scheduleStatus)}
+                            startIcon={<PublicIcon />}
+                            onClick={() => handleValidate()}
+                            loading={validating}
+                        >Validate Schedule</LoadingButton>
+
+                        {scheduleStatus === 'VALID_UNPUBLISHED' && (
+                            <LoadingButton
+                                variant='contained'
+                                color='success'
+                                startIcon={<PublicIcon />}
+                                onClick={() => handlePublish()}
+                                loading={publishing}
+                            >Publish Schedule</LoadingButton>
+                        )}
+
+                        {['UNSAVED', 'PENDING', 'VALID_UNPUBLISHED', 'INVALID'].includes(scheduleStatus) && (
+                            <Button
+                                variant='outlined'
+                                color='error'
+                                startIcon={<DeleteIcon />}
+                                onClick={() => handleDiscard()}
+                            >Discard Changes</Button>
+                        )}
                     </PageHeaderActions>
                 </Box>
                 <Collapse in={scheduleStatus !== 'UNDEFINED'}>
@@ -225,24 +252,59 @@ const HomePage = () => {
             {scheduleStatus === 'UNDEFINED' ? (
                 <PageContent>
                     <Container maxWidth='md'>
-                        <Paper sx={{ p: 8, textAlign: 'center' }}>
+                        <Paper sx={{ px: 8, pt: 6, pb: 1, textAlign: 'center' }}>
                             <Typography variant='h4' mb={2}>There is no existing schedule</Typography>
                             <Typography variant='body1' mb={2}>Click to generate a schedule.</Typography>
-                            <LoadingButton
-                                variant='contained'
-                                startIcon={<PublicIcon />}
-                                loading={generating}
-                                onClick={() => _handleGenerate()}
-                            >
-                                Generate Schedule
-                            </LoadingButton>
+                            <Menu anchorEl={courseMenuAnchorEl} open={Boolean(courseMenuAnchorEl)} onClose={() => setCourseMenuAnchorEl(null)}>
+                                <MenuItem
+                                    onClick={() => {
+                                        setShowNewCourseDialog(true);
+                                        setCourseMenuAnchorEl(null)
+                                    }}
+                                >Create Course</MenuItem>
+                            </Menu>
+                            <Box display='flex' gap={1} justifyContent='center'>
+                                <Button variant='outlined' startIcon={<SchoolIcon />} endIcon={<ExpandMoreIcon />} onClick={(event) => setCourseMenuAnchorEl(event.currentTarget)}>
+                                    Course Options
+                                </Button>
+                                <LoadingButton
+                                    variant='contained'
+                                    startIcon={<PublicIcon />}
+                                    loading={generating}
+                                    onClick={() => _handleGenerate()}
+                                    disabled={rowSelectionModel.length <= 0}
+                                >
+                                    Generate Schedule
+                                </LoadingButton>
+                            </Box>
+                            <Box sx={{ textAlign: 'left', my: 3 }}>
+                                <Typography>
+                                    <strong>
+                                        {`Scheduling ${rowSelectionModel.length} ${pluralize(rowSelectionModel.length, 'courses')}`}
+                                    </strong>
+                                </Typography>
+                                <Divider sx={{ pt: 1 }} />
+                                <CoursesTable
+                                    showNewCourseDialog={showNewCourseDialog}
+                                    onCloseNewCourseDialog={() => setShowNewCourseDialog(false)}
+                                    DataGridProps={{
+                                        checkboxSelection: true,
+                                        sx: {
+                                            height: 500,
+                                            border: 0
+                                        },
+                                        rowSelectionModel,
+                                        onRowSelectionModelChange: setRowSelectionModel
+                                    }}
+                                />
+                            </Box>
                         </Paper>
                     </Container>
                 </PageContent>
             ) : (
                 <ScheduleList 
                     courses={scheduleContext.displaySchedule()} 
-                    onChange={handleChangeSchedule}
+                    onChange={() => {}} // handleChangeSchedule}
                 />
             )}
         </AppPage>
