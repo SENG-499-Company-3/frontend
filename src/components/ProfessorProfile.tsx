@@ -65,51 +65,49 @@ const ProfessorProfile = (props: IProfessorProfileProps) => {
                     </Tabs>
                 </Box>
             </Paper>
-            {tab === 0 && (
-                <Paper elevation={0} square>
-                    <NoSsrCalendar view="week" courses={profCourses} canEdit={props.canEditCalendar}/>
-                </Paper>
-            )}
-            {tab === 1 && (
-                <>
-                    <PageHeader>
-                        <Box display='flex'>
-                            <Box flex='1'>
-                                <Typography mb={1} variant='h4'>Professor Preferences</Typography>
-                                <Typography>Enter your preferences for the given teaching term.</Typography>
-                            </Box>
-                            {props.canEditPreferences && (
-                                <PageHeaderActions>
-                                    {isEditingPreferences ? (
-                                        <>
-                                            <Button
-                                                variant='contained'
-                                                onClick={() => setIsEditingPreferences(false)}
-                                            >Save</Button>
-                                            <Button
-                                                variant='outlined'
-                                                onClick={() => {
-                                                    setPreferences(defaultPreferences);
-                                                    setIsEditingPreferences(false);
-                                                }}
-                                            >Cancel</Button>
-                                        </>
-                                    ) : (
-                                        <Button variant='contained' onClick={() => setIsEditingPreferences(true)}>Edit Preferences</Button>
-                                    )}
-                                </PageHeaderActions>
-                            )}
+            
+            <Paper elevation={0} square sx={{ display: tab === 0 ? 'unset' : 'none'}}>
+                <NoSsrCalendar view="week" courses={profCourses} canEdit={props.canEditCalendar}/>
+            </Paper>
+
+            <Box sx={{ display: tab === 1 ? 'unset' : 'none' }}>
+                <PageHeader>
+                    <Box display='flex'>
+                        <Box flex='1'>
+                            <Typography mb={1} variant='h4'>Professor Preferences</Typography>
+                            <Typography>Enter your preferences for the given teaching term.</Typography>
                         </Box>
-                    </PageHeader>
-                    <PageContent>
-                        <PreferencesViewer
-                            preferences={preferences}
-                            editing={props.canEditPreferences && isEditingPreferences}
-                            onChange={setPreferences}
-                        />
-                    </PageContent>
-                </>
-            )}
+                        {props.canEditPreferences && (
+                            <PageHeaderActions>
+                                {isEditingPreferences ? (
+                                    <>
+                                        <Button
+                                            variant='contained'
+                                            onClick={() => setIsEditingPreferences(false)}
+                                        >Save</Button>
+                                        <Button
+                                            variant='outlined'
+                                            onClick={() => {
+                                                setPreferences(defaultPreferences);
+                                                setIsEditingPreferences(false);
+                                            }}
+                                        >Cancel</Button>
+                                    </>
+                                ) : (
+                                    <Button variant='contained' onClick={() => setIsEditingPreferences(true)}>Edit Preferences</Button>
+                                )}
+                            </PageHeaderActions>
+                        )}
+                    </Box>
+                </PageHeader>
+                <PageContent>
+                    <PreferencesViewer
+                        preferences={preferences}
+                        editing={props.canEditPreferences && isEditingPreferences}
+                        onChange={setPreferences}
+                    />
+                </PageContent>
+            </Box>
         </AppPage>
     )
 }
