@@ -129,9 +129,6 @@ export const CourseContextProvider = (props: PropsWithChildren) => {
         courses: () => courses,
         addCourse: (newCourse: INewCourse) => {
             return api.courses.createCourse(newCourse)
-                .then((course: ICourse) => {
-                    setCourses([...courses, course])
-                });
         },
         deleteCourse: (deletedCourse: ICourse) => {
             return api.courses.deleteCourse(deletedCourse._id)

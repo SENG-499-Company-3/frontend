@@ -260,7 +260,7 @@ const HomePage = () => {
                     <Container maxWidth='md'>
                         <Paper sx={{ px: 8, pt: 6, pb: 1, textAlign: 'center' }}>
                             <Typography variant='h4' mb={2}>There is no existing schedule</Typography>
-                            <Typography variant='body1' mb={2}>Click to generate a schedule.</Typography>
+                            <Typography variant='body1' mb={2}>Select courses to schedule below, then click to generate a schedule.</Typography>
                             <Menu anchorEl={courseMenuAnchorEl} open={Boolean(courseMenuAnchorEl)} onClose={() => setCourseMenuAnchorEl(null)}>
                                 <MenuItem
                                     onClick={() => {
