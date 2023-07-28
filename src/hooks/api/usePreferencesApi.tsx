@@ -40,6 +40,7 @@ const usePreferencesApi = (axios: AxiosInstance) => {
     }
 
     const savePreferences = async (newPreferences: IPreferences): Promise<any[]> => {
+        return Promise.resolve(null);
         const { data } = await axios.put('/preferences/update', newPreferences);
 
         return data;

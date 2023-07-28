@@ -103,7 +103,8 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
                 return props.preferences?.availability
                     ? (!props.preferences.availability.some((userAvailability) => userAvailability.term.id === defaultAvilability.term.id))
                     : true
-            })
+            }),
+            ...(props.preferences?.availability ?? [])
         ],
     }    
 

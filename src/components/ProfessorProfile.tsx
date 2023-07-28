@@ -24,7 +24,7 @@ const NoSsrCalendar = dynamic(() => import("./schedule/CourseCalendar"), {
 
 const ProfessorProfile = (props: IProfessorProfileProps) => {
     console.log('prof profile props:', props)
-    const [tab, setTab] = useState<number>(0);
+    const [tab, setTab] = useState<number>(1);
     const [preferences, setPreferences] = useState<IPreferences>(null);
     const [editablePreferences, setEditablePreferences] = useState<IPreferences>(null);
     const [saving, setSaving] = useState<boolean>(false)
