@@ -3,11 +3,13 @@ import { ITerm } from '../hooks/api/useTermsApi';
 import { useApi } from './ApiContext';
 
 interface ITermsContext {
-    terms: () => ITerm[]
+    terms: () => ITerm[];
+    fetchTerms: () => Promise<void>
 }
 
 export const TermsContext = createContext<ITermsContext>({
-    terms: () => []
+    terms: () => [],
+    fetchTerms: () => Promise.resolve()
 });
 
 export const defaultTerms: ITerm[] = [
@@ -32,17 +34,23 @@ export const TermsContextProvider = (props: PropsWithChildren) => {
     const [terms, setTerms] = useState<ITerm[]>([]);
     const api = useApi();
 
+    const fetchTerms = async () => {
+        return api.terms.listTerms()
+            .then((terms) => {
+                setTerms(terms);
+            })
+            .catch(() => {
+                setTerms(defaultTerms)
+            })
+    }
+
     const termsContext: ITermsContext = {
-        terms: () => terms
+        terms: () => terms,
+        fetchTerms
     }
     
     useEffect(() => {
-        /*
-        api.terms.listTerms().then((terms) => {
-            setTerms(terms);
-        });
-        */
-       setTerms(defaultTerms)
+        fetchTerms();
     }, []);
 
     return (

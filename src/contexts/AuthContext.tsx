@@ -54,8 +54,6 @@ export const AuthContext = createContext<IAuthContext>({
     fetchSelf: () => {},
     logout: () => {},
     login: () => Promise.resolve(),
-    //userToken: () => null,
-    //setUserToken: () => {},
     isAuthenticated: () => false,
     isAdmin: () => false,
     avatarInitials: () => ''
@@ -63,7 +61,6 @@ export const AuthContext = createContext<IAuthContext>({
 
 export const AuthGuard = (props: PropsWithChildren) => {
     const authContext = useContext(AuthContext);
-    // const api = useApi();
 
     return (
         authContext.isAuthenticated()
