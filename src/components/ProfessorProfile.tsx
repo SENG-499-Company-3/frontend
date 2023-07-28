@@ -52,7 +52,8 @@ const ProfessorProfile = (props: IProfessorProfileProps) => {
 
         api.preferences.savePreferences(editablePreferences)
             .then(() => {
-                getPreferences();
+                // getPreferences();
+                setPreferences(editablePreferences);
             })
             .finally(() => {
                 setIsEditingPreferences(false);

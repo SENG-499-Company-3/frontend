@@ -91,6 +91,8 @@ export const ScheduleContextProvider = (props: PropsWithChildren) => {
             }),
 
         displaySchedule: () => {
+            return defaultCourseScheduleData;
+            /*
             const courses: Course[] = [];
 
             if(!currentSchedule || !currentSchedule.length) return defaultCourseScheduleData;
@@ -119,6 +121,7 @@ export const ScheduleContextProvider = (props: PropsWithChildren) => {
 
             }
             return courses;
+            */
         }
     }
 
