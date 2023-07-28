@@ -35,19 +35,19 @@ const NewCourseDialog = (props: INewCourseDialogProps) => {
     const [courseNumber, setCourseNumber] = useState<string>('');
     const courseContext = useContext(CourseContext);
 
-    const handleCreateCourse = () => {
+    const handleCreateCourse = async () => {
         setCreating(true)
-        courseContext.addCourse({
-            Subj: courseCode,
-            Title: courseName, 
-            Num: courseNumber
-        })
-            .then(() => {
-                props.onClose()
-            })
-            .finally(() => {
-                setCreating(false)
-            })
+        try {
+            await courseContext.addCourse({
+                Subj: courseCode,
+                Title: courseName, 
+                Num: courseNumber
+            });
+            await courseContext.fetchCourses();
+            props.onClose()
+        } finally {
+            setCreating(false)
+        }
     }
 
     const handleClose = () => {

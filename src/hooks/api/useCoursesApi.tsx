@@ -16,8 +16,8 @@ const useCoursesApi = (axios: AxiosInstance) => {
         return data;
     }
 
-    const createCourse = async (course: INewCourse): Promise<ICourse> => {
-        const { data } = await axios.post('/courses', course);
+    const createCourse = async (course: INewCourse): Promise<void> => {
+        const { data } = await axios.post('/courses/create', course);
 
         return data;
     }
