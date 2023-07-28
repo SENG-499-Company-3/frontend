@@ -172,8 +172,6 @@ const CoursesTable = (props: ICoursesTableProps) => {
         courseCodeWithNumber: makeCourseName(course)
     }));
 
-    console.log({ courses })
-
     return (
         loading ? (
             <LoadingSpinner />

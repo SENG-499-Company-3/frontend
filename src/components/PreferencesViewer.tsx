@@ -64,7 +64,6 @@ interface IPreferencesViewerProps {
 }
 
 const PreferencesViewer = (props: IPreferencesViewerProps) => {
-    console.log({ props })
     const termsContext = useContext(TermsContext);
     const termYears = termsContext.terms()
         .reduce((years, term) => {

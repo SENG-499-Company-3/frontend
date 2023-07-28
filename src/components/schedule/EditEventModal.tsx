@@ -55,8 +55,6 @@ const EditEventModal = ({ isOpen, onClose, onSave, course, courseBgColor }) => {
         })
   }, [])
 
-  console.log(classrooms)
-
   const courseBlock = editableEvent.Days + ' ' + convertToTime(editableEvent.Begin) + ' ' + convertToTime(editableEvent.End);
 
   const handleSaveChanges = () => {

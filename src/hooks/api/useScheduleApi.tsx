@@ -1,12 +1,10 @@
 import { AxiosInstance, AxiosResponse } from 'axios'
 import { Schedule } from '../../contexts/ScheduleContext';
+import { ICourse } from './useCoursesApi';
+import { ITerm } from './useTermsApi';
 
 export const WORKING_SCHEDULE =  '';
 
-interface IGenerateScheduleRequest {
-    scheduledCourseIds: number[];
-    termId: number;
-}
 
 const useScheduleApi = (axios: AxiosInstance) => {
     const getSchedule = async (): Promise<Schedule> => {
@@ -15,13 +13,15 @@ const useScheduleApi = (axios: AxiosInstance) => {
         return data;
     }
 
-    const generateSchedule = async (request: IGenerateScheduleRequest): Promise<Schedule> => {
-        const { data } = await axios.post(`/schedule/create`, request);
+    const generateSchedule = async (selectedCourses: ICourse[], term: ITerm): Promise<any> => {
+        console.log('selectedCourses', selectedCourses);
+        const { data } = await axios.post(`/schedule/generate_trigger`, { selectedCourses, term });
+        console.log('data', data);
 
-        return data;
+        return data.rawAssignments;
     }
 
-    const validateSchedule = async (request: Schedule): Promise<void> => {
+    const validateSchedule = async (request: any): Promise<void> => {
         const { data } = await axios.post(`/schedule/validate`, request);
 
         return data;
