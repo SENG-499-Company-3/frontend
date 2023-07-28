@@ -40,8 +40,12 @@ const NewCourseDialog = (props: INewCourseDialogProps) => {
         try {
             await courseContext.addCourse({
                 Subj: courseCode,
+                Num: courseNumber,
                 Title: courseName, 
-                Num: courseNumber
+                CourseYear: 0,
+                Cap: 0,
+                Enrolled: 0
+                
             });
             await courseContext.fetchCourses();
             props.onClose()

@@ -128,6 +128,8 @@ export const CourseContextProvider = (props: PropsWithChildren) => {
     const courseContext: ICourseContext = {
         courses: () => courses,
         addCourse: (newCourse: INewCourse) => {
+            console.log('newCourse', newCourse);
+            
             return api.courses.createCourse(newCourse)
         },
         deleteCourse: (deletedCourse: ICourse) => {
