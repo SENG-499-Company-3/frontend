@@ -21,6 +21,8 @@ interface IAuthContext {
      */
     logout: () => void;
 
+    login: (username: string, password: string) => Promise<void>
+
     /**
      * The currently set user token.
      */
@@ -51,6 +53,7 @@ export const AuthContext = createContext<IAuthContext>({
     currentUser: () => null,
     fetchSelf: () => {},
     logout: () => {},
+    login: () => Promise.resolve(),
     //userToken: () => null,
     //setUserToken: () => {},
     isAuthenticated: () => false,
@@ -94,8 +97,16 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
         logout: () => {
             setCurrentUser(null);
             api.setUserToken(null);
-            localStorage.removeItem(USER_TOKEN);
+            // localStorage.removeItem(USER_TOKEN);
             router.push('/login');
+        },
+        login: async (username: string, password: string) => {
+            const token = await api.auth.login(username, password)
+            localStorage.setItem(USER_TOKEN, token);
+            api.setUserToken(token);
+            // await fetchSelf();
+
+            return;
         },
         isAuthenticated: () => Boolean(currentUser) && Boolean(api.userToken),
         isAdmin: () => currentUser.userrole === AuthenticatedUserType.ADMIN,

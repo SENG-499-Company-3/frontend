@@ -13,8 +13,8 @@ import Typography from '@mui/material/Typography';
 import { IExistingUserDetails } from '../types/auth.d'
 import { AuthContext } from '../contexts/AuthContext'
 import { useRouter } from 'next/router'
-import useApi from '../hooks/useApi';
 import { LoadingButton } from '@mui/lab';
+import { useApi } from '../contexts/ApiContext';
 
 const LoginPage = () => {
     const router = useRouter();
@@ -39,7 +39,7 @@ const LoginPage = () => {
     const handleSubmit = (event) => {
         event.preventDefault();
         setLoading(true);
-        api.auth.login(email, password)
+        authContext.login(email, password)
             .then(() => {
                 router.push('/'); // Redirect user
             })
