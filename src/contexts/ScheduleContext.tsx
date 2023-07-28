@@ -3,9 +3,9 @@ import React, { PropsWithChildren, createContext, useEffect, useState } from 're
 import { WORKING_SCHEDULE } from '../hooks/api/useScheduleApi';
 import { Course } from '../types/course';
 
-import { courseScheduleData } from '../components/common/sampleData/courseSchedule'
 import { ICourse } from '../hooks/api/useCoursesApi';
 import { ITerm } from '../hooks/api/useTermsApi';
+import { defaultCourseScheduleData } from '../components/common/sampleData/courseSchedule';
 
 export type ScheduleStatus =
     | 'UNDEFINED'
@@ -48,6 +48,8 @@ export const ScheduleContext = createContext<IScheduleContext>({
 
 export const ScheduleContextProvider = (props: PropsWithChildren) => {
     const [currentSchedule, setCurrentSchedule] = useState<Schedule[]>(null);
+
+    console.log({ currentSchedule })
     
     const api = useApi();
     
@@ -68,10 +70,10 @@ export const ScheduleContextProvider = (props: PropsWithChildren) => {
             }),
 
         generateSchedule: (selectedCourses: ICourse[], term: ITerm) => api.schedule.generateSchedule(selectedCourses, term)
-            .then((schedule: Schedule[]) => {
-                console.log('schedule', schedule);
+            .then((scheduleData: Schedule['data']) => {
+                console.log('scheduleData', scheduleData);
                 setCurrentSchedule({
-                    data: schedule,
+                    data: scheduleData,
                     status: "VALID_UNPUBLISHED"
                 });
                 console.log('currentSchedule', currentSchedule);
@@ -89,10 +91,9 @@ export const ScheduleContextProvider = (props: PropsWithChildren) => {
             }),
 
         displaySchedule: () => {
-
             const courses: Course[] = [];
 
-            if(!currentSchedule || !currentSchedule.length) return courses;
+            if(!currentSchedule || !currentSchedule.length) return defaultCourseScheduleData;
 
             for (const cur of currentSchedule) {
                 for (const data of cur.data) {

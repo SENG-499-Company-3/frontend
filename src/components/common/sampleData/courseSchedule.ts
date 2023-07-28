@@ -1,4 +1,4 @@
-export const courseScheduleData = [
+export const defaultCourseScheduleData = [
     {
       Term: 202305,
       Subj: 'CSC',

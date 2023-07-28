@@ -4,7 +4,6 @@ import AppPage from '../components/layout/AppPage'
 import PageHeader from '../components/layout/PageHeader'
 import { Alert, AlertColor, Divider, AlertTitle, Box, Button, Collapse, Container, FormControl, InputLabel, MenuItem, Paper, Select, Typography, Menu } from '@mui/material'
 import PageHeaderActions from '../components/layout/PageHeaderActions'
-import { courseScheduleData } from '../components/common/sampleData/courseSchedule'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SchoolIcon from '@mui/icons-material/School';
 import PublicIcon from '@mui/icons-material/Public';
@@ -142,6 +141,9 @@ const HomePage = () => {
         }, 2000)
     }
 
+    const displayedSchedule = scheduleContext.displaySchedule();
+    console.log({ displayedSchedule })
+
     return (
         <AppPage>
             <PageHeader>
@@ -276,11 +278,16 @@ const HomePage = () => {
                     </Container>
                 </PageContent>
             ) : (
-                <ScheduleList 
-                    courses={scheduleContext.displaySchedule()} 
-                    onChange={() => {}} // handleChangeSchedule}
-                />
-            )}
+                <>
+                    {displayedSchedule && (
+
+                        <ScheduleList 
+                            courses={displayedSchedule} 
+                            onChange={() => {}} // handleChangeSchedule}
+                        />
+                    )}
+                </>
+                )}
         </AppPage>
     )
 }

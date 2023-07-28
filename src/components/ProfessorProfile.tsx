@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import AppPage from "./layout/AppPage"
 import PageHeader from "./layout/PageHeader"
 import dynamic from "next/dynamic";
-import { courseScheduleData } from "./common/sampleData/courseSchedule";
 import PageContent from "./layout/PageContent";
 import PreferencesViewer from "./PreferencesViewer";
 import PageHeaderActions from "./layout/PageHeaderActions";
@@ -11,6 +10,7 @@ import { IUser } from "../hooks/api/useUserApi";
 import { IPreferences } from "../hooks/api/usePreferencesApi";
 import { useApi } from "../contexts/ApiContext";
 import { LoadingButton } from "@mui/lab";
+import { defaultCourseScheduleData } from "./common/sampleData/courseSchedule";
 
 interface IProfessorProfileProps {
     professor: IUser | null;
@@ -31,7 +31,7 @@ const ProfessorProfile = (props: IProfessorProfileProps) => {
     const [isEditingPreferences, setIsEditingPreferences] = useState<boolean>(false);
     const api = useApi();
 
-    const profCourses = courseScheduleData.filter(course => course.ProfessorID === props.professor?._id);
+    const profCourses = defaultCourseScheduleData.filter(course => course.ProfessorID === props.professor?._id);
 
     const professorEmail = useMemo(() => props.professor?.email, [props.professor]);
 
