@@ -1,14 +1,15 @@
 import { AxiosInstance, AxiosResponse } from 'axios'
+import { ITerm } from './useTermsApi';
 
 export interface ICoursePreference {
-    courseId: number;
+    courseYear: number;
     courseName: string;
     willingness: 'WILLING' | 'UNWILLING' | 'VERY_WILLING'
     ability: 'ABLE' |'WITH_DIFFICULTY';
 }
 
 export interface IAvailability {
-    termId: number
+    term: ITerm
     isAvailable: boolean
 }
 
@@ -18,24 +19,18 @@ export interface ILoad {
 }
 
 export interface IPreferences {
+    email: string;
     coursePreferences: ICoursePreference[]
-    additionalDetails: string
+    additionalDetailes: string
     availability: IAvailability[]
-    load: ILoad[]
+    load: number
 }
 
 const usePreferencesApi = (axios: AxiosInstance) => {
-    const getPreferencesByUserId = async (userId: string): Promise<IPreferences> => {
-        const { data } = await axios.get<string>(`/preferences/${userId}`);
-
-        let preferences: IPreferences = null;
-        try {
-            preferences = JSON.parse(data) as IPreferences;
-        } catch {
-            // Do nothing.
-        }
-
-        return preferences;
+    const getPreferencesByEmail = async (email: string): Promise<IPreferences> => {
+        const { data } = await axios.get<IPreferences>(`/preferences/email?teacherEmail=${email}`);
+        
+        return data;
     }
 
     const listPreferences = async (): Promise<any[]> => {
@@ -44,9 +39,17 @@ const usePreferencesApi = (axios: AxiosInstance) => {
         return data;
     }
 
+    const savePreferences = async (newPreferences: IPreferences): Promise<any[]> => {
+        return Promise.resolve(null);
+        const { data } = await axios.put('/preferences/update', newPreferences);
+
+        return data;
+    }
+
     return {
-        getPreferencesByUserId,
-        listPreferences
+        getPreferencesByEmail,
+        listPreferences,
+        savePreferences
     }
 }
 

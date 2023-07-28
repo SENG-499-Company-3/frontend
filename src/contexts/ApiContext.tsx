@@ -30,13 +30,12 @@ export const useApi = () => {
 
 export const ApiContextProvider = (props: PropsWithChildren) => {
 	const [userToken, setUserToken] = useState<string | null>();
-	console.log('useApi.userToken:', userToken)
 
 	/**
 	 * For now, we'll use a hardcoded API host. But in the future, we will need to pull this in
 	 * from an environment variable of some kind.
 	 */
-	const API_HOST = 'http://localhost:3001';// 'http://52.39.88.189:3001';
+	const API_HOST = 'http://52.39.88.189:3001'; // 'http://localhost:3001';
 	const baseURL = `${API_HOST}`; // To be changed later if needed
 
 	const axiosInstance = axios.create({

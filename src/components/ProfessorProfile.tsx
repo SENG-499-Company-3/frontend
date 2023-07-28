@@ -1,5 +1,5 @@
 import { Avatar, Box, Button, Paper, Tab, Tabs, Typography } from "@mui/material"
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import AppPage from "./layout/AppPage"
 import PageHeader from "./layout/PageHeader"
 import dynamic from "next/dynamic";
@@ -10,6 +10,7 @@ import PageHeaderActions from "./layout/PageHeaderActions";
 import { IUser } from "../hooks/api/useUserApi";
 import { IPreferences } from "../hooks/api/usePreferencesApi";
 import { useApi } from "../contexts/ApiContext";
+import { LoadingButton } from "@mui/lab";
 
 interface IProfessorProfileProps {
     professor: IUser | null;
@@ -22,20 +23,47 @@ const NoSsrCalendar = dynamic(() => import("./schedule/CourseCalendar"), {
 });
 
 const ProfessorProfile = (props: IProfessorProfileProps) => {
-    const [tab, setTab] = useState<number>(0);
-    const [preferences, setPreferences] = useState<IPreferences>(null)
+    console.log('prof profile props:', props)
+    const [tab, setTab] = useState<number>(1);
+    const [preferences, setPreferences] = useState<IPreferences>(null);
+    const [editablePreferences, setEditablePreferences] = useState<IPreferences>(null);
+    const [saving, setSaving] = useState<boolean>(false)
     const [isEditingPreferences, setIsEditingPreferences] = useState<boolean>(false);
     const api = useApi();
 
-    const profCourses = courseScheduleData.filter(course => course.ProfessorID === props.professor?.id);
+    const profCourses = courseScheduleData.filter(course => course.ProfessorID === props.professor?._id);
 
-    const professorId = useMemo(() => props.professor?.id, [props.professor]);
-    useEffect(() => {
-        api.preferences.getPreferencesByUserId(professorId)
-            .then((preferences) => {
+    const professorEmail = useMemo(() => props.professor?.email, [props.professor]);
+
+    const getPreferences = useCallback(() => {
+        return api.preferences.getPreferencesByEmail(professorEmail).then((preferences) => {
                 setPreferences(preferences);
+                setEditablePreferences(preferences);
             })
-    }, [professorId]);
+        
+    }, [professorEmail])
+
+    useEffect(() => {
+        getPreferences();
+    }, [professorEmail]);
+
+    const handleSavePreferences = () => {
+        setSaving(true);
+
+        api.preferences.savePreferences(editablePreferences)
+            .then(() => {
+                getPreferences();
+            })
+            .finally(() => {
+                setIsEditingPreferences(false);
+                setSaving(false);
+            })   
+    }
+
+    const handleCancelEdit = () => {
+        setEditablePreferences(preferences);
+        setIsEditingPreferences(false);
+    }
 
     return (
         <AppPage>
@@ -81,17 +109,16 @@ const ProfessorProfile = (props: IProfessorProfileProps) => {
                             <PageHeaderActions>
                                 {isEditingPreferences ? (
                                     <>
-                                        <Button
+                                        <LoadingButton
+                                            loading={saving}
                                             variant='contained'
-                                            onClick={() => setIsEditingPreferences(false)}
-                                        >Save</Button>
-                                        <Button
+                                            onClick={() => handleSavePreferences()}
+                                        >Save</LoadingButton>
+                                        <LoadingButton
+                                            loading={saving}
                                             variant='outlined'
-                                            onClick={() => {
-                                                setPreferences(null);
-                                                setIsEditingPreferences(false);
-                                            }}
-                                        >Cancel</Button>
+                                            onClick={() => handleCancelEdit()}
+                                        >Cancel</LoadingButton>
                                     </>
                                 ) : (
                                     <Button variant='contained' onClick={() => setIsEditingPreferences(true)}>Edit Preferences</Button>
@@ -102,9 +129,9 @@ const ProfessorProfile = (props: IProfessorProfileProps) => {
                 </PageHeader>
                 <PageContent>
                     <PreferencesViewer
-                        preferences={preferences}
+                        preferences={editablePreferences}
                         editing={props.canEditPreferences && isEditingPreferences}
-                        onChange={setPreferences}
+                        onChange={setEditablePreferences}
                     />
                 </PageContent>
             </Box>

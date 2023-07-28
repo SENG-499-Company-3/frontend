@@ -5,9 +5,7 @@ export interface ICourse {
     Subj: string;
     Num: string;
     Title: string;
-    CourseYear?: number,
-    Cap?: number,
-    Enrolled?: number
+    CourseYear?: string;
 }
 
 export type INewCourse = Omit<ICourse, '_id'>
