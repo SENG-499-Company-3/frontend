@@ -17,7 +17,7 @@ import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import { SelectChangeEvent } from '@mui/material/Select';
 import { DataGrid, GridColDef } from "@mui/x-data-grid"
-import { useState, useContext, Fragment } from 'react';
+import { useState, useContext, Fragment, useEffect, useMemo } from 'react';
 
 import AppPage from './layout/AppPage'
 import PageHeader from "./layout/PageHeader"
@@ -29,31 +29,26 @@ import { getMonthStringFromNumber, makeCourseName, pluralize } from "../utils/he
 import { ICoursePreference, IPreferences } from "../hooks/api/usePreferencesApi";
 import { ITerm } from "../hooks/api/useTermsApi";
 import { TermsContext, defaultTerms } from "../contexts/TermsContext";
+import { CourseContext } from "../contexts/CourseContext";
 
 const DEFAULT_MAX_COURSES = 6;
 
 export const getDefaultCoursePreferences = (courses: ICourse[]): ICoursePreference[] => courses.map((course: ICourse) => ({
-    courseId: course._id,
+    courseYear: Number(course.CourseYear || String(course.Num)[0]),
     courseName: makeCourseName(course),
     willingness: 'WILLING',
     ability: 'ABLE'
 }));
 
 export const getDefaultPreferences = (courses: ICourse[], terms: ITerm[]): IPreferences => ({
+    email: '',
     coursePreferences: getDefaultCoursePreferences(courses),
-    additionalDetails: '',
+    additionalDetailes: '',
     availability: terms.map((term) => ({
-        termId: term.id,
+        term,
         isAvailable: true
     })),
-    load: terms
-        .reduce((years, term) => {
-            if (!years.includes(term.year)) {
-                years.push(term.year);
-            }
-            return years;
-        }, [])
-        .map((year) => ({ year, maxCourses: DEFAULT_MAX_COURSES }))
+    load: DEFAULT_MAX_COURSES
 })
 
 
@@ -64,8 +59,25 @@ interface IPreferencesViewerProps {
 }
 
 const PreferencesViewer = (props: IPreferencesViewerProps) => {
-    console.log({ props })
+    console.log('props.preferences:', props.preferences);
     const termsContext = useContext(TermsContext);
+    const courseContext = useContext(CourseContext);
+
+    useEffect(() => {
+        courseContext.fetchCourses();
+        termsContext.fetchTerms();
+    }, []);
+
+    const allCourses = courseContext.courses();
+    const allTerms = termsContext.terms();
+    const yearForLoad = new Date().getFullYear();
+
+    console.log('allTerms:', allTerms)
+
+    const defaultPrefrencesObject = useMemo(() => {
+        return getDefaultPreferences(allCourses, allTerms);
+    }, [allCourses, allTerms]);
+
     const termYears = termsContext.terms()
         .reduce((years, term) => {
             if (!years.includes(term.year)) {
@@ -74,6 +86,26 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
 
             return years;
         }, []);
+
+    const preferencesObject: IPreferences = {
+        ...(props.preferences || defaultPrefrencesObject),
+        coursePreferences: [
+            ...defaultPrefrencesObject.coursePreferences.filter((defaultCoursePref) => {
+                return props.preferences?.coursePreferences
+                    ? (!props.preferences.coursePreferences.some((userCoursePref) => defaultCoursePref.courseName === userCoursePref.courseName))
+                    : true
+            }),
+            ...(props.preferences?.coursePreferences ?? [])
+        ],
+        load: props.preferences?.load || defaultPrefrencesObject.load,
+        availability: [
+            ...defaultPrefrencesObject.availability.filter((defaultAvilability) => {
+                return props.preferences?.availability
+                    ? (!props.preferences.availability.some((userAvailability) => userAvailability.term.id === defaultAvilability.term.id))
+                    : true
+            })
+        ],
+    }    
 
     const coursePreferenceColumns: GridColDef<ICoursePreference>[] = [
         {
@@ -95,9 +127,9 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
             renderCell: props.editing && ((params) => {
                 const handleChange = (event: SelectChangeEvent) => {
                     const willingness = event.target.value as ICoursePreference['willingness'];
-                    const updatedCoursePreferences = [...props.preferences?.coursePreferences];
+                    const updatedCoursePreferences = [...preferencesObject.coursePreferences];
                     updatedCoursePreferences.find((preference) => preference.courseName === params.row.courseName).willingness = willingness;
-                    props.onChange({ ...props.preferences, coursePreferences: updatedCoursePreferences });
+                    props.onChange({ ...preferencesObject, coursePreferences: updatedCoursePreferences });
                 };
 
                 return (
@@ -127,9 +159,9 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
             renderCell: props.editing && ((params) => {
                 const handleChange = (event: SelectChangeEvent) => {
                     const ability = event.target.value as ICoursePreference['ability'];
-                    const updatedCoursePreferences = [...props.preferences?.coursePreferences];
+                    const updatedCoursePreferences = [...preferencesObject.coursePreferences];
                     updatedCoursePreferences.find((preference) => preference.courseName === params.row.courseName).ability = ability;
-                    props.onChange({ ...props.preferences, coursePreferences: updatedCoursePreferences });
+                    props.onChange({ ...preferencesObject, coursePreferences: updatedCoursePreferences });
                 };
 
                 return (
@@ -147,6 +179,8 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
         }
     ];
 
+    console.log('preferencesObject:', preferencesObject);
+
     return (
         <Paper>
             <Box p={4}>
@@ -162,7 +196,7 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
                             getRowId={(row: ICoursePreference) => row.courseName}
                             sx={{ p: 0, height: 500 }}
                             columns={coursePreferenceColumns}
-                            rows={props.preferences?.coursePreferences || []}
+                            rows={preferencesObject.coursePreferences}
                             disableRowSelectionOnClick
                         />
                     </Grid>
@@ -180,19 +214,14 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
                     <Grid item xs={12} lg={8}>
                         <Box>
                             {termYears.map((termYear: number, index: number) => {
-                                const handleChangeLoad = (event, year) => {
-                                    const maxCourses = event.target.value;
-                                    const newLoad = [...props.preferences?.load];
-                                    const yearIndex = newLoad.findIndex((load) => load.year === year)
-                                    newLoad[yearIndex] = { year, maxCourses };
+                                const handleChangeLoad = (event) => {
+                                    const newLoad = event.target.value;
 
                                     props.onChange({
-                                        ...props.preferences,
+                                        ...preferencesObject,
                                         load: newLoad
                                     });
                                 }
-
-                                const maxCourses = props.preferences?.load.find((load) => load.year === termYear)?.maxCourses;
 
                                 return (
                                     <Fragment key={`year-${termYear}`}>
@@ -204,20 +233,20 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
 
                                                 const handleChangeAvailability = (event, updatedTerm: ITerm) => {
                                                     const isAvailable: boolean = event.target.value !== 'false';
-                                                    const newAvailability = [...props.preferences?.availability];
-                                                    const termIndex = newAvailability.findIndex((availability) => availability.termId === updatedTerm.id)
+                                                    const newAvailability = [...preferencesObject.availability];
+                                                    const termIndex = newAvailability.findIndex((availability) => availability.term.id === updatedTerm.id)
                                                     newAvailability[termIndex] = {
-                                                        termId: updatedTerm.id,
+                                                        term: updatedTerm,
                                                         isAvailable
                                                     };
                 
                                                     props.onChange({
-                                                        ...props.preferences,
+                                                        ...preferencesObject,
                                                         availability: newAvailability
                                                     });
                                                 }
 
-                                                const isAvailable = props.preferences?.availability.find((availability) => availability.termId === term.id)?.isAvailable
+                                                const isAvailable = preferencesObject.availability.find((availability) => availability.term.id === term.id)?.isAvailable
 
                                                 return (                                
                                                     <Box key={`term-${term.id}`} mb={2}>
@@ -255,33 +284,34 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
                                                 )
                                             })
                                         }
-                                       
-                                       <Box mt={2}>
-                                            <Typography variant="h6">
-                                                Course Load for {termYear}
-                                            </Typography>
-                                            <Typography color="textSecondary">
-                                                Enter your maximum course load for the {termYear} teaching year
-                                            </Typography>
-                                            <Box mt={2}>
-                                                {props.editing ? (
-                                                    <TextField
-                                                        name={`load-${termYear}`}
-                                                        size='small'
-                                                        type='number'
-                                                        // InputProps={{ inputProps: { min: 0, max: 6 }}}
-                                                        value={maxCourses}
-                                                        onChange={(event) => handleChangeLoad(event, termYear)}
-                                                        label='Course Load'
-                                                        required
-                                                    />
-                                                ) : (
-                                                    <Typography>
-                                                        <strong>{pluralize(maxCourses, `${maxCourses} course`)}</strong>
-                                                    </Typography>
-                                                )}
+                                       {termYear === yearForLoad && (
+                                        <Box mt={2}>
+                                                <Typography variant="h6">
+                                                    Course Load for {termYear}
+                                                </Typography>
+                                                <Typography color="textSecondary">
+                                                    Enter your maximum course load for the {termYear} teaching year
+                                                </Typography>
+                                                <Box mt={2}>
+                                                    {props.editing ? (
+                                                        <TextField
+                                                            name={`load-${termYear}`}
+                                                            size='small'
+                                                            type='number'
+                                                            // InputProps={{ inputProps: { min: 0, max: 6 }}}
+                                                            value={preferencesObject.load}
+                                                            onChange={(event) => handleChangeLoad(event)}
+                                                            label='Course Load'
+                                                            required
+                                                        />
+                                                    ) : (
+                                                        <Typography>
+                                                            <strong>{pluralize(preferencesObject.load, `${preferencesObject.load} course`)}</strong>
+                                                        </Typography>
+                                                    )}
+                                                </Box>
                                             </Box>
-                                        </Box>
+                                       )}
                                         
                                         {index < termYears.length - 1 && (
                                             <Divider sx={{ my: 3 }} />
@@ -312,9 +342,9 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
                                 fullWidth
                                 rows={4}
                                 disabled={!props.editing}
-                                value={props.preferences?.additionalDetails || ''}
+                                value={props.preferences?.additionalDetailes || ''}
                                 onChange={(event) => {
-                                    props.onChange({ ...props.preferences, additionalDetails: event.target.value });
+                                    props.onChange({ ...props.preferences, additionalDetailes: event.target.value });
                                 }}
                             />
                         </Box>

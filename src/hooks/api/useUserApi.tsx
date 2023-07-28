@@ -2,7 +2,7 @@ import { AxiosInstance, AxiosResponse } from 'axios'
 import { IAuthenticatedUser } from '../../types/auth.d';
 
 export interface IUser {
-    id: string;
+    _id: string;
     email: string;
     name: string;
     userrole: string;
