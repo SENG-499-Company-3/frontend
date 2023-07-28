@@ -1,5 +1,4 @@
 import { AxiosInstance, AxiosResponse } from 'axios'
-import { defaultCoursePreferences, defaultPreferences } from '../../components/PreferencesViewer';
 
 export interface ICoursePreference {
     courseId: number;
@@ -29,7 +28,7 @@ const usePreferencesApi = (axios: AxiosInstance) => {
     const getPreferencesByUserId = async (userId: string): Promise<IPreferences> => {
         const { data } = await axios.get<string>(`/preferences/${userId}`);
 
-        let preferences: IPreferences = defaultPreferences;
+        let preferences: IPreferences = null;
         try {
             preferences = JSON.parse(data) as IPreferences;
         } catch {

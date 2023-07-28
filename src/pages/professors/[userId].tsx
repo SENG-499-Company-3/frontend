@@ -39,7 +39,7 @@ const ProfessorPage = () => {
         return (
             <ProfessorProfile
                 professor={professor}
-                canEditCalendar={professor && professor.role === 'ADMIN'}
+                canEditCalendar={professor && professor.userrole === 'ADMIN'}
                 canEditPreferences={false}
             />
             

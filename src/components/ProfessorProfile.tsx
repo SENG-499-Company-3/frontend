@@ -5,7 +5,7 @@ import PageHeader from "./layout/PageHeader"
 import dynamic from "next/dynamic";
 import { courseScheduleData } from "./common/sampleData/courseSchedule";
 import PageContent from "./layout/PageContent";
-import PreferencesViewer, { defaultPreferences } from "./PreferencesViewer";
+import PreferencesViewer from "./PreferencesViewer";
 import PageHeaderActions from "./layout/PageHeaderActions";
 import { IUser } from "../hooks/api/useUserApi";
 import { IPreferences } from "../hooks/api/usePreferencesApi";
@@ -23,7 +23,7 @@ const NoSsrCalendar = dynamic(() => import("./schedule/CourseCalendar"), {
 
 const ProfessorProfile = (props: IProfessorProfileProps) => {
     const [tab, setTab] = useState<number>(0);
-    const [preferences, setPreferences] = useState<IPreferences>(defaultPreferences)
+    const [preferences, setPreferences] = useState<IPreferences>(null)
     const [isEditingPreferences, setIsEditingPreferences] = useState<boolean>(false);
     const api = useApi();
 
@@ -88,7 +88,7 @@ const ProfessorProfile = (props: IProfessorProfileProps) => {
                                         <Button
                                             variant='outlined'
                                             onClick={() => {
-                                                setPreferences(defaultPreferences);
+                                                setPreferences(null);
                                                 setIsEditingPreferences(false);
                                             }}
                                         >Cancel</Button>

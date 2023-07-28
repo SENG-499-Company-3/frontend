@@ -17,6 +17,7 @@ import { Divider } from "@mui/material";
 
 import { IUser } from "../../hooks/api/useUserApi";
 import { IClassroom } from "../../hooks/api/useClassroomApi";
+import { useApi } from "../../contexts/ApiContext";
 
 const mockInstructors = ["Michael Zastre", "John Smith", "Jane Doe", "Bob", "Jabbari, Hosna"];
 const mockLocations = ["ECS 123", "ECS 115", "ELW 220", "CLE 225", "HSD A240"];

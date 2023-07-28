@@ -58,7 +58,7 @@ export const getDefaultPreferences = (courses: ICourse[], terms: ITerm[]): IPref
 
 
 interface IPreferencesViewerProps {
-    preferences: IPreferences
+    preferences: IPreferences | null
     onChange: (preferences: IPreferences) => void
     editing: boolean
 }
@@ -95,7 +95,7 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
             renderCell: props.editing && ((params) => {
                 const handleChange = (event: SelectChangeEvent) => {
                     const willingness = event.target.value as ICoursePreference['willingness'];
-                    const updatedCoursePreferences = [...props.preferences.coursePreferences];
+                    const updatedCoursePreferences = [...props.preferences?.coursePreferences];
                     updatedCoursePreferences.find((preference) => preference.courseName === params.row.courseName).willingness = willingness;
                     props.onChange({ ...props.preferences, coursePreferences: updatedCoursePreferences });
                 };
@@ -127,7 +127,7 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
             renderCell: props.editing && ((params) => {
                 const handleChange = (event: SelectChangeEvent) => {
                     const ability = event.target.value as ICoursePreference['ability'];
-                    const updatedCoursePreferences = [...props.preferences.coursePreferences];
+                    const updatedCoursePreferences = [...props.preferences?.coursePreferences];
                     updatedCoursePreferences.find((preference) => preference.courseName === params.row.courseName).ability = ability;
                     props.onChange({ ...props.preferences, coursePreferences: updatedCoursePreferences });
                 };
@@ -162,7 +162,7 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
                             getRowId={(row: ICoursePreference) => row.courseName}
                             sx={{ p: 0, height: 500 }}
                             columns={coursePreferenceColumns}
-                            rows={props.preferences.coursePreferences}
+                            rows={props.preferences?.coursePreferences || []}
                             disableRowSelectionOnClick
                         />
                     </Grid>
@@ -182,7 +182,7 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
                             {termYears.map((termYear: number, index: number) => {
                                 const handleChangeLoad = (event, year) => {
                                     const maxCourses = event.target.value;
-                                    const newLoad = [...props.preferences.load];
+                                    const newLoad = [...props.preferences?.load];
                                     const yearIndex = newLoad.findIndex((load) => load.year === year)
                                     newLoad[yearIndex] = { year, maxCourses };
 
@@ -192,7 +192,7 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
                                     });
                                 }
 
-                                const maxCourses = props.preferences.load.find((load) => load.year === termYear)?.maxCourses;
+                                const maxCourses = props.preferences?.load.find((load) => load.year === termYear)?.maxCourses;
 
                                 return (
                                     <Fragment key={`year-${termYear}`}>
@@ -204,7 +204,7 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
 
                                                 const handleChangeAvailability = (event, updatedTerm: ITerm) => {
                                                     const isAvailable: boolean = event.target.value !== 'false';
-                                                    const newAvailability = [...props.preferences.availability];
+                                                    const newAvailability = [...props.preferences?.availability];
                                                     const termIndex = newAvailability.findIndex((availability) => availability.termId === updatedTerm.id)
                                                     newAvailability[termIndex] = {
                                                         termId: updatedTerm.id,
@@ -217,7 +217,7 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
                                                     });
                                                 }
 
-                                                const isAvailable = props.preferences.availability.find((availability) => availability.termId === term.id)?.isAvailable
+                                                const isAvailable = props.preferences?.availability.find((availability) => availability.termId === term.id)?.isAvailable
 
                                                 return (                                
                                                     <Box key={`term-${term.id}`} mb={2}>
@@ -312,7 +312,7 @@ const PreferencesViewer = (props: IPreferencesViewerProps) => {
                                 fullWidth
                                 rows={4}
                                 disabled={!props.editing}
-                                value={props.preferences.additionalDetails}
+                                value={props.preferences?.additionalDetails || ''}
                                 onChange={(event) => {
                                     props.onChange({ ...props.preferences, additionalDetails: event.target.value });
                                 }}
