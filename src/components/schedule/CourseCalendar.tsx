@@ -196,11 +196,6 @@ const CourseCalendar = ({
   };
 
   const onClickEvent: ExternalEventTypes["clickEvent"] = (res) => {
-    // console.group("onClickEvent");
-    // console.log("MouseEvent : ", res.nativeEvent);
-    // console.log("Event Info : ", res.event);
-    // console.groupEnd();
-
     const course = allCourses.find((course) => course.id === res.event.id);
 
     setSelectedEvent(res.event);

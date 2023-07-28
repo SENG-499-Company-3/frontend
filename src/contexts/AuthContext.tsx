@@ -123,7 +123,6 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
     }
 
     useEffect(() => {
-        // console.log('api.userToken changed to:', api.userToken)
         // If user has not been fetched yet, attempt fetch. If it fails, the token has expired
         if (api.userToken && !currentUser) {
             fetchSelf();
@@ -133,7 +132,6 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
     // On first render, load token from localStorage
     useEffect(() => {
         const existingToken = localStorage.getItem(USER_TOKEN)
-        console.log('setting api.userToken to:', existingToken)
         if (existingToken) {
             api.setUserToken(existingToken)
         }

@@ -4,7 +4,6 @@ import AppPage from '../components/layout/AppPage'
 import PageHeader from '../components/layout/PageHeader'
 import { Alert, AlertColor, Divider, AlertTitle, Box, Button, Collapse, Container, FormControl, InputLabel, MenuItem, Paper, Select, Typography, Menu } from '@mui/material'
 import PageHeaderActions from '../components/layout/PageHeaderActions'
-import { courseScheduleData } from '../components/common/sampleData/courseSchedule'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SchoolIcon from '@mui/icons-material/School';
 import PublicIcon from '@mui/icons-material/Public';
@@ -17,6 +16,7 @@ import { getMonthStringFromNumber, pluralize } from '../utils/helper'
 import { ITerm } from '../hooks/api/useTermsApi'
 import { GridRowSelectionModel } from '@mui/x-data-grid'
 import CoursesTable from '../components/CoursesTable'
+import { CourseContext } from '../contexts/CourseContext'
 
 const HomePage = () => {
     const [generating, setGenerating] = useState<boolean>(false);
@@ -31,7 +31,9 @@ const HomePage = () => {
 
     const scheduleStatus = scheduleContext.currentSchedule()?.status || 'UNDEFINED';
     const [currentTerm, setCurrentTerm] = React.useState<ITerm | null>(terms[0] || null);
-    const [courses, setCourses] = React.useState(courseScheduleData);
+
+    const courseContext = useContext(CourseContext);
+    const courses = courseContext.courses();
 
     useEffect(() => {
         scheduleContext.fetchSchedule();
@@ -97,56 +99,21 @@ const HomePage = () => {
     }
 
     const handleSetScheduleStatus = (newStatus: ScheduleStatus) => {
-        const updatedSchedule = { ...scheduleContext.workingSchedule(), status: newStatus };
-        scheduleContext._setWorkingSchedule(updatedSchedule);
-    }
-
-    const _handleGenerate = () => {
-        setGenerating(true);
-        setTimeout(() => {
-            setGenerating(false);
-            handleSetScheduleStatus('VALID_UNPUBLISHED');
-        }, 2000)
+        console.log('newStatus', newStatus);
+        // const updatedSchedule = { ...scheduleContext.workingSchedule(), status: newStatus };
+        // scheduleContext._setWorkingSchedule(updatedSchedule);
     }
 
     const handleGenerate = () => {
         setGenerating(true);
-        scheduleContext.generateSchedule().finally(() => setGenerating(false))
+
+        const selected = courses.filter((course) => rowSelectionModel.includes(course._id));
+        console.log('selected', selected);
+        const term = currentTerm;
+        console.log('term', term);
+
+        scheduleContext.generateSchedule(selected, term).finally(() => setGenerating(false))
     }
-
-    /*
-     * @TODO uncomment
-    const handleChangeSchedule = (changedCourses: Course[], changed: boolean) => {
-        //Update working schedule
-        if (changed) {
-            // Desynced and does not work. Set manually
-            // handleSetScheduleStatus('PENDING');
-
-            //TODO: DELETE ME
-            console.log(changedCourses.length);
-
-            //Update displaySchedule
-            scheduleContext._setDisplaySchedule(changedCourses);
-
-            const updateWorking: Schedule = { ...scheduleContext.workingSchedule(), scheduledCourses: changedCourses, status: 'PENDING' };
-
-            //Handle the case when the courses are filtered
-            if (term !== termOptions[3].title) {
-                const currentTermValue = termOptions.find((option) => option.title === term).value;
-            
-                //Read workingSchedule for current data. Filter out untouched sections(terms) - set aside
-                const unchangedSchedule = scheduleContext.workingSchedule().scheduledCourses.filter((item) => item.Term !== currentTermValue[0]);
-            
-                //Mash both back into the ScheduleContext
-                const final = { ...scheduleContext.workingSchedule(), scheduledCourses: [...unchangedSchedule, ...changedCourses] };
-                scheduleContext._setWorkingSchedule(final);
-            
-            } else {
-                scheduleContext._setWorkingSchedule(updateWorking);
-            };
-        }
-    }
-    */
 
     const handleDiscard = () => {
         if (confirm('Discard changes?')) {
@@ -173,6 +140,9 @@ const HomePage = () => {
             handleSetScheduleStatus('VALID_PUBLISHED');
         }, 2000)
     }
+
+    const displayedSchedule = scheduleContext.displaySchedule();
+    console.log({ displayedSchedule })
 
     return (
         <AppPage>
@@ -277,7 +247,7 @@ const HomePage = () => {
                                     variant='contained'
                                     startIcon={<PublicIcon />}
                                     loading={generating}
-                                    onClick={() => _handleGenerate()}
+                                    onClick={() => handleGenerate()}
                                     disabled={rowSelectionModel.length <= 0}
                                 >
                                     Generate Schedule
@@ -308,11 +278,16 @@ const HomePage = () => {
                     </Container>
                 </PageContent>
             ) : (
-                <ScheduleList 
-                    courses={scheduleContext.displaySchedule()} 
-                    onChange={() => {}} // handleChangeSchedule}
-                />
-            )}
+                <>
+                    {displayedSchedule && (
+
+                        <ScheduleList 
+                            courses={displayedSchedule} 
+                            onChange={() => {}} // handleChangeSchedule}
+                        />
+                    )}
+                </>
+                )}
         </AppPage>
     )
 }

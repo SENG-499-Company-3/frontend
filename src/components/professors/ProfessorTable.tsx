@@ -19,6 +19,8 @@ const ProfessorTable = (props: IProfessorTableProps) => {
         { field: 'preferencesSubmitted', headerName: 'Preferences Submitted', type: 'date', flex: 1 },
     ];
 
+    console.log('{ professors }:', props.professors)
+
     const professorList = props.professors.map((professor: IUser) => ({
         id: professor.id,
         instructor: professor.name,

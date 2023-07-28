@@ -15,7 +15,6 @@ const ProfessorsListPage = () => {
     const [professors, setProfessors] = useState<IUser[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
 
-    console.log({ professors })
 
     const api = useApi();
 
