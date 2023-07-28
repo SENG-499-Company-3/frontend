@@ -1,6 +1,6 @@
 import { useContext } from "react"
 import ProfessorProfile from "../components/ProfessorProfile"
-import { AuthContext } from "../contexts/AuthContext"
+import { AuthContext, withAuthGuard } from "../contexts/AuthContext"
 import { IAuthenticatedUser } from "../types/auth";
 import LoadingSpinner from "../components/layout/LoadingSpinner";
 import { IUser } from "../hooks/api/useUserApi";
@@ -22,4 +22,4 @@ const ProfessorProfilePage = () => {
     )
 }
 
-export default ProfessorProfilePage
+export default withAuthGuard(ProfessorProfilePage)

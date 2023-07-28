@@ -6,13 +6,16 @@ import PageHeader from '../../components/layout/PageHeader'
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material'
 import PageHeaderActions from '../../components/layout/PageHeaderActions'
 import PageContent from '../../components/layout/PageContent'
-import useApi from '../../hooks/useApi';
 import { IUser } from '../../hooks/api/useUserApi';
 import LoadingSpinner from '../../components/layout/LoadingSpinner';
+import { withAuthGuard } from '../../contexts/AuthContext';
+import { useApi } from '../../contexts/ApiContext';
 
 const ProfessorsListPage = () => {
     const [professors, setProfessors] = useState<IUser[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
+
+    console.log({ professors })
 
     const api = useApi();
 
@@ -20,7 +23,7 @@ const ProfessorsListPage = () => {
         setLoading(true);
         api.user.listUsers()
             .then((users: IUser[]) => {
-                setProfessors(users.filter((user) => user.role === 'TEACHER'));
+                setProfessors(users.filter((user) => user.userrole === 'TEACHER'));
             })
             .catch(() => {
                 console.error("Failed to fetch professors.")
@@ -53,4 +56,4 @@ const ProfessorsListPage = () => {
     )
 }
 
-export default ProfessorsListPage
+export default withAuthGuard(ProfessorsListPage);

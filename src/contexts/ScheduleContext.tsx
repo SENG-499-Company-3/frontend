@@ -1,6 +1,6 @@
+import { useApi } from './ApiContext'
 import React, { PropsWithChildren, createContext, useEffect, useState } from 'react';
 import { WORKING_SCHEDULE } from '../hooks/api/useScheduleApi';
-import useApi from '../hooks/useApi';
 import { Course } from '../types/course';
 
 import { courseScheduleData } from '../components/common/sampleData/courseSchedule'

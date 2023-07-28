@@ -18,7 +18,7 @@ import Alert from "@mui/material/Alert";
 import Modal from "@mui/material/Modal";
 import { courseBlocks, termOptions } from "../../utils/helper";
 import Autocomplete from "@mui/material/Autocomplete";
-import useApi from "../../hooks/useApi";
+
 import { IUser } from "../../hooks/api/useUserApi";
 import { IClassroom } from "../../hooks/api/useClassroomApi";
 

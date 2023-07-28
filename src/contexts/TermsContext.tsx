@@ -1,6 +1,6 @@
 import { PropsWithChildren, createContext, useState, useEffect } from 'react'
-import useApi from '../hooks/useApi'
 import { ITerm } from '../hooks/api/useTermsApi';
+import { useApi } from './ApiContext';
 
 interface ITermsContext {
     terms: () => ITerm[]

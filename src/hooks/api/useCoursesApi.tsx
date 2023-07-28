@@ -1,11 +1,13 @@
 import { AxiosInstance, AxiosResponse } from 'axios'
 
 export interface ICourse {
-    courseId: number
-    courseCode: string;
-    courseNumber: string;
-    courseName: string;
+    _id: number
+    Subj: string;
+    Num: string;
+    Title: string;
 }
+
+export type INewCourse = Omit<ICourse, '_id'>
 
 const useCoursesApi = (axios: AxiosInstance) => {
     const listCourses = async (): Promise<ICourse[]> => {
@@ -14,7 +16,7 @@ const useCoursesApi = (axios: AxiosInstance) => {
         return data;
     }
 
-    const createCourse = async (course: Omit<ICourse, 'courseId'>): Promise<ICourse> => {
+    const createCourse = async (course: INewCourse): Promise<ICourse> => {
         const { data } = await axios.post('/courses', course);
 
         return data;

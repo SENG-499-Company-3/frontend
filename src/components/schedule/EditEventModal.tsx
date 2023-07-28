@@ -14,7 +14,7 @@ import Typography from "@mui/material/Typography";
 import Autocomplete from "@mui/material/Autocomplete";
 import { convertToTime, courseBlocks, termOptions } from "../../utils/helper";
 import { Divider } from "@mui/material";
-import useApi from "../../hooks/useApi";
+
 import { IUser } from "../../hooks/api/useUserApi";
 import { IClassroom } from "../../hooks/api/useClassroomApi";
 

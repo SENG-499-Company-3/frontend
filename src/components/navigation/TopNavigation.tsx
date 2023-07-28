@@ -1,11 +1,11 @@
 import { useContext, useState } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
-import useApi from '../../hooks/useApi';
-import { AppBar, Avatar, Box, Button, Drawer, IconButton, Toolbar, Typography } from "@mui/material";
+import { AppBar, ButtonBase, Avatar, Box, Button, Drawer, IconButton, Toolbar, Typography } from "@mui/material";
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import MenuIcon from '@mui/icons-material/Menu';
 import Link from "next/link";
 import { SideNavigation } from "./SideNavigation";
+import { useApi } from "../../contexts/ApiContext";
 
 interface ITopNavigationProps {
     onToggleThemeMode: () => void
@@ -17,7 +17,8 @@ export const TopNavigation = (props: ITopNavigationProps) => {
     const [showSideNav, setShowSideNav] = useState<boolean>(false);
 
     const signOut = async () => {
-        await api.auth.logout();
+        // await api.auth.logout();
+        alert('TODO')
     }
 
     return (
@@ -61,9 +62,13 @@ export const TopNavigation = (props: ITopNavigationProps) => {
 
                     {authContext.isAuthenticated() ? (
                         <>
-                            <Avatar>{authContext.avatarInitials()}</Avatar>
-                            <Typography variant='h6'>{authContext.currentUser().name}</Typography>
-                            <Button variant='contained' disabled onClick={() => void signOut()}><strong>Sign Out</strong></Button>
+                            <ButtonBase LinkComponent={Link} href='/profile'>
+                                <Box display='flex' gap={1} sx={{ p: 1, alignItems: 'center' }}>
+                                    <Avatar>{authContext.avatarInitials()}</Avatar>
+                                    <Typography variant='h6'>{authContext.currentUser().name}</Typography>
+                                </Box>
+                            </ButtonBase>
+                            <Button variant='contained' onClick={() => authContext.logout()}><strong>Sign Out</strong></Button>
                         </>
                     ) : (
                         <>

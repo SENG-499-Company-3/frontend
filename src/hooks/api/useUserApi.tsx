@@ -5,7 +5,7 @@ export interface IUser {
     id: string;
     email: string;
     name: string;
-    role: string;
+    userrole: string;
     submittedPreferences: boolean;
 }
 

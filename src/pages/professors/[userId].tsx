@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import ProfessorProfile from "../../components/ProfessorProfile"
-import useApi from "../../hooks/useApi";
+
 import { IUser } from '../../hooks/api/useUserApi';
 import { useRouter } from 'next/router';
 import LoadingSpinner from '../../components/layout/LoadingSpinner';
+import { useApi } from '../../contexts/ApiContext';
 
 const ProfessorPage = () => {
     const api = useApi();

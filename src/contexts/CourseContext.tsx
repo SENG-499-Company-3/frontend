@@ -1,123 +1,123 @@
 import { PropsWithChildren, createContext, useState } from "react"
-import { ICourse } from "../hooks/api/useCoursesApi"
-import useApi from "../hooks/useApi"
+import { ICourse, INewCourse } from "../hooks/api/useCoursesApi"
+import { useApi } from "./ApiContext"
 
 const defaultCourses: ICourse[] = [
     {
-        courseId: 1,
-        courseCode: 'CSC ',
-        courseNumber: '111',
-        courseName: 'Course name',
+        _id: 1,
+        Subj: 'CSC ',
+        Num: '111',
+        Title: 'Course name',
     },
     {
-        courseId: 2,
-        courseCode: 'CSC ',
-        courseNumber: '115',
-        courseName: 'Course name',
+        _id: 2,
+        Subj: 'CSC ',
+        Num: '115',
+        Title: 'Course name',
     },
     {
-        courseId: 3,
-        courseCode: 'CSC ',
-        courseNumber: '226',
-        courseName: 'Course name',
+        _id: 3,
+        Subj: 'CSC ',
+        Num: '226',
+        Title: 'Course name',
     },
     {
-        courseId: 4,
-        courseCode: 'CSC ',
-        courseNumber: '225',
-        courseName: 'Course name',
+        _id: 4,
+        Subj: 'CSC ',
+        Num: '225',
+        Title: 'Course name',
     },
     {
-        courseId: 5,
-        courseCode: 'CSC ',
-        courseNumber: '230',
-        courseName: 'Course name',
+        _id: 5,
+        Subj: 'CSC ',
+        Num: '230',
+        Title: 'Course name',
     },
     {
-        courseId: 6,
-        courseCode: 'CSC ',
-        courseNumber: '320',
-        courseName: 'Course name',
+        _id: 6,
+        Subj: 'CSC ',
+        Num: '320',
+        Title: 'Course name',
     },
     {
-        courseId: 7,
-        courseCode: 'CSC ',
-        courseNumber: '370',
-        courseName: 'Course name',
+        _id: 7,
+        Subj: 'CSC ',
+        Num: '370',
+        Title: 'Course name',
     },
     {
-        courseId: 8,
-        courseCode: 'CSC ',
-        courseNumber: '360',
-        courseName: 'Course name',
+        _id: 8,
+        Subj: 'CSC ',
+        Num: '360',
+        Title: 'Course name',
     },
     {
-        courseId: 9,
-        courseCode: 'MATH',
-        courseNumber: '101',
-        courseName: 'Course name',
+        _id: 9,
+        Subj: 'MATH',
+        Num: '101',
+        Title: 'Course name',
     },
     {
-        courseId: 10,
-        courseCode: 'MATH',
-        courseNumber: '110',
-        courseName: 'Course name',
+        _id: 10,
+        Subj: 'MATH',
+        Num: '110',
+        Title: 'Course name',
     },
     {
-        courseId: 11,
-        courseCode: 'MATH',
-        courseNumber: '122',
-        courseName: 'Course name',
+        _id: 11,
+        Subj: 'MATH',
+        Num: '122',
+        Title: 'Course name',
     },
     {
-        courseId: 12,
-        courseCode: 'SENG',
-        courseNumber: '265',
-        courseName: 'Course name',
+        _id: 12,
+        Subj: 'SENG',
+        Num: '265',
+        Title: 'Course name',
     },
     {
-        courseId: 13,   
-        courseCode: 'SENG',
-        courseNumber: '310',
-        courseName: 'Course name',
+        _id: 13,   
+        Subj: 'SENG',
+        Num: '310',
+        Title: 'Course name',
     },
     {
-        courseId: 14,
-        courseCode: 'SENG',
-        courseNumber: '275',
-        courseName: 'Course name',
+        _id: 14,
+        Subj: 'SENG',
+        Num: '275',
+        Title: 'Course name',
     },
     {
-        courseId: 15,
-        courseCode: 'SENG',
-        courseNumber: '350',
-        courseName: 'Course name',
+        _id: 15,
+        Subj: 'SENG',
+        Num: '350',
+        Title: 'Course name',
     },
     {
-        courseId: 16,
-        courseCode: 'SENG',
-        courseNumber: '360',
-        courseName: 'Course name',
+        _id: 16,
+        Subj: 'SENG',
+        Num: '360',
+        Title: 'Course name',
     },
     {
-        courseId: 17,   
-        courseCode: 'ENGR',
-        courseNumber: '110',
-        courseName: 'Course name',
+        _id: 17,   
+        Subj: 'ENGR',
+        Num: '110',
+        Title: 'Course name',
     }
 ]
 
 interface ICourseContext {
     courses: () => ICourse[]
-    addCourse: (newCourse: ICourse) => void
-    deleteCourse: (course: ICourse) => void
+    addCourse: (newCourse: INewCourse) => Promise<void>
+    deleteCourse: (course: ICourse) => Promise<void>
     fetchCourses: () => Promise<void>
 }
 
 export const CourseContext = createContext<ICourseContext>({
     courses: () => null,
-    addCourse: () => { },
-    deleteCourse: () => { },
+    addCourse: () => Promise.reject(),
+    deleteCourse: () => Promise.reject(),
     fetchCourses: () => Promise.reject()
 });
 
@@ -125,26 +125,33 @@ export const CourseContextProvider = (props: PropsWithChildren) => {
     const [courses, setCourses] = useState<ICourse[]>([]);
     const api = useApi();
 
-
     const courseContext: ICourseContext = {
         courses: () => courses,
-        addCourse: (newCourse: ICourse) => {
-            setCourses([...courses, newCourse])
+        addCourse: (newCourse: INewCourse) => {
+            return api.courses.createCourse(newCourse)
+                .then((course: ICourse) => {
+                    setCourses([...courses, course])
+                });
         },
         deleteCourse: (deletedCourse: ICourse) => {
-            setCourses(courses.filter((course) => course.courseId !== deletedCourse.courseId))
+            return api.courses.deleteCourse(deletedCourse._id)
+                .then(() => {
+                    setCourses(courses.filter((course) => course._id !== deletedCourse._id))
+                })
         },
-        fetchCourses: () => api.courses.listCourses()
-            .then((courses) => {
-                setCourses(courses)
-            })
-            .catch(() => {
-                console.error("Failed to fetch courses.")
-                setCourses(defaultCourses)
-            })
-            .finally(() => {
-                //
-            })
+        fetchCourses: () => {
+            return api.courses.listCourses()
+                .then((courses) => {
+                    setCourses(courses)
+                })
+                .catch(() => {
+                    console.error("Failed to fetch courses.")
+                    setCourses(defaultCourses)
+                })
+                .finally(() => {
+                    //
+                })
+        }   
     }
 
     return (

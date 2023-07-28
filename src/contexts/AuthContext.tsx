@@ -1,34 +1,35 @@
-import React, { PropsWithChildren, createContext, useEffect, useCallback } from 'react'
+import React, { PropsWithChildren, createContext, useEffect, useContext, useCallback, Fragment } from 'react'
 import { AuthenticatedUserType, IAuthenticatedUser } from '../types/auth.d'
 import { useRouter } from 'next/router';
-import useApi from '../hooks/useApi';
 import { USER_TOKEN } from '../hooks/api/useAuthApi';
+import { useApi } from './ApiContext';
+import { IUser } from '../hooks/api/useUserApi';
 
 interface IAuthContext {
     /**
      * The currently signed-in user.
      */
-    currentUser: () => IAuthenticatedUser | null;
+    currentUser: () => IUser | null;
 
     /**
-     * Updates the context to reflect the current user upon signing in.
+     * Fetches the currently signed in user and updates the context.
      */
-    setCurrentUser: (user: IAuthenticatedUser) => void;
+    fetchSelf: () => void;
+
+    /**
+     * Logs out the user and redirects them to the login page
+     */
+    logout: () => void;
 
     /**
      * The currently set user token.
      */
-    userToken: () => string | null;
+    //userToken: () => string | null;
 
     /**
      * Updates the context to reflect the new user token.
      */
-    setUserToken: (token: string) => void;
-
-    /**
-     * Removes the current user from the Auth context
-     */
-    resetCurrentUser: () => void;
+    //setUserToken: (token: string) => void;
 
     /**
      * Returns `true` if there is a user currently signed in; `false` otherwise.
@@ -48,36 +49,62 @@ interface IAuthContext {
 
 export const AuthContext = createContext<IAuthContext>({
     currentUser: () => null,
-    setCurrentUser: () => { },
-    userToken: () => null,
-    setUserToken: () => { },
-    resetCurrentUser: () => { },
+    fetchSelf: () => {},
+    logout: () => {},
+    //userToken: () => null,
+    //setUserToken: () => {},
     isAuthenticated: () => false,
     isAdmin: () => false,
     avatarInitials: () => ''
 });
 
+export const AuthGuard = (props: PropsWithChildren) => {
+    const authContext = useContext(AuthContext);
+    // const api = useApi();
+
+    return (
+        authContext.isAuthenticated()
+            ? <>{props.children}</>
+            : <></>
+    )
+}
+
+export const withAuthGuard = (WrappedComponent) => {
+    return (props) => (
+      <AuthGuard>
+        <WrappedComponent {...props} />
+      </AuthGuard>
+    );
+  };
+
 export const AuthContextProvider = (props: PropsWithChildren) => {
-    const [currentUser, setCurrentUser] = React.useState<IAuthenticatedUser | null>(null);
-    const [userToken, setUserToken] = React.useState<string | null>(null);
+    const [currentUser, setCurrentUser] = React.useState<IUser | null>(null);
     const router = useRouter();
     const api = useApi();
 
+    const fetchSelf = () => {
+        api.auth.self().then((user) => {
+            setCurrentUser(user);
+        });
+    }
+
     const authContext: IAuthContext = {
-        currentUser: () => currentUser,
-        setCurrentUser,
-        userToken: useCallback(() => userToken, [userToken]),
-        setUserToken,
-        resetCurrentUser: () => setCurrentUser(null),
-        isAuthenticated: () => Boolean(currentUser),
-        isAdmin: () => currentUser.role === AuthenticatedUserType.ADMIN,
+        currentUser: useCallback(() => currentUser, [currentUser]),
+        fetchSelf,
+        logout: () => {
+            setCurrentUser(null);
+            api.setUserToken(null);
+            localStorage.removeItem(USER_TOKEN);
+            router.push('/login');
+        },
+        isAuthenticated: () => Boolean(currentUser) && Boolean(api.userToken),
+        isAdmin: () => currentUser.userrole === AuthenticatedUserType.ADMIN,
         avatarInitials: () => {
             if (!currentUser?.name) {
                 return '';
             }
 
             const stringParts = currentUser.name.split(' ');
-
 
             return stringParts
                 .slice(0, Math.max(stringParts.length - 2, 2))
@@ -88,8 +115,19 @@ export const AuthContextProvider = (props: PropsWithChildren) => {
     }
 
     useEffect(() => {
-        if (localStorage.getItem(USER_TOKEN)) {
-            setUserToken(localStorage.getItem(USER_TOKEN))
+        // console.log('api.userToken changed to:', api.userToken)
+        // If user has not been fetched yet, attempt fetch. If it fails, the token has expired
+        if (api.userToken && !currentUser) {
+            fetchSelf();
+        }
+    }, [api.userToken])
+
+    // On first render, load token from localStorage
+    useEffect(() => {
+        const existingToken = localStorage.getItem(USER_TOKEN)
+        console.log('setting api.userToken to:', existingToken)
+        if (existingToken) {
+            api.setUserToken(existingToken)
         }
     }, []);
 
